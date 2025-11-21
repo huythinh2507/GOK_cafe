@@ -1,4 +1,5 @@
 using GOKCafe.Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace GOKCafe.Infrastructure.Data;
 
@@ -6,11 +7,21 @@ public static class DbSeeder
 {
     public static async Task SeedAsync(ApplicationDbContext context)
     {
-        // Check if data already exists
-        if (context.Categories.Any())
+        // Seed Categories if not exist
+        if (!context.Categories.Any())
         {
-            return; // Database has been seeded
+            await SeedCategoriesAndProducts(context);
         }
+
+        // Seed new homepage entities if not exist
+        if (!context.TeaAttributes.Any())
+        {
+            await SeedHomePageEntities(context);
+        }
+    }
+
+    private static async Task SeedCategoriesAndProducts(ApplicationDbContext context)
+    {
 
         // Seed Categories
         var coffeeCategory = new Category
@@ -225,6 +236,11 @@ public static class DbSeeder
 
         await context.Offers.AddRangeAsync(offers);
 
+        await context.SaveChangesAsync();
+    }
+
+    private static async Task SeedHomePageEntities(ApplicationDbContext context)
+    {
         // Seed Partners
         var partners = new List<Partner>
         {
@@ -262,21 +278,227 @@ public static class DbSeeder
 
         await context.Partners.AddRangeAsync(partners);
 
-        // Seed Admin User
-        var adminUser = new User
+        // Seed Tea Attributes
+        var teaAttributes = new List<TeaAttribute>
+        {
+            new TeaAttribute
+            {
+                Id = Guid.NewGuid(),
+                Title = "Freshness",
+                Description = "Freshly picked tea leaves",
+                ImageUrl = "https://images.unsplash.com/photo-1564890369478-c89ca6d9cde9?w=800",
+                DisplayOrder = 1,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new TeaAttribute
+            {
+                Id = Guid.NewGuid(),
+                Title = "Authentic",
+                Description = "Traditional brewing methods",
+                ImageUrl = "https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=800",
+                DisplayOrder = 2,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new TeaAttribute
+            {
+                Id = Guid.NewGuid(),
+                Title = "Flavorful",
+                Description = "Rich and aromatic flavors",
+                ImageUrl = "https://images.unsplash.com/photo-1597481499750-3e6b22637e12?w=800",
+                DisplayOrder = 3,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new TeaAttribute
+            {
+                Id = Guid.NewGuid(),
+                Title = "Colorful",
+                Description = "Vibrant tea presentations",
+                ImageUrl = "https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=800",
+                DisplayOrder = 4,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new TeaAttribute
+            {
+                Id = Guid.NewGuid(),
+                Title = "Sustainability",
+                Description = "Eco-friendly and organic",
+                ImageUrl = "https://images.unsplash.com/photo-1627662055896-e8f7f65c7da4?w=800",
+                DisplayOrder = 5,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new TeaAttribute
+            {
+                Id = Guid.NewGuid(),
+                Title = "Natural",
+                Description = "Pure and natural ingredients",
+                ImageUrl = "https://images.unsplash.com/photo-1594631252845-29fc4cc8cde9?w=800",
+                DisplayOrder = 6,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            }
+        };
+
+        await context.TeaAttributes.AddRangeAsync(teaAttributes);
+
+        // Seed Banners
+        var coldBrewProduct = await context.Products.FirstOrDefaultAsync(p => p.Name == "Natural Cold Brew Coffee");
+        var banners = new List<Banner>
+        {
+            new Banner
+            {
+                Id = Guid.NewGuid(),
+                Title = "Natural Cold Brew Coffee",
+                Subtitle = "MORE THAN JUST COLD COFFEE",
+                Description = "Refresh your mind with organic, sustainably-sourced cold brew coffee, delivered straight to your door.",
+                ImageUrl = "https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=800",
+                ButtonText = "Discover More",
+                ButtonLink = "/products/natural-cold-brew-coffee",
+                ProductId = coldBrewProduct?.Id,
+                DisplayOrder = 1,
+                IsActive = true,
+                Type = BannerType.Hero,
+                CreatedAt = DateTime.UtcNow
+            }
+        };
+
+        await context.Banners.AddRangeAsync(banners);
+
+        // Seed Missions
+        var missions = new List<Mission>
+        {
+            new Mission
+            {
+                Id = Guid.NewGuid(),
+                Title = "OUR MISSIONS",
+                Subtitle = "YOU'RE THE REASON WE'RE HERE",
+                Description = "Everything we do is a matter of heart, body and soul. We strive to form profound partnerships with farmers from all over the world to create perspective together and form healthy working relationships built on trust and respect.",
+                MediaUrl = "https://images.unsplash.com/photo-1447933601403-0c6688de566e?w=800",
+                MediaType = MediaType.Image,
+                ButtonText = "Read More",
+                ButtonLink = "/about",
+                DisplayOrder = 1,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            }
+        };
+
+        await context.Missions.AddRangeAsync(missions);
+
+        // Seed Info Cards
+        var infoCards = new List<InfoCard>
+        {
+            new InfoCard
+            {
+                Id = Guid.NewGuid(),
+                Title = "A quiet morning with the farmers at the high peaks tea loa",
+                Description = "Experience the journey from farm to cup",
+                ImageUrl = "https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=800",
+                ButtonText = "Read more",
+                ButtonLink = "/farmers",
+                DisplayOrder = 1,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new InfoCard
+            {
+                Id = Guid.NewGuid(),
+                Title = "Explore Wholesale. We help build coffee programs to grow.",
+                Description = "Partner with us for your business",
+                ImageUrl = "https://images.unsplash.com/photo-1511920170033-f8396924c348?w=800",
+                ButtonText = "Read more",
+                ButtonLink = "/wholesale",
+                DisplayOrder = 2,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new InfoCard
+            {
+                Id = Guid.NewGuid(),
+                Title = "Quality coffee delivered to your door.",
+                Description = "Subscribe and never run out of fresh coffee",
+                ImageUrl = "https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=800",
+                ButtonText = "Read more",
+                ButtonLink = "/subscribe",
+                DisplayOrder = 3,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            }
+        };
+
+        await context.InfoCards.AddRangeAsync(infoCards);
+
+        // Seed Contact Info
+        var contactInfo = new ContactInfo
         {
             Id = Guid.NewGuid(),
-            Email = "admin@gokcafe.com",
-            PasswordHash = "AQAAAAEAACcQAAAAEGxyz123...", // This should be properly hashed in production
-            FirstName = "Admin",
-            LastName = "User",
-            PhoneNumber = "+1234567890",
-            Role = UserRole.Admin,
+            Title = "WHERE TO FIND US",
+            Subtitle = "COFFEE, TEA, FOOD AND MORE",
+            Description = "Stop by and enjoy beautiful coffees and delicious food prepared in house by our friendly staff.",
+            Address = "232/33 Vo Thi Sau, Phuong Vo Thi Sau, Quan 3, TP. Ho Chi Minh",
+            Phone = "084 838 302 882",
+            Email = "hello@gok.com",
+            WorkingHours = "7:00 - 22:30 (Monday - Sunday)",
+            ImageUrl = "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=800",
+            MapUrl = "https://maps.google.com",
+            ButtonText = "View Map",
+            ButtonLink = "/contact",
             IsActive = true,
             CreatedAt = DateTime.UtcNow
         };
 
-        await context.Users.AddAsync(adminUser);
+        await context.ContactInfos.AddAsync(contactInfo);
+
+        // Seed Service Features
+        var serviceFeatures = new List<ServiceFeature>
+        {
+            new ServiceFeature
+            {
+                Id = Guid.NewGuid(),
+                Title = "Shipped FREE and to your Door",
+                Description = "with orders above 350,000 VNĐ",
+                IconUrl = "https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=100",
+                DisplayOrder = 1,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new ServiceFeature
+            {
+                Id = Guid.NewGuid(),
+                Title = "Carefully delivered within 1-3 days",
+                Description = "and packaged with love",
+                IconUrl = "https://images.unsplash.com/photo-1534536281715-e28d76689b4d?w=100",
+                DisplayOrder = 2,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new ServiceFeature
+            {
+                Id = Guid.NewGuid(),
+                Title = "From Seed to Cup",
+                Description = "An experience starts with only the best ingredients",
+                IconUrl = "https://images.unsplash.com/photo-1447933601403-0c6688de566e?w=100",
+                DisplayOrder = 3,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new ServiceFeature
+            {
+                Id = Guid.NewGuid(),
+                Title = "We would love to help you",
+                Description = "084 838 302 882",
+                IconUrl = "https://images.unsplash.com/photo-1423666639041-f56000c27a9a?w=100",
+                DisplayOrder = 4,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            }
+        };
+
+        await context.ServiceFeatures.AddRangeAsync(serviceFeatures);
 
         await context.SaveChangesAsync();
     }

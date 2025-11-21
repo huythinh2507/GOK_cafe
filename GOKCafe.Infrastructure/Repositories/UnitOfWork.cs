@@ -22,6 +22,12 @@ public class UnitOfWork : IUnitOfWork
         Offers = new Repository<Offer>(_context);
         Partners = new Repository<Partner>(_context);
         ContactMessages = new Repository<ContactMessage>(_context);
+        TeaAttributes = new Repository<TeaAttribute>(_context);
+        Banners = new Repository<Banner>(_context);
+        Missions = new Repository<Mission>(_context);
+        InfoCards = new Repository<InfoCard>(_context);
+        ContactInfos = new Repository<ContactInfo>(_context);
+        ServiceFeatures = new Repository<ServiceFeature>(_context);
     }
 
     public IRepository<User> Users { get; }
@@ -33,6 +39,12 @@ public class UnitOfWork : IUnitOfWork
     public IRepository<Offer> Offers { get; }
     public IRepository<Partner> Partners { get; }
     public IRepository<ContactMessage> ContactMessages { get; }
+    public IRepository<TeaAttribute> TeaAttributes { get; }
+    public IRepository<Banner> Banners { get; }
+    public IRepository<Mission> Missions { get; }
+    public IRepository<InfoCard> InfoCards { get; }
+    public IRepository<ContactInfo> ContactInfos { get; }
+    public IRepository<ServiceFeature> ServiceFeatures { get; }
 
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
