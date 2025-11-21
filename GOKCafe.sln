@@ -11,6 +11,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GOKCafe.Infrastructure", "G
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GOKCafe.Application", "GOKCafe.Application\GOKCafe.Application.csproj", "{9DAF653B-6081-4EF9-A2A1-7E0CB4B2D9E5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GOKCafe.Tests.Unit", "GOKCafe.Tests.Unit\GOKCafe.Tests.Unit.csproj", "{757B6E3B-66CB-4C3B-B8EC-5A52A55FEDC6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GOKCafe.Tests.Integration", "GOKCafe.Tests.Integration\GOKCafe.Tests.Integration.csproj", "{4D3D5482-0EBE-42E1-B119-8DD92166A64D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,5 +40,13 @@ Global
 		{9DAF653B-6081-4EF9-A2A1-7E0CB4B2D9E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9DAF653B-6081-4EF9-A2A1-7E0CB4B2D9E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9DAF653B-6081-4EF9-A2A1-7E0CB4B2D9E5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{757B6E3B-66CB-4C3B-B8EC-5A52A55FEDC6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{757B6E3B-66CB-4C3B-B8EC-5A52A55FEDC6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{757B6E3B-66CB-4C3B-B8EC-5A52A55FEDC6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{757B6E3B-66CB-4C3B-B8EC-5A52A55FEDC6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4D3D5482-0EBE-42E1-B119-8DD92166A64D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D3D5482-0EBE-42E1-B119-8DD92166A64D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4D3D5482-0EBE-42E1-B119-8DD92166A64D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4D3D5482-0EBE-42E1-B119-8DD92166A64D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

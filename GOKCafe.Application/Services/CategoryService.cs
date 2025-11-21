@@ -89,6 +89,7 @@ public class CategoryService : ICategoryService
                 Name = dto.Name,
                 Description = dto.Description,
                 Slug = slug,
+                ImageUrl = dto.ImageUrl,
                 DisplayOrder = dto.DisplayOrder,
                 IsActive = true
             };
@@ -118,6 +119,7 @@ public class CategoryService : ICategoryService
             category.Name = dto.Name;
             category.Description = dto.Description;
             category.Slug = GenerateSlug(dto.Name);
+            category.ImageUrl = dto.ImageUrl;
             category.DisplayOrder = dto.DisplayOrder;
             category.IsActive = dto.IsActive;
 
@@ -168,6 +170,7 @@ public class CategoryService : ICategoryService
             Name = category.Name,
             Description = category.Description,
             Slug = category.Slug,
+            ImageUrl = category.ImageUrl,
             DisplayOrder = category.DisplayOrder,
             IsActive = category.IsActive,
             ProductCount = category.Products?.Count ?? 0
