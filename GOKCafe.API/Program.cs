@@ -3,6 +3,7 @@ using GOKCafe.Application.Services.Interfaces;
 using GOKCafe.Domain.Interfaces;
 using GOKCafe.Infrastructure.Data;
 using GOKCafe.Infrastructure.Repositories;
+using GOKCafe.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -18,6 +19,10 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 // Register repositories
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+// Configure caching
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSingleton<ICacheService, CacheService>();
 
 // Register services
 builder.Services.AddScoped<IProductService, ProductService>();

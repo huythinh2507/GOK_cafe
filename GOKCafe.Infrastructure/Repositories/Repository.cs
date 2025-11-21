@@ -84,4 +84,9 @@ public class Repository<T> : IRepository<T> where T : BaseEntity
         entity.IsDeleted = true;
         Update(entity);
     }
+
+    public virtual IQueryable<T> GetQueryable()
+    {
+        return _dbSet.AsQueryable();
+    }
 }

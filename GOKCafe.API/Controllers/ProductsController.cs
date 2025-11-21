@@ -22,10 +22,11 @@ public class ProductsController : ControllerBase
     public async Task<IActionResult> GetProducts(
         [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 10,
-        [FromQuery] Guid? categoryId = null,
-        [FromQuery] bool? isFeatured = null)
+        [FromQuery] List<Guid>? categoryIds = null,
+        [FromQuery] bool? isFeatured = null,
+        [FromQuery] string? search = null)
     {
-        var result = await _productService.GetProductsAsync(pageNumber, pageSize, categoryId, isFeatured);
+        var result = await _productService.GetProductsAsync(pageNumber, pageSize, categoryIds, isFeatured, search);
         return result.Success ? Ok(result) : BadRequest(result);
     }
 
@@ -36,16 +37,6 @@ public class ProductsController : ControllerBase
     public async Task<IActionResult> GetProductById(Guid id)
     {
         var result = await _productService.GetProductByIdAsync(id);
-        return result.Success ? Ok(result) : NotFound(result);
-    }
-
-    /// <summary>
-    /// Get product by slug
-    /// </summary>
-    [HttpGet("slug/{slug}")]
-    public async Task<IActionResult> GetProductBySlug(string slug)
-    {
-        var result = await _productService.GetProductBySlugAsync(slug);
         return result.Success ? Ok(result) : NotFound(result);
     }
 

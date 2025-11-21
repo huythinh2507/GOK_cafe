@@ -3,36 +3,69 @@ using GOKCafe.Application.DTOs.Product;
 using GOKCafe.Application.Services.Interfaces;
 using GOKCafe.Domain.Entities;
 using GOKCafe.Domain.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace GOKCafe.Application.Services;
 
 public class ProductService : IProductService
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ICacheService _cacheService;
+    private const string ProductCacheKeyPrefix = "product:";
+    private const string ProductListCacheKeyPrefix = "products:";
+    private static readonly TimeSpan CacheExpiration = TimeSpan.FromMinutes(30);
 
-    public ProductService(IUnitOfWork unitOfWork)
+    public ProductService(IUnitOfWork unitOfWork, ICacheService cacheService)
     {
         _unitOfWork = unitOfWork;
+        _cacheService = cacheService;
     }
 
     public async Task<ApiResponse<PaginatedResponse<ProductDto>>> GetProductsAsync(
-        int pageNumber, int pageSize, Guid? categoryId = null, bool? isFeatured = null)
+        int pageNumber, int pageSize, List<Guid>? categoryIds = null, bool? isFeatured = null, string? search = null)
     {
         try
         {
-            var query = (await _unitOfWork.Products.GetAllAsync()).AsQueryable();
+            // Generate cache key based on parameters
+            var categoryIdsKey = categoryIds != null && categoryIds.Any()
+                ? string.Join("-", categoryIds.OrderBy(x => x))
+                : "all";
+            var featuredKey = isFeatured.HasValue ? isFeatured.Value.ToString() : "all";
+            var searchKey = !string.IsNullOrWhiteSpace(search) ? search.ToLower() : "none";
+            var cacheKey = $"{ProductListCacheKeyPrefix}page:{pageNumber}:size:{pageSize}:cats:{categoryIdsKey}:feat:{featuredKey}:search:{searchKey}";
 
-            if (categoryId.HasValue)
-                query = query.Where(p => p.CategoryId == categoryId.Value);
+            // Try to get from cache
+            var cachedResponse = await _cacheService.GetAsync<ApiResponse<PaginatedResponse<ProductDto>>>(cacheKey);
+            if (cachedResponse != null)
+                return cachedResponse;
 
+            // If not in cache, fetch from database
+            var query = _unitOfWork.Products.GetQueryable()
+                .Include(p => p.Category)
+                .Include(p => p.ProductImages)
+                .Where(p => p.IsActive);
+
+            // Filter by multiple categories
+            if (categoryIds != null && categoryIds.Any())
+                query = query.Where(p => categoryIds.Contains(p.CategoryId));
+
+            // Filter by featured
             if (isFeatured.HasValue)
                 query = query.Where(p => p.IsFeatured == isFeatured.Value);
 
-            query = query.Where(p => p.IsActive);
+            // Search by name or description
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var searchLower = search.ToLower();
+                query = query.Where(p =>
+                    p.Name.ToLower().Contains(searchLower) ||
+                    (p.Description != null && p.Description.ToLower().Contains(searchLower)));
+            }
 
-            var totalCount = query.Count();
-            var items = query
+            var totalCount = await query.CountAsync();
+            var items = await query
                 .OrderBy(p => p.DisplayOrder)
+                .ThenBy(p => p.Name)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .Select(p => new ProductDto
@@ -57,7 +90,7 @@ public class ProductService : IProductService
                         DisplayOrder = pi.DisplayOrder,
                         IsPrimary = pi.IsPrimary
                     }).ToList()
-                }).ToList();
+                }).ToListAsync();
 
             var response = new PaginatedResponse<ProductDto>
             {
@@ -67,7 +100,12 @@ public class ProductService : IProductService
                 PageSize = pageSize
             };
 
-            return ApiResponse<PaginatedResponse<ProductDto>>.SuccessResult(response);
+            var result = ApiResponse<PaginatedResponse<ProductDto>>.SuccessResult(response);
+
+            // Cache the result
+            await _cacheService.SetAsync(cacheKey, result, CacheExpiration);
+
+            return result;
         }
         catch (Exception ex)
         {
@@ -81,31 +119,29 @@ public class ProductService : IProductService
     {
         try
         {
-            var product = await _unitOfWork.Products.GetByIdAsync(id);
+            var cacheKey = $"{ProductCacheKeyPrefix}{id}";
+
+            // Try to get from cache
+            var cachedResponse = await _cacheService.GetAsync<ApiResponse<ProductDto>>(cacheKey);
+            if (cachedResponse != null)
+                return cachedResponse;
+
+            // If not in cache, fetch from database
+            var product = await _unitOfWork.Products.GetQueryable()
+                .Include(p => p.Category)
+                .Include(p => p.ProductImages)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
             if (product == null)
                 return ApiResponse<ProductDto>.FailureResult("Product not found");
 
             var productDto = MapToDto(product);
-            return ApiResponse<ProductDto>.SuccessResult(productDto);
-        }
-        catch (Exception ex)
-        {
-            return ApiResponse<ProductDto>.FailureResult(
-                "An error occurred while retrieving the product",
-                new List<string> { ex.Message });
-        }
-    }
+            var result = ApiResponse<ProductDto>.SuccessResult(productDto);
 
-    public async Task<ApiResponse<ProductDto>> GetProductBySlugAsync(string slug)
-    {
-        try
-        {
-            var product = await _unitOfWork.Products.FirstOrDefaultAsync(p => p.Slug == slug);
-            if (product == null)
-                return ApiResponse<ProductDto>.FailureResult("Product not found");
+            // Cache the result
+            await _cacheService.SetAsync(cacheKey, result, CacheExpiration);
 
-            var productDto = MapToDto(product);
-            return ApiResponse<ProductDto>.SuccessResult(productDto);
+            return result;
         }
         catch (Exception ex)
         {
@@ -142,6 +178,9 @@ public class ProductService : IProductService
             await _unitOfWork.Products.AddAsync(product);
             await _unitOfWork.SaveChangesAsync();
 
+            // Invalidate product list cache
+            await _cacheService.RemoveByPrefixAsync(ProductListCacheKeyPrefix);
+
             var productDto = MapToDto(product);
             return ApiResponse<ProductDto>.SuccessResult(productDto, "Product created successfully");
         }
@@ -175,6 +214,10 @@ public class ProductService : IProductService
             _unitOfWork.Products.Update(product);
             await _unitOfWork.SaveChangesAsync();
 
+            // Invalidate caches
+            await _cacheService.RemoveAsync($"{ProductCacheKeyPrefix}{id}");
+            await _cacheService.RemoveByPrefixAsync(ProductListCacheKeyPrefix);
+
             var productDto = MapToDto(product);
             return ApiResponse<ProductDto>.SuccessResult(productDto, "Product updated successfully");
         }
@@ -196,6 +239,10 @@ public class ProductService : IProductService
 
             _unitOfWork.Products.SoftDelete(product);
             await _unitOfWork.SaveChangesAsync();
+
+            // Invalidate caches
+            await _cacheService.RemoveAsync($"{ProductCacheKeyPrefix}{id}");
+            await _cacheService.RemoveByPrefixAsync(ProductListCacheKeyPrefix);
 
             return ApiResponse<bool>.SuccessResult(true, "Product deleted successfully");
         }
