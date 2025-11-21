@@ -13,6 +13,12 @@ public interface IUnitOfWork : IDisposable
     IRepository<Offer> Offers { get; }
     IRepository<Partner> Partners { get; }
     IRepository<ContactMessage> ContactMessages { get; }
+    IRepository<TeaAttribute> TeaAttributes { get; }
+    IRepository<Banner> Banners { get; }
+    IRepository<Mission> Missions { get; }
+    IRepository<InfoCard> InfoCards { get; }
+    IRepository<ContactInfo> ContactInfos { get; }
+    IRepository<ServiceFeature> ServiceFeatures { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     Task BeginTransactionAsync();

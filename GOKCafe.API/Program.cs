@@ -28,6 +28,7 @@ builder.Services.AddSingleton<ICacheService, CacheService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IHomeService, HomeService>();
 
 // Configure CORS
 builder.Services.AddCors(options =>

@@ -19,6 +19,12 @@ public class ApplicationDbContext : DbContext
     public DbSet<Offer> Offers { get; set; }
     public DbSet<Partner> Partners { get; set; }
     public DbSet<ContactMessage> ContactMessages { get; set; }
+    public DbSet<TeaAttribute> TeaAttributes { get; set; }
+    public DbSet<Banner> Banners { get; set; }
+    public DbSet<Mission> Missions { get; set; }
+    public DbSet<InfoCard> InfoCards { get; set; }
+    public DbSet<ContactInfo> ContactInfos { get; set; }
+    public DbSet<ServiceFeature> ServiceFeatures { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -36,6 +42,12 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<Offer>().HasQueryFilter(e => !e.IsDeleted);
         modelBuilder.Entity<Partner>().HasQueryFilter(e => !e.IsDeleted);
         modelBuilder.Entity<ContactMessage>().HasQueryFilter(e => !e.IsDeleted);
+        modelBuilder.Entity<TeaAttribute>().HasQueryFilter(e => !e.IsDeleted);
+        modelBuilder.Entity<Banner>().HasQueryFilter(e => !e.IsDeleted);
+        modelBuilder.Entity<Mission>().HasQueryFilter(e => !e.IsDeleted);
+        modelBuilder.Entity<InfoCard>().HasQueryFilter(e => !e.IsDeleted);
+        modelBuilder.Entity<ContactInfo>().HasQueryFilter(e => !e.IsDeleted);
+        modelBuilder.Entity<ServiceFeature>().HasQueryFilter(e => !e.IsDeleted);
     }
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

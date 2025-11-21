@@ -21,6 +21,9 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
             .IsRequired()
             .HasMaxLength(100);
 
+        builder.Property(c => c.ImageUrl)
+            .HasMaxLength(500);
+
         builder.HasIndex(c => c.Slug)
             .IsUnique();
 
