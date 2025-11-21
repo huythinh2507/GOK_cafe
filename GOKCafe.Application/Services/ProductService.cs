@@ -3,7 +3,6 @@ using GOKCafe.Application.DTOs.Product;
 using GOKCafe.Application.Services.Interfaces;
 using GOKCafe.Domain.Entities;
 using GOKCafe.Domain.Interfaces;
-using Microsoft.EntityFrameworkCore;
 
 namespace GOKCafe.Application.Services;
 

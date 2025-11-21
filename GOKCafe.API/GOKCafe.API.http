@@ -1,6 +1,159 @@
 @GOKCafe.API_HostAddress = http://localhost:5142
+@categoryId = {{$guid}}
+@productId = {{$guid}}
 
-GET {{GOKCafe.API_HostAddress}}/weatherforecast/
+###########################################################
+# CATEGORIES API
+###########################################################
+
+### Get All Categories
+GET {{GOKCafe.API_HostAddress}}/api/categories
 Accept: application/json
+
+### Get Category by ID
+# Replace with actual GUID from database
+GET {{GOKCafe.API_HostAddress}}/api/categories/{{categoryId}}
+Accept: application/json
+
+### Get Category by Slug
+GET {{GOKCafe.API_HostAddress}}/api/categories/slug/coffee
+Accept: application/json
+
+### Create Category
+POST {{GOKCafe.API_HostAddress}}/api/categories
+Content-Type: application/json
+
+{
+  "name": "Desserts",
+  "description": "Sweet treats to complement your drink",
+  "displayOrder": 4
+}
+
+### Update Category
+# Replace with actual GUID from database
+PUT {{GOKCafe.API_HostAddress}}/api/categories/{{categoryId}}
+Content-Type: application/json
+
+{
+  "name": "Coffee Updated",
+  "description": "Updated description",
+  "displayOrder": 1,
+  "isActive": true
+}
+
+### Delete Category
+# Replace with actual GUID from database
+DELETE {{GOKCafe.API_HostAddress}}/api/categories/{{categoryId}}
+
+###########################################################
+# PRODUCTS API
+###########################################################
+
+### Get All Products (Paginated)
+GET {{GOKCafe.API_HostAddress}}/api/products?pageNumber=1&pageSize=10
+Accept: application/json
+
+### Get Featured Products
+GET {{GOKCafe.API_HostAddress}}/api/products?pageNumber=1&pageSize=10&isFeatured=true
+Accept: application/json
+
+### Get Products by Category
+# Replace categoryId with actual GUID
+GET {{GOKCafe.API_HostAddress}}/api/products?pageNumber=1&pageSize=10&categoryId={{categoryId}}
+Accept: application/json
+
+### Get Product by ID
+# Replace with actual GUID from database
+GET {{GOKCafe.API_HostAddress}}/api/products/{{productId}}
+Accept: application/json
+
+### Get Product by Slug
+GET {{GOKCafe.API_HostAddress}}/api/products/slug/natural-cold-brew-coffee
+Accept: application/json
+
+### Create Product
+# Replace categoryId with actual GUID from categories
+POST {{GOKCafe.API_HostAddress}}/api/products
+Content-Type: application/json
+
+{
+  "name": "Mocha",
+  "description": "Rich chocolate and espresso blend",
+  "price": 5.50,
+  "discountPrice": 4.99,
+  "imageUrl": "https://images.unsplash.com/photo-1578374173705-c04ea15bc199?w=800",
+  "stockQuantity": 80,
+  "isFeatured": true,
+  "categoryId": "{{categoryId}}"
+}
+
+### Update Product
+# Replace with actual GUID from database
+PUT {{GOKCafe.API_HostAddress}}/api/products/{{productId}}
+Content-Type: application/json
+
+{
+  "name": "Mocha Updated",
+  "description": "Updated description",
+  "price": 5.99,
+  "discountPrice": 5.49,
+  "imageUrl": "https://images.unsplash.com/photo-1578374173705-c04ea15bc199?w=800",
+  "stockQuantity": 90,
+  "isActive": true,
+  "isFeatured": true,
+  "categoryId": "{{categoryId}}"
+}
+
+### Delete Product
+# Replace with actual GUID from database
+DELETE {{GOKCafe.API_HostAddress}}/api/products/{{productId}}
+
+###########################################################
+# ORDERS API
+###########################################################
+
+### Get All Orders (Paginated)
+GET {{GOKCafe.API_HostAddress}}/api/orders?pageNumber=1&pageSize=10
+Accept: application/json
+
+### Get Orders by Status
+GET {{GOKCafe.API_HostAddress}}/api/orders?pageNumber=1&pageSize=10&status=Pending
+Accept: application/json
+
+### Get Order by ID
+# Replace with actual GUID from database
+GET {{GOKCafe.API_HostAddress}}/api/orders/{{$guid}}
+Accept: application/json
+
+### Create Order
+# Replace productId with actual product GUIDs from database
+POST {{GOKCafe.API_HostAddress}}/api/orders
+Content-Type: application/json
+
+{
+  "customerName": "John Doe",
+  "customerEmail": "john.doe@example.com",
+  "customerPhone": "+1234567890",
+  "shippingAddress": "123 Main St, New York, NY 10001",
+  "notes": "Please deliver between 2-4 PM",
+  "paymentMethod": "CreditCard",
+  "items": [
+    {
+      "productId": "{{productId}}",
+      "quantity": 2
+    }
+  ]
+}
+
+### Update Order Status
+# Replace with actual order GUID
+PATCH {{GOKCafe.API_HostAddress}}/api/orders/{{$guid}}/status
+Content-Type: application/json
+
+"Confirmed"
+
+### Cancel Order
+# Replace with actual order GUID
+POST {{GOKCafe.API_HostAddress}}/api/orders/{{$guid}}/cancel
 
 ###
