@@ -1,0 +1,40 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GOKCafe.API", "GOKCafe.API\GOKCafe.API.csproj", "{B4510837-EDB7-47DD-853D-6BED519A4A0D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GOKCafe.Domain", "GOKCafe.Domain\GOKCafe.Domain.csproj", "{1893A819-EC00-4CCF-A1FA-A443F8EFE55E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GOKCafe.Infrastructure", "GOKCafe.Infrastructure\GOKCafe.Infrastructure.csproj", "{B721EC53-18AB-4E88-9867-E56E9FBD0B16}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GOKCafe.Application", "GOKCafe.Application\GOKCafe.Application.csproj", "{9DAF653B-6081-4EF9-A2A1-7E0CB4B2D9E5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B4510837-EDB7-47DD-853D-6BED519A4A0D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B4510837-EDB7-47DD-853D-6BED519A4A0D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B4510837-EDB7-47DD-853D-6BED519A4A0D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B4510837-EDB7-47DD-853D-6BED519A4A0D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1893A819-EC00-4CCF-A1FA-A443F8EFE55E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1893A819-EC00-4CCF-A1FA-A443F8EFE55E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1893A819-EC00-4CCF-A1FA-A443F8EFE55E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1893A819-EC00-4CCF-A1FA-A443F8EFE55E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B721EC53-18AB-4E88-9867-E56E9FBD0B16}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B721EC53-18AB-4E88-9867-E56E9FBD0B16}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B721EC53-18AB-4E88-9867-E56E9FBD0B16}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B721EC53-18AB-4E88-9867-E56E9FBD0B16}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9DAF653B-6081-4EF9-A2A1-7E0CB4B2D9E5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9DAF653B-6081-4EF9-A2A1-7E0CB4B2D9E5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9DAF653B-6081-4EF9-A2A1-7E0CB4B2D9E5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9DAF653B-6081-4EF9-A2A1-7E0CB4B2D9E5}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
