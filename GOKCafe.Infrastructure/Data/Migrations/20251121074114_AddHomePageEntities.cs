@@ -206,11 +206,49 @@ namespace GOKCafe.Infrastructure.Data.Migrations
                 name: "IX_Banners_ProductId",
                 table: "Banners",
                 column: "ProductId");
+
+            // Add Product Indexes for performance
+            migrationBuilder.CreateIndex(
+                name: "IX_Products_CategoryId_IsActive_DisplayOrder",
+                table: "Products",
+                columns: new[] { "CategoryId", "IsActive", "DisplayOrder" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Products_DisplayOrder",
+                table: "Products",
+                column: "DisplayOrder");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Products_IsActive",
+                table: "Products",
+                column: "IsActive");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Products_IsFeatured",
+                table: "Products",
+                column: "IsFeatured");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            // Drop Product Indexes
+            migrationBuilder.DropIndex(
+                name: "IX_Products_CategoryId_IsActive_DisplayOrder",
+                table: "Products");
+
+            migrationBuilder.DropIndex(
+                name: "IX_Products_DisplayOrder",
+                table: "Products");
+
+            migrationBuilder.DropIndex(
+                name: "IX_Products_IsActive",
+                table: "Products");
+
+            migrationBuilder.DropIndex(
+                name: "IX_Products_IsFeatured",
+                table: "Products");
+
             migrationBuilder.DropTable(
                 name: "Banners");
 
