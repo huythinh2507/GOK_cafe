@@ -18,4 +18,5 @@ public interface IRepository<T> where T : BaseEntity
     void Remove(T entity);
     void RemoveRange(IEnumerable<T> entities);
     void SoftDelete(T entity);
+    IQueryable<T> GetQueryable();
 }

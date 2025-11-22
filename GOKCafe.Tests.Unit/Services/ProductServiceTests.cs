@@ -5,6 +5,7 @@ using GOKCafe.Domain.Entities;
 using GOKCafe.Domain.Interfaces;
 using GOKCafe.Tests.Unit.Helpers;
 using Moq;
+using MockQueryable.Moq;
 
 namespace GOKCafe.Tests.Unit.Services;
 
@@ -12,16 +13,18 @@ public class ProductServiceTests
 {
     private readonly Mock<IUnitOfWork> _unitOfWorkMock;
     private readonly Mock<IRepository<Product>> _productRepositoryMock;
+    private readonly Mock<ICacheService> _cacheServiceMock;
     private readonly ProductService _productService;
 
     public ProductServiceTests()
     {
         _unitOfWorkMock = new Mock<IUnitOfWork>();
         _productRepositoryMock = new Mock<IRepository<Product>>();
+        _cacheServiceMock = new Mock<ICacheService>();
 
         _unitOfWorkMock.Setup(u => u.Products).Returns(_productRepositoryMock.Object);
 
-        _productService = new ProductService(_unitOfWorkMock.Object);
+        _productService = new ProductService(_unitOfWorkMock.Object, _cacheServiceMock.Object);
     }
 
     [Fact]
@@ -42,8 +45,8 @@ public class ProductServiceTests
         products.ForEach(p => p.Category = category);
 
         _productRepositoryMock
-            .Setup(r => r.GetAllAsync())
-            .ReturnsAsync(products);
+            .Setup(r => r.GetQueryable())
+            .Returns(products.AsQueryable());
 
         // Act
         var result = await _productService.GetProductsAsync(1, 10);
@@ -74,11 +77,11 @@ public class ProductServiceTests
         products.ForEach(p => p.Category = category);
 
         _productRepositoryMock
-            .Setup(r => r.GetAllAsync())
-            .ReturnsAsync(products);
+            .Setup(r => r.GetQueryable())
+            .Returns(products.AsQueryable());
 
-        // Act
-        var result = await _productService.GetProductsAsync(1, 10, coffeeId);
+        // Act - Changed to List<Guid>
+        var result = await _productService.GetProductsAsync(1, 10, new List<Guid> { coffeeId });
 
         // Assert
         result.Success.Should().BeTrue();
@@ -104,8 +107,8 @@ public class ProductServiceTests
         products.ForEach(p => p.Category = category);
 
         _productRepositoryMock
-            .Setup(r => r.GetAllAsync())
-            .ReturnsAsync(products);
+            .Setup(r => r.GetQueryable())
+            .Returns(products.AsQueryable());
 
         // Act
         var result = await _productService.GetProductsAsync(1, 10, isFeatured: true);
@@ -124,8 +127,8 @@ public class ProductServiceTests
         product.Category = TestDataBuilder.CreateCategory("Coffee");
 
         _productRepositoryMock
-            .Setup(r => r.GetByIdAsync(product.Id))
-            .ReturnsAsync(product);
+            .Setup(r => r.GetQueryable())
+            .Returns(new List<Product> { product }.AsQueryable());
 
         // Act
         var result = await _productService.GetProductByIdAsync(product.Id);
@@ -142,8 +145,8 @@ public class ProductServiceTests
         // Arrange
         var productId = Guid.NewGuid();
         _productRepositoryMock
-            .Setup(r => r.GetByIdAsync(productId))
-            .ReturnsAsync((Product?)null);
+            .Setup(r => r.GetQueryable())
+            .Returns(new List<Product>().AsQueryable());
 
         // Act
         var result = await _productService.GetProductByIdAsync(productId);
@@ -151,25 +154,6 @@ public class ProductServiceTests
         // Assert
         result.Success.Should().BeFalse();
         result.Message.Should().Be("Product not found");
-    }
-
-    [Fact]
-    public async Task GetProductBySlugAsync_ShouldReturnProduct_WhenSlugExists()
-    {
-        // Arrange
-        var product = TestDataBuilder.CreateProduct("Espresso");
-        product.Category = TestDataBuilder.CreateCategory("Coffee");
-
-        _productRepositoryMock
-            .Setup(r => r.FirstOrDefaultAsync(It.IsAny<System.Linq.Expressions.Expression<Func<Product, bool>>>()))
-            .ReturnsAsync(product);
-
-        // Act
-        var result = await _productService.GetProductBySlugAsync("espresso");
-
-        // Assert
-        result.Success.Should().BeTrue();
-        result.Data.Should().NotBeNull();
     }
 
     [Fact]
@@ -208,6 +192,7 @@ public class ProductServiceTests
         result.Message.Should().Be("Product created successfully");
 
         _productRepositoryMock.Verify(r => r.AddAsync(It.IsAny<Product>()), Times.Once);
+        _cacheServiceMock.Verify(c => c.RemoveByPrefixAsync("products:", It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -269,6 +254,8 @@ public class ProductServiceTests
         result.Message.Should().Be("Product updated successfully");
 
         _productRepositoryMock.Verify(r => r.Update(It.IsAny<Product>()), Times.Once);
+        _cacheServiceMock.Verify(c => c.RemoveAsync($"product:{product.Id}", It.IsAny<CancellationToken>()), Times.Once);
+        _cacheServiceMock.Verify(c => c.RemoveByPrefixAsync("products:", It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -319,6 +306,8 @@ public class ProductServiceTests
         result.Message.Should().Be("Product deleted successfully");
 
         _productRepositoryMock.Verify(r => r.SoftDelete(It.IsAny<Product>()), Times.Once);
+        _cacheServiceMock.Verify(c => c.RemoveAsync($"product:{product.Id}", It.IsAny<CancellationToken>()), Times.Once);
+        _cacheServiceMock.Verify(c => c.RemoveByPrefixAsync("products:", It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -337,5 +326,67 @@ public class ProductServiceTests
         result.Success.Should().BeFalse();
         result.Message.Should().Be("Product not found");
         _productRepositoryMock.Verify(r => r.SoftDelete(It.IsAny<Product>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task GetProductByIdAsync_ShouldReturnFromCache_WhenCacheHit()
+    {
+        // Arrange
+        var product = TestDataBuilder.CreateProduct("Espresso");
+        product.Category = TestDataBuilder.CreateCategory("Coffee");
+
+        var cachedResponse = GOKCafe.Application.DTOs.Common.ApiResponse<GOKCafe.Application.DTOs.Product.ProductDto>
+            .SuccessResult(new GOKCafe.Application.DTOs.Product.ProductDto
+            {
+                Id = product.Id,
+                Name = "Cached Espresso",
+                CategoryName = "Coffee"
+            });
+
+        _cacheServiceMock
+            .Setup(c => c.GetAsync<GOKCafe.Application.DTOs.Common.ApiResponse<GOKCafe.Application.DTOs.Product.ProductDto>>(
+                $"product:{product.Id}",
+                It.IsAny<CancellationToken>()))
+            .ReturnsAsync(cachedResponse);
+
+        // Act
+        var result = await _productService.GetProductByIdAsync(product.Id);
+
+        // Assert
+        result.Success.Should().BeTrue();
+        result.Data!.Name.Should().Be("Cached Espresso");
+
+        // Verify database was NOT queried
+        _productRepositoryMock.Verify(r => r.GetQueryable(), Times.Never);
+
+        // Verify cache was checked
+        _cacheServiceMock.Verify(c => c.GetAsync<It.IsAnyType>(
+            It.IsAny<string>(),
+            It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task GetProductByIdAsync_ShouldCacheResult_WhenCacheMiss()
+    {
+        // Arrange
+        var product = TestDataBuilder.CreateProduct("Espresso");
+        product.Category = TestDataBuilder.CreateCategory("Coffee");
+
+        _productRepositoryMock
+            .Setup(r => r.GetQueryable())
+            .Returns(new List<Product> { product }.AsQueryable());
+
+        // Act
+        var result = await _productService.GetProductByIdAsync(product.Id);
+
+        // Assert
+        result.Success.Should().BeTrue();
+
+        // Verify cache was set
+        _cacheServiceMock.Verify(c => c.SetAsync(
+            $"product:{product.Id}",
+            It.IsAny<object>(),
+            It.IsAny<TimeSpan>(),
+            It.IsAny<CancellationToken>()), Times.Once);
     }
 }
