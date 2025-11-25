@@ -3,14 +3,24 @@
     var siteName = "GOK Cafe";
     var logoUrl = "";
 
-    // Try to get settings from Umbraco
+    // Try to get Header document from Home children
     if (UmbracoContext?.Content != null)
     {
-        var settingsNode = UmbracoContext.Content.GetAtRoot().FirstOrDefault(x => x.ContentType.Alias == "settings");
-        if (settingsNode != null)
+        // Get Home node first
+        var homeNode = UmbracoContext.Content.GetAtRoot().FirstOrDefault(x => x.ContentType.Alias == "home" || x.ContentType.Alias == "homepage");
+        if (homeNode != null)
         {
-            siteName = settingsNode.Value<string>("siteName") ?? "GOK Cafe";
-            logoUrl = settingsNode.Value<Umbraco.Cms.Core.Models.PublishedContent.IPublishedContent>("logo")?.Url() ?? "";
+            // Get Header from Home's children
+            var headerNode = homeNode.Children.FirstOrDefault(x => x.ContentType.Alias == "header");
+            if (headerNode != null)
+            {
+                // Get logo from Header document type
+                var logoMedia = headerNode.Value<Umbraco.Cms.Core.Models.PublishedContent.IPublishedContent>("logo");
+                if (logoMedia != null)
+                {
+                    logoUrl = logoMedia.Url();
+                }
+            }
         }
     }
 }
@@ -54,7 +64,7 @@
         <div id="mobileMenu" class="hidden md:hidden pb-4">
             <div class="flex flex-col space-y-3">
                 <a href="/" class="text-gray-700 hover:text-blue-600 font-medium transition-colors py-2">Home</a>
-                <a href="/products" class="text-gray-700 hover:text-blue-600 font-medium transition-colors py-2">Menu</a>
+                <a href="/products" class="text-gray-700 hover:text-blue-600 font-medium transition-colors py-2"></a>
                 <a href="/categories" class="text-gray-700 hover:text-blue-600 font-medium transition-colors py-2">Categories</a>
                 <a href="/about" class="text-gray-700 hover:text-blue-600 font-medium transition-colors py-2">About</a>
                 <a href="/contact" class="text-gray-700 hover:text-blue-600 font-medium transition-colors py-2">Contact</a>

@@ -1,14 +1,26 @@
-@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
 @{
     var siteName = "GOK Cafe";
+    var logoUrl = "";
 
-    // Try to get settings from Umbraco
+    // Try to get Header document from Home children
     if (UmbracoContext?.Content != null)
     {
-        var settingsNode = UmbracoContext.Content.GetAtRoot().FirstOrDefault(x => x.ContentType.Alias == "settings");
-        if (settingsNode != null)
+        // Get Home node first
+        var homeNode = UmbracoContext.Content.GetAtRoot().FirstOrDefault(x => x.ContentType.Alias == "home" || x.ContentType.Alias == "homepage");
+        if (homeNode != null)
         {
-            siteName = settingsNode.Value<string>("siteName") ?? "GOK Cafe";
+            // Get Header from Home's children
+            var headerNode = homeNode.Children.FirstOrDefault(x => x.ContentType.Alias == "header");
+            if (headerNode != null)
+            {
+                // Get logo from Header document type
+                var logoMedia = headerNode.Value<Umbraco.Cms.Core.Models.PublishedContent.IPublishedContent>("logo");
+                if (logoMedia != null)
+                {
+                    logoUrl = logoMedia.Url();
+                }
+            }
         }
     }
 }
@@ -19,7 +31,14 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             <!-- About Column -->
             <div>
-                <h5 class="text-xl font-bold mb-4 font-heading">@siteName</h5>
+                @if (!string.IsNullOrEmpty(logoUrl))
+                {
+                    <img src="@logoUrl" alt="@siteName" class="h-12 mb-4" />
+                }
+                else
+                {
+                    <h5 class="text-xl font-bold mb-4 font-heading">@siteName</h5>
+                }
                 <p class="text-gray-300 mb-4">Premium coffee and delicious pastries made with love and passion.</p>
                 <div class="flex space-x-4">
                     <a href="#" class="text-gray-300 hover:text-white transition-colors">
