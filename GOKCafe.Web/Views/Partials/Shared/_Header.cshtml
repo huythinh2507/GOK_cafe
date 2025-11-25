@@ -1,0 +1,68 @@
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@{
+    var siteName = "GOK Cafe";
+    var logoUrl = "";
+
+    // Try to get settings from Umbraco
+    if (UmbracoContext?.Content != null)
+    {
+        var settingsNode = UmbracoContext.Content.GetAtRoot().FirstOrDefault(x => x.ContentType.Alias == "settings");
+        if (settingsNode != null)
+        {
+            siteName = settingsNode.Value<string>("siteName") ?? "GOK Cafe";
+            logoUrl = settingsNode.Value<Umbraco.Cms.Core.Models.PublishedContent.IPublishedContent>("logo")?.Url() ?? "";
+        }
+    }
+}
+
+<!-- Header -->
+<header class="bg-white shadow-md sticky top-0 z-50">
+    <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16">
+            <!-- Logo -->
+            <a href="/" class="flex items-center">
+                @if (!string.IsNullOrEmpty(logoUrl))
+                {
+                    <img src="@logoUrl" alt="@siteName" class="h-10" />
+                }
+                else
+                {
+                    <span class="text-2xl font-bold text-blue-700 font-heading">@siteName</span>
+                }
+            </a>
+
+            <!-- Desktop Navigation -->
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="/" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">Home</a>
+                <a href="/products" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">Menu</a>
+                <a href="/categories" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">Categories</a>
+                <a href="/about" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">About</a>
+                <a href="/contact" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">Contact</a>
+                <a href="/cart" class="relative text-gray-700 hover:text-blue-600 transition-colors">
+                    <i class="fas fa-shopping-cart text-xl"></i>
+                    <span class="cart-count absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">0</span>
+                </a>
+            </div>
+
+            <!-- Mobile menu button -->
+            <button type="button" class="md:hidden text-gray-700 hover:text-blue-600 focus:outline-none" onclick="toggleMobileMenu()">
+                <i class="fas fa-bars text-2xl"></i>
+            </button>
+        </div>
+
+        <!-- Mobile Navigation -->
+        <div id="mobileMenu" class="hidden md:hidden pb-4">
+            <div class="flex flex-col space-y-3">
+                <a href="/" class="text-gray-700 hover:text-blue-600 font-medium transition-colors py-2">Home</a>
+                <a href="/products" class="text-gray-700 hover:text-blue-600 font-medium transition-colors py-2">Menu</a>
+                <a href="/categories" class="text-gray-700 hover:text-blue-600 font-medium transition-colors py-2">Categories</a>
+                <a href="/about" class="text-gray-700 hover:text-blue-600 font-medium transition-colors py-2">About</a>
+                <a href="/contact" class="text-gray-700 hover:text-blue-600 font-medium transition-colors py-2">Contact</a>
+                <a href="/cart" class="text-gray-700 hover:text-blue-600 font-medium transition-colors py-2 flex items-center">
+                    <i class="fas fa-shopping-cart mr-2"></i>
+                    Cart <span class="cart-count ml-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">0</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+</header>
