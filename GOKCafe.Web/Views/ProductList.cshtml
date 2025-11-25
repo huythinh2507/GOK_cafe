@@ -1,0 +1,220 @@
+@using GOKCafe.Web.Models.ViewModels
+@model ProductListViewModel
+@{
+    Layout = "~/Views/_Layout.cshtml";
+    ViewData["Title"] = Model.PageTitle;
+}
+
+<div class="product-list-page">
+    <!-- Page Header -->
+    <section class="page-header bg-light py-5">
+        <div class="container">
+            <h1 class="display-4">@Model.PageTitle</h1>
+            @if (!string.IsNullOrEmpty(Model.Introduction))
+            {
+                <p class="lead">@Model.Introduction</p>
+            }
+        </div>
+    </section>
+
+    <!-- Filters and Products -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row">
+                <!-- Sidebar Filters -->
+                <div class="col-lg-3 mb-4">
+                    <div class="filters-sidebar">
+                        <h5 class="mb-3">Filters</h5>
+
+                        <!-- Search -->
+                        <div class="filter-group mb-4">
+                            <label class="form-label">Search</label>
+                            <form method="get" action="/products">
+                                <div class="input-group">
+                                    <input type="text" name="search" class="form-control" placeholder="Search products..."
+                                           value="@Model.SearchTerm" />
+                                    <button class="btn btn-outline-secondary" type="submit">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Categories -->
+                        @if (Model.Categories.Any())
+                        {
+                            <div class="filter-group mb-4">
+                                <label class="form-label">Categories</label>
+                                <ul class="list-unstyled">
+                                    <li class="mb-2">
+                                        <a href="/products" class="@(Model.SelectedCategoryId == null ? "fw-bold" : "")">
+                                            All Categories
+                                        </a>
+                                    </li>
+                                    @foreach (var category in Model.Categories)
+                                    {
+                                        <li class="mb-2">
+                                            <a href="/products?category=@category.Id"
+                                               class="@(Model.SelectedCategoryId == category.Id ? "fw-bold" : "")">
+                                                @category.Name
+                                                <span class="badge bg-secondary">@category.ProductCount</span>
+                                            </a>
+                                        </li>
+                                    }
+                                </ul>
+                            </div>
+                        }
+
+                        <!-- Clear Filters -->
+                        @if (Model.SelectedCategoryId != null || !string.IsNullOrEmpty(Model.SearchTerm))
+                        {
+                            <a href="/products" class="btn btn-outline-secondary w-100">
+                                <i class="fas fa-times"></i> Clear Filters
+                            </a>
+                        }
+                    </div>
+                </div>
+
+                <!-- Products Grid -->
+                <div class="col-lg-9">
+                    <!-- Results Info -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <p class="mb-0 text-muted">
+                            Showing @Model.Products.Items.Count of @Model.Products.TotalItems products
+                        </p>
+                        <div class="sort-options">
+                            <!-- TODO: Add sorting options -->
+                        </div>
+                    </div>
+
+                    @if (Model.Products.Items.Any())
+                    {
+                        <!-- Products Grid -->
+                        <div class="product-grid mb-4">
+                            @foreach (var product in Model.Products.Items)
+                            {
+                                <div class="product-card">
+                                    <div class="product-image-wrapper">
+                                        @if (!string.IsNullOrEmpty(product.ImageUrl))
+                                        {
+                                            <img src="@product.ImageUrl" alt="@product.Name" class="product-image" />
+                                        }
+                                        else
+                                        {
+                                            <div class="product-image-placeholder">
+                                                <i class="fas fa-coffee fa-3x"></i>
+                                            </div>
+                                        }
+                                        @if (product.DiscountPrice.HasValue && product.DiscountPrice > 0)
+                                        {
+                                            <span class="badge badge-sale">Sale</span>
+                                        }
+                                        @if (product.IsFeatured)
+                                        {
+                                            <span class="badge badge-featured">Featured</span>
+                                        }
+                                    </div>
+
+                                    <div class="product-info">
+                                        <h3 class="product-name">
+                                            <a href="/products/@product.Slug">@product.Name</a>
+                                        </h3>
+
+                                        @if (!string.IsNullOrEmpty(product.ShortDescription))
+                                        {
+                                            <p class="product-description">@product.ShortDescription</p>
+                                        }
+
+                                        <div class="product-price">
+                                            @if (product.DiscountPrice.HasValue && product.DiscountPrice > 0)
+                                            {
+                                                <span class="price-original">$@product.Price.ToString("F2")</span>
+                                                <span class="price-discount">$@product.DiscountPrice.Value.ToString("F2")</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="price">$@product.Price.ToString("F2")</span>
+                                            }
+                                        </div>
+
+                                        <div class="product-meta">
+                                            <span class="badge bg-info">@product.StockQuantity in stock</span>
+                                        </div>
+
+                                        <div class="product-actions mt-3">
+                                            <a href="/products/@product.Slug" class="btn btn-outline-primary btn-sm">
+                                                View Details
+                                            </a>
+                                            <button class="btn btn-primary btn-sm" onclick="addToCart('@product.Id')">
+                                                <i class="fas fa-cart-plus"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Pagination -->
+                        @if (Model.Products.TotalPages > 1)
+                        {
+                            <nav aria-label="Product pagination">
+                                <ul class="pagination justify-content-center">
+                                    @if (Model.Products.HasPreviousPage)
+                                    {
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page=@(Model.Products.PageNumber - 1)@(Model.SelectedCategoryId != null ? $"&category={Model.SelectedCategoryId}" : "")@(!string.IsNullOrEmpty(Model.SearchTerm) ? $"&search={Model.SearchTerm}" : "")">
+                                                Previous
+                                            </a>
+                                        </li>
+                                    }
+
+                                    @for (int i = 1; i <= Model.Products.TotalPages; i++)
+                                    {
+                                        <li class="page-item @(i == Model.Products.PageNumber ? "active" : "")">
+                                            <a class="page-link" href="?page=@i@(Model.SelectedCategoryId != null ? $"&category={Model.SelectedCategoryId}" : "")@(!string.IsNullOrEmpty(Model.SearchTerm) ? $"&search={Model.SearchTerm}" : "")">
+                                                @i
+                                            </a>
+                                        </li>
+                                    }
+
+                                    @if (Model.Products.HasNextPage)
+                                    {
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page=@(Model.Products.PageNumber + 1)@(Model.SelectedCategoryId != null ? $"&category={Model.SelectedCategoryId}" : "")@(!string.IsNullOrEmpty(Model.SearchTerm) ? $"&search={Model.SearchTerm}" : "")">
+                                                Next
+                                            </a>
+                                        </li>
+                                    }
+                                </ul>
+                            </nav>
+                        }
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning text-center">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <h4 class="mt-3">No products found</h4>
+                            <p>Try adjusting your filters or search criteria.</p>
+                            <a href="/products" class="btn btn-primary">View All Products</a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+@section Scripts {
+    <script>
+        function addToCart(productId) {
+            console.log('Add to cart:', productId);
+            alert('Product added to cart!');
+
+            const cartCount = document.querySelector('.cart-count');
+            if (cartCount) {
+                const currentCount = parseInt(cartCount.textContent) || 0;
+                cartCount.textContent = currentCount + 1;
+            }
+        }
+    </script>
+}
