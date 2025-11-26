@@ -26,10 +26,17 @@
 }
 
 <!-- Header -->
-<header class="bg-white shadow-md sticky top-0 z-50">
+<header class="bg-gray-50 border-b border-gray-200">
     <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between h-16">
-            <!-- Logo -->
+        <div class="flex items-center justify-between h-20">
+            <!-- Left Navigation -->
+            <div class="hidden md:flex items-center md:gap-3 lg:gap-12">
+                <a href="/" class="text-gray-700 hover:text-primary font-medium transition-colors uppercase text-base">Home</a>
+                <a href="/visions" class="text-gray-700 hover:text-primary font-medium transition-colors uppercase  text-base">Visions</a>
+                <a href="/products" class="text-gray-700 hover:text-primary font-medium transition-colors uppercase  text-base">Products</a>
+            </div>
+
+            <!-- Center Logo -->
             <a href="/" class="flex items-center">
                 @if (!string.IsNullOrEmpty(logoUrl))
                 {
@@ -41,37 +48,31 @@
                 }
             </a>
 
-            <!-- Desktop Navigation -->
-            <div class="hidden md:flex items-center space-x-8">
-                <a href="/" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">Home</a>
-                <a href="/products" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">Menu</a>
-                <a href="/categories" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">Categories</a>
-                <a href="/about" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">About</a>
-                <a href="/contact" class="text-gray-700 hover:text-blue-600 font-medium transition-colors">Contact</a>
-                <a href="/cart" class="relative text-gray-700 hover:text-blue-600 transition-colors">
-                    <i class="fas fa-shopping-cart text-xl"></i>
-                    <span class="cart-count absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">0</span>
-                </a>
+            <!-- Right Navigation -->
+            <div class="hidden md:flex items-center md:gap-3 lg:gap-12">
+                <a href="/partners" class="text-gray-700 hover:text-primary font-medium transition-colors uppercase  text-base">Partners</a>
+                <a href="/contact" class="text-gray-700 hover:text-primary font-medium transition-colors uppercase  text-base">Contact</a>
+                <a href="/blog" class="text-gray-700 hover:text-primary font-medium transition-colors uppercase  text-base">Blog</a>
+                <button type="button" class="text-gray-700 hover:text-primary transition-colors">
+                    <i class="fas fa-search text-lg"></i>
+                </button>
             </div>
 
             <!-- Mobile menu button -->
-            <button type="button" class="md:hidden text-gray-700 hover:text-blue-600 focus:outline-none" onclick="toggleMobileMenu()">
+            <button type="button" class="md:hidden text-gray-700 hover:text-primary focus:outline-none" onclick="toggleMobileMenu()">
                 <i class="fas fa-bars text-2xl"></i>
             </button>
         </div>
 
         <!-- Mobile Navigation -->
-        <div id="mobileMenu" class="hidden md:hidden pb-4">
+        <div id="mobileMenu" class="hidden lg:hidden pb-4">
             <div class="flex flex-col space-y-3">
-                <a href="/" class="text-gray-700 hover:text-blue-600 font-medium transition-colors py-2">Home</a>
-                <a href="/products" class="text-gray-700 hover:text-blue-600 font-medium transition-colors py-2"></a>
-                <a href="/categories" class="text-gray-700 hover:text-blue-600 font-medium transition-colors py-2">Categories</a>
-                <a href="/about" class="text-gray-700 hover:text-blue-600 font-medium transition-colors py-2">About</a>
-                <a href="/contact" class="text-gray-700 hover:text-blue-600 font-medium transition-colors py-2">Contact</a>
-                <a href="/cart" class="text-gray-700 hover:text-blue-600 font-medium transition-colors py-2 flex items-center">
-                    <i class="fas fa-shopping-cart mr-2"></i>
-                    Cart <span class="cart-count ml-2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">0</span>
-                </a>
+                <a href="/" class="text-gray-700 hover:text-primary font-medium transition-colors py-2 uppercase text-sm">Home</a>
+                <a href="/visions" class="text-gray-700 hover:text-primary font-medium transition-colors py-2 uppercase text-sm">Visions</a>
+                <a href="/products" class="text-gray-700 hover:text-primary font-medium transition-colors py-2 uppercase text-sm">Products</a>
+                <a href="/partners" class="text-gray-700 hover:text-primary font-medium transition-colors py-2 uppercase text-sm">Partners</a>
+                <a href="/contact" class="text-gray-700 hover:text-primary font-medium transition-colors py-2 uppercase text-sm">Contact</a>
+                <a href="/blog" class="text-gray-700 hover:text-primary font-medium transition-colors py-2 uppercase text-sm">Blog</a>
             </div>
         </div>
     </nav>

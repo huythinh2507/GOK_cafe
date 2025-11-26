@@ -11,8 +11,24 @@
     var categories = ViewData["Categories"] as List<CategoryDto> ?? new List<CategoryDto>();
 }
 
-@* Hero Section *@
-@await Html.PartialAsync("~/Views/Partials/Homepage/_HeroSection.cshtml", Model)
+@* Banner Section *@
+@await Html.PartialAsync("~/Views/Partials/Homepage/_BannerSection.cshtml", Model)
+
+@* Our Coffee Section *@
+@await Html.PartialAsync("~/Views/Partials/Homepage/_OurCoffeeSection.cshtml", Model)
+
+@* Our Tea Range Section *@
+@await Html.PartialAsync("~/Views/Partials/Homepage/_OurTeaRangeSection.cshtml", Model)
+
+@* Show All Tea Item Section *@
+@await Html.PartialAsync("~/Views/Partials/Homepage/_ShowAllTea.cshtml", Model)
+
+@* Our Partners Section *@
+@await Html.PartialAsync("~/Views/Partials/Homepage/OurPartners.cshtml", Model)
+
+@* Where To Find Us Section *@
+@await Html.PartialAsync("~/Views/Partials/Homepage/WhereToFindUs.cshtml", Model)
+
 
 @section Scripts {
     <script>
