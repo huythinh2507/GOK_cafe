@@ -1,0 +1,77 @@
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@{
+    // Get the OurDelicious parent node from Home
+    var ourDeliciousSection = UmbracoContext?.Content?.GetAtRoot()
+        .FirstOrDefault(x =>  x.ContentType.Alias == "homepage")?
+        .Children
+        .FirstOrDefault(x => x.ContentType.Alias == "ourDeliciousSection");
+
+    var items = ourDeliciousSection?.Children.Where(x => x.IsVisible()).ToList() ?? new List<Umbraco.Cms.Core.Models.PublishedContent.IPublishedContent>();
+}
+
+@if (items.Any())
+{
+    <!-- Our Delicious Offer Section -->
+    <section class="min-h-screen flex flex-col justify-center py-8 sm:py-12 lg:py-16 bg-white font-heading">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Section Header -->
+            <div class="text-center mb-6 sm:mb-8 lg:mb-12">
+                <p class="text-[#0767B3] text-xs sm:text-sm font-medium uppercase tracking-wide mb-2">EXPERIENCE OUR BEST</p>
+                <h2 class="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-semibold text-gray-900">OUR DELICIOUS OFFER</h2>
+            </div>
+
+            <!-- Product Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5 lg:gap-6 max-w-[1440px] mx-auto">
+                @foreach (var item in items)
+                {
+                    var title = item.Value<string>("title") ?? item.Name;
+                    var description = item.Value<string>("description") ?? "";
+
+                    // Get the background image from Media Picker - try multiple property name variations
+                    var backgroundImage = item.Value<Umbraco.Cms.Core.Models.PublishedContent.IPublishedContent>("backgroundImage");
+
+                    // If null, try checking if property exists with different casing
+                    if (backgroundImage == null && item.HasProperty("backgroundImage"))
+                    {
+                        // Property exists but value might be null - check if it has a value
+                        var hasValue = item.HasValue("backgroundImage");
+                    }
+
+                    var backgroundUrl = backgroundImage?.Url() ?? "";
+
+                    <div class="group relative overflow-hidden shadow-lg h-[400px] sm:h-[450px] lg:h-[500px] xl:h-[600px]">
+                        <!-- Background Image with Overlay -->
+                        <div class="absolute inset-0">
+                            @if (!string.IsNullOrEmpty(backgroundUrl))
+                            {
+                                <img src="@backgroundUrl" alt="@title" class="w-full h-full object-cover" loading="lazy" />
+                            }
+                            else
+                            {
+                                <!-- Fallback: Show gray background with debug info -->
+                                <div class="w-full h-full bg-gray-500 flex items-center justify-center">
+                                    <span class="text-white text-xs">Image not found for @item.Name</span>
+                                </div>
+                            }
+                            <!-- Dark overlay - using opacity and bg-black/30 for better visibility -->
+                            <div class="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-all duration-300"></div>
+                        </div>
+
+                        <!-- Content -->
+                        <div class="relative h-full flex flex-col justify-end p-4 sm:p-6 lg:p-8 text-white">
+                            <h3 class="text-lg sm:text-xl lg:text-2xl font-semibold mb-2 sm:mb-3">@title</h3>
+                            <p class="text-white text-xs sm:text-sm mb-4 sm:mb-5 lg:mb-6 line-clamp-2 sm:line-clamp-3">@description</p>
+
+                            <!-- View Products Button -->
+                            <div>
+                                <a href="@item.Url()" class="inline-block border-2 border-white text-white px-4 sm:px-5 lg:px-6 py-2 sm:py-2.5 lg:py-3 text-sm sm:text-base font-semibold hover:bg-white hover:text-gray-900 transition-all duration-300">
+                                    View Products
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+}

@@ -14,6 +14,9 @@
 @* Hero Section *@
 @await Html.PartialAsync("~/Views/Partials/Homepage/_HeroSection.cshtml", Model)
 
+@* Our Delicious Section *@
+@await Html.PartialAsync("~/Views/Partials/Homepage/_OurDeliciousSection.cshtml", Model)
+
 @section Scripts {
     <script>
         function addToCart(productId) {

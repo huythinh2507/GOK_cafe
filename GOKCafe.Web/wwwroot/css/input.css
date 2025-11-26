@@ -125,4 +125,21 @@
   .text-balance {
     text-wrap: balance;
   }
+
+  /* Opacity utilities for overlays */
+  .bg-black\/20 {
+    background-color: rgba(0, 0, 0, 0.2);
+  }
+
+  .bg-black\/30 {
+    background-color: rgba(0, 0, 0, 0.3);
+  }
+
+  .bg-black\/40 {
+    background-color: rgba(0, 0, 0, 0.4);
+  }
+
+  .group:hover .group-hover\:bg-black\/40 {
+    background-color: rgba(0, 0, 0, 0.4);
+  }
 }

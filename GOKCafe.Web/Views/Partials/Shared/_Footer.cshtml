@@ -27,27 +27,23 @@
 
 <!-- Footer -->
 <footer class="bg-[#202020] text-white mt-auto font-heading">
-    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
-        <!-- Top Section with Logo and Newsletter -->
-        <div class="flex flex-col lg:flex-row justify-between items-start mb-12 lg:mb-16 gap-8 lg:gap-12">
-            <!-- Logo -->
-            <div class="flex-shrink-0">
-                @if (!string.IsNullOrEmpty(logoUrl))
-                {
-                    <img src="@logoUrl" alt="@siteName" class="h-10" />
-                }
-                else
-                {
-                    <div class="flex items-center gap-3">
-                        <div class="text-2xl font-bold">@siteName</div>
-                    </div>
-                }
-            </div>
-
+    <div class="container mx-auto px-6 sm:px-8 lg:px-8 py-8 sm:py-12 lg:py-16">
+        <!-- Logo -->
+        <div class="mb-8 sm:mb-10">
+            @if (!string.IsNullOrEmpty(logoUrl))
+            {
+                <img src="@logoUrl" alt="@siteName" class="h-10" />
+            }
+            else
+            {
+                <div class="flex items-center gap-3">
+                    <div class="text-2xl font-bold">@siteName</div>
+                </div>
+            }
         </div>
 
         <!-- Main Footer Content -->
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-10 lg:gap-x-16 mb-12">
+        <div class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-8 lg:gap-x-16 mb-8 sm:mb-12">
             <!-- Shop Column -->
             <div>
                 <h5 class="text-base font-semibold mb-6 text-white">Shop</h5>
@@ -92,18 +88,18 @@
                 </div>
             </div>
 
-            <!-- Newsletter Column -->
-            <div>
+            <!-- Newsletter Column - Full width on mobile & tablet, 1 column on desktop -->
+            <div class="sm:col-span-3 lg:col-span-1">
                 <h5 class="text-base font-bold mb-6 text-white">Newsletter</h5>
 
                 <!-- Newsletter Subscription -->
                 <div class="w-full">
                     <p class="text-sm text-gray-300 mb-4 leading-relaxed">Get the latest information, exclusives, and special offers delivered directly to you.</p>
-                    <div class="flex gap-0">
+                    <div class="flex gap-0 w-full">
                         <input type="email"
                                placeholder="Enter email"
-                               class="flex-1 px-4 py-3 bg-white text-gray-900 focus:outline-none placeholder-gray-500 text-sm" />
-                        <button class="px-4 py-3 bg-[#0767B3] hover:bg-[#054f82] text-white transition-colors duration-200 flex items-center justify-center">
+                               class="flex-1 min-w-0 px-4 py-3 bg-white text-gray-900 focus:outline-none placeholder-gray-500 text-sm" />
+                        <button class="px-4 py-3 bg-[#0767B3] hover:bg-[#054f82] text-white transition-colors duration-200 flex items-center justify-center flex-shrink-0">
                             <i class="fas fa-arrow-right text-lg"></i>
                         </button>
                     </div>
@@ -111,15 +107,11 @@
             </div>
         </div>
 
-        <!-- Bottom Section -->
-        <div class="">
-            <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
-                <!-- Copyright -->
-                <p class="text-gray-300 text-xs sm:text-sm order-2 sm:order-1">
-                    &copy; @DateTime.Now.Year Gift of Kindness Coffee. All Rights Reserved.
-                </p>
-
-            </div>
+        <!-- Bottom Section / Copyright -->
+        <div class="pt-8 border-t border-gray-700">
+            <p class="text-gray-300 text-xs sm:text-sm text-center sm:text-left">
+                &copy; @DateTime.Now.Year Gift of Kindness Coffee. All Rights Reserved.
+            </p>
         </div>
     </div>
 </footer>
