@@ -478,9 +478,6 @@ umbraco-package-schema.json
 # Log files
 /umbraco/Logs/
 
-# Media files
-/wwwroot/media/
-
 ##
 ## Tailwind CSS
 ##
