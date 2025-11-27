@@ -29,6 +29,10 @@
 <header class="bg-gray-50 border-b border-gray-200">
     <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-20">
+            <!-- Mobile menu button -->
+            <button type="button" class="md:hidden text-gray-700 hover:text-primary focus:outline-none" onclick="toggleMobileMenu()">
+                <i class="fas fa-bars text-2xl"></i>
+            </button>
             <!-- Left Navigation -->
             <div class="hidden md:flex items-center md:gap-3 lg:gap-12">
                 <a href="/" class="text-gray-700 hover:text-primary font-medium transition-colors uppercase text-base">Home</a>
@@ -53,14 +57,9 @@
                 <a href="/partners" class="text-gray-700 hover:text-primary font-medium transition-colors uppercase  text-base">Partners</a>
                 <a href="/contact" class="text-gray-700 hover:text-primary font-medium transition-colors uppercase  text-base">Contact</a>
                 <a href="/blog" class="text-gray-700 hover:text-primary font-medium transition-colors uppercase  text-base">Blog</a>
-                <button type="button" class="text-gray-700 hover:text-primary transition-colors">
-                    <i class="fas fa-search text-lg"></i>
-                </button>
             </div>
-
-            <!-- Mobile menu button -->
-            <button type="button" class="md:hidden text-gray-700 hover:text-primary focus:outline-none" onclick="toggleMobileMenu()">
-                <i class="fas fa-bars text-2xl"></i>
+            <button type="button" class="text-gray-700 hover:text-primary transition-colors">
+                <i class="fas fa-search text-lg"></i>
             </button>
         </div>
 
