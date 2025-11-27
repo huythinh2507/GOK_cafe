@@ -1,0 +1,84 @@
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@{
+    var sectionTitle = "EXPERIENCE THE TEA ZEN";
+    var sectionHeading = "OUR TEA RANGE";
+    var buttonText = "Shop All Tea";
+    var buttonUrl = "/tea";
+    var teaItems = new List<dynamic>();
+
+    // Get Our Tea Range section from Home children
+    if (UmbracoContext?.Content != null)
+    {
+        var homeNode = UmbracoContext.Content.GetAtRoot().FirstOrDefault(x => x.ContentType.Alias == "home" || x.ContentType.Alias == "homepage");
+        if (homeNode != null)
+        {
+            var ourTeaNode = homeNode.Children.FirstOrDefault(x => x.ContentType.Alias == "ourTeaRange");
+            if (ourTeaNode != null)
+            {
+                // Get section properties
+                sectionTitle = ourTeaNode.Value<string>("sectionTitle") ?? sectionTitle;
+                sectionHeading = ourTeaNode.Value<string>("sectionHeading") ?? sectionHeading;
+                buttonText = ourTeaNode.Value<string>("buttonText") ?? buttonText;
+                buttonUrl = ourTeaNode.Value<string>("buttonUrl") ?? buttonUrl;
+
+                // Get OurTeaRangeItem children
+                var items = ourTeaNode.Children.Where(x => x.ContentType.Alias == "ourTeaRangeItem");
+                foreach (var item in items.Take(6))
+                {
+                    var teaImage = item.Value<Umbraco.Cms.Core.Models.PublishedContent.IPublishedContent>("ourTeaRangeImage");
+                    var teaImageUrl = teaImage != null ? teaImage.Url() : "";
+
+                    teaItems.Add(new
+                    {
+                        Name = item.Value<string>("title") ?? item.Name,
+                        Image = teaImageUrl,
+                        Url = item.Url()
+                    });
+                }
+            }
+        }
+    }
+
+    // Fallback data if no Umbraco content
+    if (!teaItems.Any())
+    {
+        var fallbackItems = new[] { "Freshness", "Bubble Tea", "Flavorful", "Fruit Tea", "Sustainability" };
+        foreach (var name in fallbackItems)
+        {
+            teaItems.Add(new { Name = name, Image = "", Url = "#" });
+        }
+    }
+}
+
+<!-- Our Tea Range Section -->
+<section class="py-12 bg-white">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Section Header -->
+        <div class="text-center mb-8">
+            <p class="text-2xl text-primary font-medium uppercase tracking-wide mb-2">@sectionTitle</p>
+            <h2 class="text-4xl md:text-5xl font-semibold text-gray-900">@sectionHeading</h2>
+        </div>
+
+        <!-- Tea Grid Layout -->
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-0 mb-8">
+            @foreach (var item in teaItems)
+            {
+                <a class="relative group overflow-hidden h-[300px] block bg-gray-200">
+                    @if (!string.IsNullOrEmpty(item.Image))
+                    {
+                        <img src="@item.Image" alt="@item.Name" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <h3 class="text-white text-3xl font-bold drop-shadow-lg">@item.Name</h3>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <h3 class="text-gray-800 text-3xl font-bold">@item.Name</h3>
+                        </div>
+                    }
+                </a>
+            }
+        </div>
+    </div>
+</section>

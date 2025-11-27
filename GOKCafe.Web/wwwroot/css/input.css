@@ -8,19 +8,19 @@
   --color-secondary: #0a8ed9;
   --color-secondary-light: #3ba6e6;
 
-  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-sans: 'Poppins', system-ui, sans-serif;
   --font-heading: 'Poppins', system-ui, sans-serif;
 }
 
 /* Custom styles for GOK Cafe */
 @layer base {
   body {
-    font-family: var(--font-sans);
+    font-family: 'Poppins', system-ui, sans-serif;
     color: rgb(17 24 39);
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-heading);
+    font-family: 'Poppins', system-ui, sans-serif;
   }
 }
 
