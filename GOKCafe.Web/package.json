@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build:css": "./tailwindcss-windows-x64.exe -i ./wwwroot/css/input.css -o ./wwwroot/css/output.css --minify",
-    "watch:css": "./tailwindcss-windows-x64.exe -i ./wwwroot/css/input.css -o ./wwwroot/css/output.css --watch",
+    "build:css": "tailwindcss-windows-x64.exe -i ./wwwroot/css/input.css -o ./wwwroot/css/output.css --minify",
+    "watch:css": "tailwindcss-windows-x64.exe -i ./wwwroot/css/input.css -o ./wwwroot/css/output.css --watch",
     "dev": "npm run watch:css"
   },
   "keywords": [],

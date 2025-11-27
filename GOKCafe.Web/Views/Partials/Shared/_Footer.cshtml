@@ -11,11 +11,11 @@
         if (homeNode != null)
         {
             // Get Header from Home's children
-            var headerNode = homeNode.Children.FirstOrDefault(x => x.ContentType.Alias == "header");
-            if (headerNode != null)
+            var footerNode = homeNode.Children.FirstOrDefault(x => x.ContentType.Alias == "footer");
+            if (footerNode != null)
             {
                 // Get logo from Header document type
-                var logoMedia = headerNode.Value<Umbraco.Cms.Core.Models.PublishedContent.IPublishedContent>("logo");
+                var logoMedia = footerNode.Value<Umbraco.Cms.Core.Models.PublishedContent.IPublishedContent>("logo");
                 if (logoMedia != null)
                 {
                     logoUrl = logoMedia.Url();
@@ -26,69 +26,92 @@
 }
 
 <!-- Footer -->
-<footer class="bg-gray-900 text-white mt-auto">
-    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <!-- About Column -->
+<footer class="bg-[#202020] text-white mt-auto font-heading">
+    <div class="container mx-auto px-6 sm:px-8 lg:px-8 py-8 sm:py-12 lg:py-16">
+        <!-- Logo -->
+        <div class="mb-8 sm:mb-10">
+            @if (!string.IsNullOrEmpty(logoUrl))
+            {
+                <img src="@logoUrl" alt="@siteName" class="h-10" />
+            }
+            else
+            {
+                <div class="flex items-center gap-3">
+                    <div class="text-2xl font-bold">@siteName</div>
+                </div>
+            }
+        </div>
+
+        <!-- Main Footer Content -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-8 lg:gap-x-16 mb-8 sm:mb-12">
+            <!-- Shop Column -->
             <div>
-                @if (!string.IsNullOrEmpty(logoUrl))
-                {
-                    <img src="@logoUrl" alt="@siteName" class="h-12 mb-4" />
-                }
-                else
-                {
-                    <h5 class="text-xl font-bold mb-4 font-heading">@siteName</h5>
-                }
-                <p class="text-gray-300 mb-4">Premium coffee and delicious pastries made with love and passion.</p>
-                <div class="flex space-x-4">
-                    <a href="#" class="text-gray-300 hover:text-white transition-colors">
-                        <i class="fab fa-facebook-f text-xl"></i>
+                <h5 class="text-base font-semibold mb-6 text-white">Shop</h5>
+                <ul class="space-y-3.5">
+                    <li><a href="/coffee-subscriptions" class="text-gray-300 hover:text-white transition-colors text-sm block">Coffee Subscriptions</a></li>
+                    <li><a href="/coffee" class="text-gray-300 hover:text-white transition-colors text-sm block">Coffee</a></li>
+                    <li><a href="/philippine-coffee" class="text-gray-300 hover:text-white transition-colors text-sm block">Philippine Coffee</a></li>
+                    <li><a href="/mostra-rewards" class="text-gray-300 hover:text-white transition-colors text-sm block">Mostra Rewards</a></li>
+                    <li><a href="/events" class="text-gray-300 hover:text-white transition-colors text-sm block">Events</a></li>
+                </ul>
+            </div>
+
+            <!-- Company Column -->
+            <div>
+                <h5 class="text-base font-semibold mb-6 text-white">Company</h5>
+                <ul class="space-y-3.5">
+                    <li><a href="/our-story" class="text-gray-300 hover:text-white transition-colors text-sm block">Our Story</a></li>
+                    <li><a href="/privacy-policy" class="text-gray-300 hover:text-white transition-colors text-sm block">Privacy Policy</a></li>
+                    <li><a href="/refund-policy" class="text-gray-300 hover:text-white transition-colors text-sm block">Refund Policy</a></li>
+                    <li><a href="/terms-of-service" class="text-gray-300 hover:text-white transition-colors text-sm block">Term of Service</a></li>
+                    <li><a href="/contact" class="text-gray-300 hover:text-white transition-colors text-sm block">Contact Us</a></li>
+                </ul>
+            </div>
+
+            <!-- Follow Us Column -->
+            <div>
+                <h5 class="text-base font-bold mb-6 text-white">Follow Us</h5>
+                <!-- Social Icons -->
+                <div class="flex gap-6">
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors" aria-label="Facebook">
+                        <i class="fab fa-facebook-f text-lg"></i>
                     </a>
-                    <a href="#" class="text-gray-300 hover:text-white transition-colors">
-                        <i class="fab fa-instagram text-xl"></i>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors" aria-label="YouTube">
+                        <i class="fab fa-youtube text-lg"></i>
                     </a>
-                    <a href="#" class="text-gray-300 hover:text-white transition-colors">
-                        <i class="fab fa-twitter text-xl"></i>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors" aria-label="Instagram">
+                        <i class="fab fa-instagram text-lg"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-colors" aria-label="TikTok">
+                        <i class="fab fa-tiktok text-lg"></i>
                     </a>
                 </div>
             </div>
 
-            <!-- Quick Links Column -->
-            <div>
-                <h5 class="text-xl font-bold mb-4 font-heading">Quick Links</h5>
-                <ul class="space-y-2">
-                    <li><a href="/" class="text-gray-300 hover:text-white transition-colors">Home</a></li>
-                    <li><a href="/products" class="text-gray-300 hover:text-white transition-colors">Menu</a></li>
-                    <li><a href="/categories" class="text-gray-300 hover:text-white transition-colors">Categories</a></li>
-                    <li><a href="/about" class="text-gray-300 hover:text-white transition-colors">About Us</a></li>
-                    <li><a href="/contact" class="text-gray-300 hover:text-white transition-colors">Contact</a></li>
-                </ul>
-            </div>
+            <!-- Newsletter Column - Full width on mobile & tablet, 1 column on desktop -->
+            <div class="sm:col-span-3 lg:col-span-1">
+                <h5 class="text-base font-bold mb-6 text-white">Newsletter</h5>
 
-            <!-- Contact Info Column -->
-            <div>
-                <h5 class="text-xl font-bold mb-4 font-heading">Contact Info</h5>
-                <ul class="space-y-3 text-gray-300">
-                    <li class="flex items-start">
-                        <i class="fas fa-map-marker-alt mt-1 mr-3"></i>
-                        <span>123 Coffee Street, City</span>
-                    </li>
-                    <li class="flex items-center">
-                        <i class="fas fa-phone mr-3"></i>
-                        <span>+1 234 567 8900</span>
-                    </li>
-                    <li class="flex items-center">
-                        <i class="fas fa-envelope mr-3"></i>
-                        <span>info@gokcafe.com</span>
-                    </li>
-                </ul>
+                <!-- Newsletter Subscription -->
+                <div class="w-full">
+                    <p class="text-sm text-gray-300 mb-4 leading-relaxed">Get the latest information, exclusives, and special offers delivered directly to you.</p>
+                    <div class="flex gap-0 w-full">
+                        <input type="email"
+                               placeholder="Enter email"
+                               class="flex-1 min-w-0 px-4 py-3 bg-white text-gray-900 focus:outline-none placeholder-gray-500 text-sm" />
+                        <button class="px-4 py-3 bg-[#0767B3] hover:bg-[#054f82] text-white transition-colors duration-200 flex items-center justify-center flex-shrink-0">
+                            <i class="fas fa-arrow-right text-lg"></i>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <hr class="my-8 border-gray-700" />
-
-        <div class="text-center text-gray-400">
-            <p>&copy; @DateTime.Now.Year @siteName. All rights reserved.</p>
+        <!-- Bottom Section / Copyright -->
+        <div class="pt-8 border-t border-gray-700">
+            <p class="text-gray-300 text-xs sm:text-sm text-center sm:text-left">
+                &copy; @DateTime.Now.Year Gift of Kindness Coffee. All Rights Reserved.
+            </p>
         </div>
     </div>
 </footer>

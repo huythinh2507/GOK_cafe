@@ -125,4 +125,65 @@
   .text-balance {
     text-wrap: balance;
   }
+
+  /* Opacity utilities for overlays */
+  .bg-black\/20 {
+    background-color: rgba(0, 0, 0, 0.2);
+  }
+
+  .bg-black\/30 {
+    background-color: rgba(0, 0, 0, 0.3);
+  }
+
+  .bg-black\/40 {
+    background-color: rgba(0, 0, 0, 0.4);
+  }
+
+  .group:hover .group-hover\:bg-black\/40 {
+    background-color: rgba(0, 0, 0, 0.4);
+  }
+
+  /* Natural Section Typography */
+  .text-\[20px\] {
+    font-size: 20px;
+  }
+
+  .text-\[16px\] {
+    font-size: 16px;
+  }
+
+  .text-\[12px\] {
+    font-size: 12px;
+  }
+
+  /* Natural Section Button Padding */
+  .px-\[48px\] {
+    padding-left: 48px;
+    padding-right: 48px;
+  }
+
+  .py-\[18px\] {
+    padding-top: 18px;
+    padding-bottom: 18px;
+  }
+
+  .px-\[36px\] {
+    padding-left: 36px;
+    padding-right: 36px;
+  }
+
+  .py-\[14px\] {
+    padding-top: 14px;
+    padding-bottom: 14px;
+  }
+
+  .px-\[24px\] {
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  .py-\[10px\] {
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
 }
