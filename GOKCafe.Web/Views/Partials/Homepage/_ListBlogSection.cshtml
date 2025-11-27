@@ -32,12 +32,12 @@
 
 <!-- Blog List Section -->
 <section class="py-0 bg-white">
-    <div class="container mx-auto ">
+    <div class="container mx-auto px-4 sm:px-0 lg:px-0">
         <!-- Blog Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-3 justify-items-center gap-4">
+        <div class="grid grid-cols-1 lg:grid-cols-3 justify-items-center gap-4">
             @foreach (var blog in blogItems)
             {
-                <div class="group relative overflow-hidden cursor-pointer" style="width:450px; height: 450px;">
+                <div class="group relative overflow-hidden cursor-pointer w-full" style=" height: 450px;">
                     <!-- Background Image with overlay -->
                     <div class="absolute inset-0 bg-cover bg-center" style="background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('@blog.BackgroundImage');">
                         @if (string.IsNullOrEmpty(blog.BackgroundImage))
@@ -47,7 +47,7 @@
                     </div>
 
                     <!-- Content -->
-                    <div class="relative h-full flex flex-col justify-end p-10 text-white">
+                    <div class="relative h-full flex flex-col justify-end p-4 text-white">
                         <h3 class="text-lg font-medium mb-3 leading-snug" style="max-width: 280px;">@blog.Title</h3>
                         <a href="@blog.Url" class="inline-flex items-center text-white text-sm font-normal group-hover:gap-3 transition-all">
                             <span>Read more</span>
