@@ -1,0 +1,144 @@
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@{
+    // Get the NaturalSection from Home
+    var naturalSection = UmbracoContext?.Content?.GetAtRoot()
+        .FirstOrDefault(x => x.ContentType.Alias == "homepage")?
+        .Children
+        .FirstOrDefault(x => x.ContentType.Alias == "naturalSection");
+
+    if (naturalSection != null)
+    {
+        // Get background images
+        var backgroundImage = naturalSection.Value<Umbraco.Cms.Core.Models.PublishedContent.IPublishedContent>("backgroundImage");
+        var backgroundUrl = backgroundImage?.Url() ?? "";
+
+        var backgroundImageMobile = naturalSection.Value<Umbraco.Cms.Core.Models.PublishedContent.IPublishedContent>("backgroundImageMobile");
+        var backgroundUrlMobile = backgroundImageMobile?.Url() ?? backgroundUrl;
+
+        <!-- Natural Cold Brew Section -->
+        <section class="relative overflow-hidden font-heading" style="background-color: #D8D8D8;">
+            <!-- Desktop Layout with Background -->
+            <div class="hidden lg:block min-h-screen">
+                <!-- Background Image with Bottle -->
+                @if (!string.IsNullOrEmpty(backgroundUrl))
+                {
+                    <div class="absolute inset-0" style="background-color: #D8D8D8;">
+                        <img src="@backgroundUrl" alt="Natural Cold Brew Coffee" class="w-full h-full object-cover object-left" loading="lazy" />
+                    </div>
+                }
+                else
+                {
+                    <!-- Fallback background color -->
+                    <div class="absolute inset-0" style="background-color: #D8D8D8;"></div>
+                }
+
+                <!-- Content Container -->
+                <div class="relative z-10 min-h-screen flex items-center">
+                    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                        <div class="flex justify-end items-center min-h-screen">
+                            <div class="w-1/2 pr-8 xl:pr-20 2xl:pr-24 text-right">
+                                <!-- Small Heading -->
+                                <p class="text-gray-500 font-medium uppercase tracking-wide mb-4 text-xs sm:text-sm">
+                                    MORE THAN JUST COLD COFFEE
+                                </p>
+
+                                <!-- Main Heading -->
+                                <h2 class="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-semibold text-gray-900 mb-6 lg:mb-8 leading-tight whitespace-nowrap">
+                                    Natural <span class="text-[#0767B3] italic">Cold Brew</span> Coffee
+                                </h2>
+
+                                <!-- Description -->
+                                <p class="text-gray-700 text-sm sm:text-base lg:text-lg leading-relaxed mb-6 lg:mb-8 ml-auto max-w-xl">
+                                    Refresh your mind with organic, sustainably-sourced cold brew coffee, delivered straight to your door.
+                                </p>
+
+                                <!-- CTA Button -->
+                                <div>
+                                    <a href="/products" class="inline-block border-2 border-[#0767B3] text-[#0767B3] font-semibold hover:bg-[#0767B3] hover:text-white transition-all duration-300 px-4 sm:px-5 lg:px-6 py-2 sm:py-2.5 lg:py-3 text-sm sm:text-base">
+                                        Discover More
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tablet Layout: Image + Content Below -->
+            <div class="hidden sm:flex lg:hidden flex-col items-center" style="background-color: #D8D8D8;">
+                <!-- Background Image -->
+                @if (!string.IsNullOrEmpty(backgroundUrlMobile))
+                {
+                    <div class="w-full" style="background-color: #D8D8D8;">
+                        <img src="@backgroundUrlMobile" alt="Natural Cold Brew Coffee" class="w-full h-auto object-contain" loading="lazy" />
+                    </div>
+                }
+
+                <!-- Content Below Image -->
+                <div class="w-full flex justify-center py-8 px-6">
+                    <div class="w-full max-w-lg text-center py-8 px-6">
+                        <!-- Small Heading -->
+                        <p class="text-gray-500 font-medium uppercase tracking-wide mb-3 text-sm">
+                            MORE THAN JUST COLD COFFEE
+                        </p>
+
+                        <!-- Main Heading -->
+                        <h2 class="text-3xl lg:text-4xl font-semibold text-gray-900 mb-5 leading-tight">
+                            Natural <span class="text-[#0767B3] italic">Cold Brew</span> Coffee
+                        </h2>
+
+                        <!-- Description -->
+                        <p class="text-gray-700 text-sm sm:text-base leading-relaxed mb-6">
+                            Refresh your mind with organic, sustainably-sourced cold brew coffee, delivered straight to your door.
+                        </p>
+
+                        <!-- CTA Button -->
+                        <div>
+                            <a href="/products" class="inline-block border-2 border-[#0767B3] text-[#0767B3] font-semibold hover:bg-[#0767B3] hover:text-white transition-all duration-300 px-5 lg:px-6 py-2.5 lg:py-3 text-sm sm:text-base">
+                                Discover More
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile Layout: Image + Content Below -->
+            <div class="flex sm:hidden flex-col items-center" style="background-color: #D8D8D8;">
+                <!-- Background Image -->
+                @if (!string.IsNullOrEmpty(backgroundUrlMobile))
+                {
+                    <div class="w-full" style="background-color: #D8D8D8;">
+                        <img src="@backgroundUrlMobile" alt="Natural Cold Brew Coffee" class="w-full h-auto object-contain" loading="lazy" />
+                    </div>
+                }
+
+                <!-- Content Below Image -->
+                <div class="w-full flex justify-center py-6 px-4">
+                    <div class="w-full max-w-sm text-center py-6 px-4">
+                        <!-- Small Heading -->
+                        <p class="text-gray-500 font-medium uppercase tracking-wide mb-2 text-xs">
+                            MORE THAN JUST COLD COFFEE
+                        </p>
+
+                        <!-- Main Heading -->
+                        <h2 class="text-2xl font-semibold text-gray-900 mb-3 leading-tight">
+                            Natural <span class="text-[#0767B3] italic">Cold Brew</span> Coffee
+                        </h2>
+
+                        <!-- Description -->
+                        <p class="text-gray-700 text-xs sm:text-sm leading-relaxed mb-5">
+                            Refresh your mind with organic, sustainably-sourced cold brew coffee, delivered straight to your door.
+                        </p>
+
+                        <!-- CTA Button -->
+                        <div>
+                            <a href="/products" class="inline-block border-2 border-[#0767B3] text-[#0767B3] font-semibold hover:bg-[#0767B3] hover:text-white transition-all duration-300 px-4 sm:px-5 py-2 sm:py-2.5 text-sm">
+                                Discover More
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    }
+}
