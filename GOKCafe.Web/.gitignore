@@ -480,3 +480,10 @@ umbraco-package-schema.json
 
 # Media files
 /wwwroot/media/
+
+##
+## Tailwind CSS
+##
+tailwindcss-windows-x64.exe
+/wwwroot/css/output.css
+package-lock.json

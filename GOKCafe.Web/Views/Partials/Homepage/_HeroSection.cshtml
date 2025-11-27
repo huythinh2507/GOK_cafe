@@ -1,0 +1,31 @@
+@model Umbraco.Cms.Core.Models.PublishedContent.IPublishedContent
+@{
+    var heroTitle = Model?.Value<string>("heroTitle");
+    var heroSubtitle = Model?.Value<string>("heroSubtitle");
+    var heroCtaText = Model?.Value<string>("heroCtaText");
+    var heroCtaUrl = Model?.Value<string>("heroCtaUrl");
+}
+
+@if (!string.IsNullOrEmpty(heroTitle))
+{
+    <!-- Hero Section -->
+    <section class="relative bg-gradient-to-r from-blue-800 to-blue-600 h-[500px] flex items-center justify-center text-white overflow-hidden">
+        <!-- Background overlay -->
+        <div class="absolute inset-0 bg-black opacity-40"></div>
+
+        <!-- Hero content -->
+        <div class="relative z-10 text-center px-4 max-w-4xl mx-auto">
+            <h1 class="text-5xl md:text-6xl font-bold mb-4 font-heading">@heroTitle</h1>
+            @if (!string.IsNullOrEmpty(heroSubtitle))
+            {
+                <p class="text-xl md:text-2xl mb-8 text-blue-100">@heroSubtitle</p>
+            }
+            @if (!string.IsNullOrEmpty(heroCtaText) && !string.IsNullOrEmpty(heroCtaUrl))
+            {
+                <a href="@heroCtaUrl" class="inline-block bg-white text-blue-800 font-semibold px-8 py-4 rounded-lg text-lg hover:bg-blue-50 transition-colors duration-200 shadow-lg">
+                    @heroCtaText
+                </a>
+            }
+        </div>
+    </section>
+}

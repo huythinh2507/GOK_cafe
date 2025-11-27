@@ -30,6 +30,8 @@ public class UnitOfWork : IUnitOfWork
         ServiceFeatures = new Repository<ServiceFeature>(_context);
         FlavourProfiles = new Repository<FlavourProfile>(_context);
         Equipments = new Repository<Equipment>(_context);
+        Carts = new Repository<Cart>(_context);
+        CartItems = new Repository<CartItem>(_context);
     }
 
     public IRepository<User> Users { get; }
@@ -49,6 +51,8 @@ public class UnitOfWork : IUnitOfWork
     public IRepository<ServiceFeature> ServiceFeatures { get; }
     public IRepository<FlavourProfile> FlavourProfiles { get; }
     public IRepository<Equipment> Equipments { get; }
+    public IRepository<Cart> Carts { get; }
+    public IRepository<CartItem> CartItems { get; }
 
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {

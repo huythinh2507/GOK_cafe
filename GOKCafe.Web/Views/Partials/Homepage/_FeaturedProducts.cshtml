@@ -1,0 +1,98 @@
+@using GOKCafe.Web.Models.DTOs
+@model (Umbraco.Cms.Core.Models.PublishedContent.IPublishedContent page, List<ProductDto> products)
+@{
+    var page = Model.page;
+    var featuredProducts = Model.products ?? new List<ProductDto>();
+    var featuredTitle = page?.Value<string>("featuredSectionTitle");
+    var featuredSubtitle = page?.Value<string>("featuredSectionSubtitle");
+}
+
+<!-- Featured Products Section -->
+<section class="py-16 bg-white">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        @if (!string.IsNullOrEmpty(featuredTitle))
+        {
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold text-gray-900 mb-4 font-heading">@featuredTitle</h2>
+                @if (!string.IsNullOrEmpty(featuredSubtitle))
+                {
+                    <p class="text-xl text-gray-600">@featuredSubtitle</p>
+                }
+            </div>
+        }
+
+        @if (featuredProducts.Any())
+        {
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                @foreach (var product in featuredProducts)
+                {
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                        <div class="relative">
+                            @if (!string.IsNullOrEmpty(product.ImageUrl))
+                            {
+                                <img src="@product.ImageUrl" alt="@product.Name" class="w-full h-64 object-cover" />
+                            }
+                            else
+                            {
+                                <div class="w-full h-64 bg-gray-100 flex items-center justify-center">
+                                    <i class="fas fa-coffee text-6xl text-gray-400"></i>
+                                </div>
+                            }
+
+                            <!-- Badges -->
+                            <div class="absolute top-2 right-2 flex flex-col gap-2">
+                                @if (product.DiscountPrice.HasValue && product.DiscountPrice > 0)
+                                {
+                                    <span class="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold">Sale</span>
+                                }
+                                @if (product.IsFeatured)
+                                {
+                                    <span class="bg-yellow-500 text-white px-3 py-1 rounded-full text-sm font-semibold">Featured</span>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="p-4">
+                            <h5 class="text-lg font-semibold mb-2 text-gray-900 hover:text-blue-600 transition-colors">
+                                <a href="/@product.Slug">@product.Name</a>
+                            </h5>
+
+                            @if (!string.IsNullOrEmpty(product.ShortDescription))
+                            {
+                                <p class="text-gray-600 text-sm mb-3 line-clamp-2">@product.ShortDescription</p>
+                            }
+
+                            <div class="mb-4">
+                                @if (product.DiscountPrice.HasValue && product.DiscountPrice > 0)
+                                {
+                                    <span class="text-gray-400 line-through mr-2">$@product.Price.ToString("F2")</span>
+                                    <span class="text-red-600 font-bold text-xl">$@product.DiscountPrice.Value.ToString("F2")</span>
+                                }
+                                else
+                                {
+                                    <span class="text-gray-900 font-bold text-xl">$@product.Price.ToString("F2")</span>
+                                }
+                            </div>
+
+                            <a href="/@product.Slug" class="block w-full text-center bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200">
+                                View Details
+                            </a>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="text-center mt-12">
+                <a href="/products" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-3 rounded-lg text-lg transition-colors duration-200">
+                    View All Products
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="bg-blue-50 border border-blue-200 text-blue-800 px-6 py-4 rounded-lg text-center">
+                <i class="fas fa-info-circle mr-2"></i> No featured products available. Please add products in Umbraco and mark them as featured.
+            </div>
+        }
+    </div>
+</section>

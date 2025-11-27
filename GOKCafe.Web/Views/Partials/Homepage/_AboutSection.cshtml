@@ -1,0 +1,23 @@
+@model Umbraco.Cms.Core.Models.PublishedContent.IPublishedContent
+@{
+    var aboutTitle = Model?.Value<string>("aboutTitle");
+    var aboutDescription = Model?.Value<string>("aboutDescription");
+}
+
+@if (!string.IsNullOrEmpty(aboutTitle))
+{
+    <!-- About Section -->
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="max-w-4xl mx-auto">
+                <h2 class="text-4xl font-bold text-gray-900 mb-6 font-heading">@aboutTitle</h2>
+                @if (!string.IsNullOrEmpty(aboutDescription))
+                {
+                    <div class="prose prose-lg max-w-none text-gray-700">
+                        @Html.Raw(aboutDescription)
+                    </div>
+                }
+            </div>
+        </div>
+    </section>
+}
