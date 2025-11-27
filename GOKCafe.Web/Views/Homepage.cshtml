@@ -23,11 +23,17 @@
 @* Show All Tea Item Section *@
 @await Html.PartialAsync("~/Views/Partials/Homepage/_ShowAllTea.cshtml", Model)
 
+@* List Blog Section *@
+@await Html.PartialAsync("~/Views/Partials/Homepage/_ListBlogSection.cshtml", Model)
+
 @* Our Partners Section *@
 @await Html.PartialAsync("~/Views/Partials/Homepage/OurPartners.cshtml", Model)
 
 @* Where To Find Us Section *@
 @await Html.PartialAsync("~/Views/Partials/Homepage/WhereToFindUs.cshtml", Model)
+
+@* OnFooter Section *@
+@await Html.PartialAsync("~/Views/Partials/Homepage/_OnFooter.cshtml", Model)
 
 
 @section Scripts {
