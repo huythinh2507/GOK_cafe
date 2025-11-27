@@ -1,0 +1,330 @@
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@{
+    // Get the OurMission from Home
+    var ourMission = UmbracoContext?.Content?.GetAtRoot()
+        .FirstOrDefault(x => x.ContentType.Alias == "homepage")?
+        .Children
+        .FirstOrDefault(x => x.ContentType.Alias == "ourMission");
+
+    if (ourMission != null)
+    {
+        var videoUrl = ourMission.Value<string>("videoUrl") ?? "";
+        var videoMedia = ourMission.Value<Umbraco.Cms.Core.Models.PublishedContent.IPublishedContent>("videoMedia");
+        var videoMediaUrl = videoMedia?.Url() ?? "";
+
+        // Get play button icon
+        var playButtonIcon = ourMission.Value<Umbraco.Cms.Core.Models.PublishedContent.IPublishedContent>("playButtonIcon");
+        var playButtonIconUrl = playButtonIcon?.Url() ?? "";
+
+        // Get mission items (children of ourMission)
+        var missionItems = ourMission.Children.Where(x => x.IsVisible()).ToList();
+
+        <!-- Our Mission Section -->
+        <section class="bg-white font-heading py-12 sm:py-16 lg:py-20 lg:min-h-screen">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <!-- Mobile & Tablet Layout -->
+                <div class="block lg:hidden">
+                    <!-- Header -->
+                    <div class="text-center mb-8">
+                        <p class="text-[#0767B3] text-xs sm:text-sm font-medium uppercase tracking-wide mb-3">
+                            YOU'RE THE REASON WE'RE HERE.
+                        </p>
+                        <h2 class="text-2xl sm:text-3xl font-semibold text-gray-900 mb-6">
+                            OUR MISSIONS
+                        </h2>
+                    </div>
+
+                    <!-- Video Section -->
+                    <div class="mb-8">
+                        <div class="relative w-full aspect-video bg-gray-200 rounded-lg overflow-hidden shadow-lg group cursor-pointer">
+                            @if (!string.IsNullOrEmpty(videoMediaUrl))
+                            {
+                                @* Use uploaded video with custom play button *@
+                                <video class="absolute inset-0 w-full h-full object-cover" id="missionVideo" poster="">
+                                    <source src="@videoMediaUrl" type="video/mp4">
+                                    Your browser does not support the video tag.
+                                </video>
+
+                                <!-- Play Button Overlay -->
+                                <div class="absolute inset-0 flex items-center justify-center bg-black/30 transition-opacity group-hover:bg-black/40" id="playOverlay">
+                                    @if (!string.IsNullOrEmpty(playButtonIconUrl))
+                                    {
+                                        <img src="@playButtonIconUrl" alt="Play" class="w-20 h-20 sm:w-24 sm:h-24 hover:scale-110 transition-transform" />
+                                    }
+                                    else
+                                    {
+                                        <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white/90 flex items-center justify-center hover:bg-white transition-all">
+                                            <svg class="w-10 h-10 sm:w-12 sm:h-12 text-[#0767B3] ml-1" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M8 5v14l11-7z" />
+                                            </svg>
+                                        </div>
+                                    }
+                                </div>
+
+                                <script>
+                                    document.addEventListener('DOMContentLoaded', function() {
+                                        const video = document.getElementById('missionVideo');
+                                        const overlay = document.getElementById('playOverlay');
+                                        const container = overlay?.parentElement;
+
+                                        container?.addEventListener('click', function() {
+                                            if (video.paused) {
+                                                video.play();
+                                                overlay.style.display = 'none';
+                                            } else {
+                                                video.pause();
+                                                overlay.style.display = 'flex';
+                                            }
+                                        });
+
+                                        video?.addEventListener('ended', function() {
+                                            overlay.style.display = 'flex';
+                                        });
+                                    });
+                                </script>
+                            }
+                            else if (!string.IsNullOrEmpty(videoUrl))
+                            {
+                                @* YouTube video with thumbnail and play button *@
+                                var videoId = "";
+                                if (videoUrl.Contains("youtu.be/"))
+                                {
+                                    videoId = videoUrl.Split("youtu.be/")[1].Split('?')[0];
+                                }
+                                else if (videoUrl.Contains("youtube.com/watch?v="))
+                                {
+                                    videoId = videoUrl.Split("v=")[1].Split('&')[0];
+                                }
+
+                                @if (!string.IsNullOrEmpty(videoId))
+                                {
+                                    <!-- YouTube Thumbnail -->
+                                    <img src="https://img.youtube.com/vi/@videoId/maxresdefault.jpg"
+                                         alt="Video Thumbnail"
+                                         class="absolute inset-0 w-full h-full object-cover"
+                                         id="ytThumbnail@(videoId)" />
+
+                                    <!-- Play Button Overlay -->
+                                    <div class="absolute inset-0 flex items-center justify-center bg-black/30 transition-opacity group-hover:bg-black/40" id="ytOverlay@(videoId)">
+                                        @if (!string.IsNullOrEmpty(playButtonIconUrl))
+                                        {
+                                            <img src="@playButtonIconUrl" alt="Play" class="w-20 h-20 sm:w-24 sm:h-24 hover:scale-110 transition-transform" />
+                                        }
+                                        else
+                                        {
+                                            <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white/90 flex items-center justify-center hover:bg-white transition-all">
+                                                <svg class="w-10 h-10 sm:w-12 sm:h-12 text-[#0767B3] ml-1" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path d="M8 5v14l11-7z"/>
+                                                </svg>
+                                            </div>
+                                        }
+                                    </div>
+
+                                    <!-- Hidden iframe -->
+                                    <div id="ytPlayer@(videoId)" class="hidden absolute inset-0 w-full h-full"></div>
+
+                                    <script>
+                                        document.getElementById('ytOverlay@(videoId)').addEventListener('click', function() {
+                                            const thumbnail = document.getElementById('ytThumbnail@(videoId)');
+                                            const overlay = document.getElementById('ytOverlay@(videoId)');
+                                            const playerDiv = document.getElementById('ytPlayer@(videoId)');
+
+                                            thumbnail.style.display = 'none';
+                                            overlay.style.display = 'none';
+                                            playerDiv.classList.remove('hidden');
+                                            playerDiv.innerHTML = '<iframe class="w-full h-full" src="https://www.youtube.com/embed/@videoId?autoplay=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
+                                        });
+                                    </script>
+                                }
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Mission Cards -->
+                    <div class="space-y-4">
+                        @foreach (var item in missionItems)
+                        {
+                            var title = item.Value<string>("title") ?? item.Name;
+                            var description = item.Value<string>("description") ?? "";
+                            var backgroundImage = item.Value<Umbraco.Cms.Core.Models.PublishedContent.IPublishedContent>("backgroundImage");
+                            var backgroundUrl = backgroundImage?.Url() ?? "";
+
+                            <div class="relative h-[200px] sm:h-[250px] rounded-lg overflow-hidden shadow-lg group">
+                                <!-- Background Image -->
+                                @if (!string.IsNullOrEmpty(backgroundUrl))
+                                {
+                                    <img src="@backgroundUrl" alt="@title" class="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+                                }
+                                else
+                                {
+                                    <div class="absolute inset-0 bg-gray-400"></div>
+                                }
+
+                                <!-- Dark Overlay -->
+                                <div class="absolute inset-0 bg-black/40"></div>
+
+                                <!-- Content -->
+                                <div class="relative h-full flex flex-col justify-end p-6 text-white">
+                                    <h3 class="text-base sm:text-lg font-semibold mb-2">@title</h3>
+                                    <a href="@item.Url()" class="inline-flex items-center text-sm font-medium hover:underline">
+                                        Read more
+                                        <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                        </svg>
+                                    </a>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Desktop Layout -->
+                <div class="hidden lg:grid grid-cols-2 gap-12 xl:gap-16 items-center min-h-[calc(100vh-12rem)]">
+                    <!-- Left Content -->
+                    <div>
+                        <!-- Small Heading -->
+                        <p class="text-[#0767B3] text-xs sm:text-sm font-medium uppercase tracking-wide mb-4">
+                            YOU'RE THE REASON WE'RE HERE.
+                        </p>
+
+                        <!-- Main Heading -->
+                        <h2 class="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-semibold text-gray-900 mb-6">
+                            OUR MISSIONS
+                        </h2>
+
+                        <!-- Description -->
+                        <p class="text-gray-700 text-sm sm:text-base lg:text-lg leading-relaxed mb-6">
+                            Everything we do is a matter of heart, body and soul.
+                        </p>
+
+                        <p class="text-gray-700 text-sm sm:text-base lg:text-lg leading-relaxed mb-8">
+                            We strive to form profound partnerships with farmers from all over the world to create perspective together and form healthy working relationships built on trust and respect.
+                        </p>
+
+                        <!-- CTA Button -->
+                        <div>
+                            <a href="#" class="inline-block border-2 border-[#0767B3] text-[#0767B3] font-semibold hover:bg-[#0767B3] hover:text-white transition-all duration-300 px-6 sm:px-8 py-2.5 sm:py-3 text-sm sm:text-base">
+                                Read More
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Right Video -->
+                    <div>
+                        <div class="relative w-full aspect-video bg-gray-200 rounded-lg overflow-hidden shadow-lg group cursor-pointer">
+                            @if (!string.IsNullOrEmpty(videoMediaUrl))
+                            {
+                                @* Use uploaded video with custom play button *@
+                                <video class="absolute inset-0 w-full h-full object-cover" id="missionVideoDesktop" poster="">
+                                    <source src="@videoMediaUrl" type="video/mp4">
+                                    Your browser does not support the video tag.
+                                </video>
+
+                                <!-- Play Button Overlay -->
+                                <div class="absolute inset-0 flex items-center justify-center bg-black/30 transition-opacity group-hover:bg-black/40" id="playOverlayDesktop">
+                                    @if (!string.IsNullOrEmpty(playButtonIconUrl))
+                                    {
+                                        <img src="@playButtonIconUrl" alt="Play" class="w-20 h-20 sm:w-24 sm:h-24 hover:scale-110 transition-transform" />
+                                    }
+                                    else
+                                    {
+                                        <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white/90 flex items-center justify-center hover:bg-white transition-all">
+                                            <svg class="w-10 h-10 sm:w-12 sm:h-12 text-[#0767B3] ml-1" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M8 5v14l11-7z"/>
+                                            </svg>
+                                        </div>
+                                    }
+                                </div>
+
+                                <script>
+                                    document.addEventListener('DOMContentLoaded', function() {
+                                        const video = document.getElementById('missionVideoDesktop');
+                                        const overlay = document.getElementById('playOverlayDesktop');
+                                        const container = overlay?.parentElement;
+
+                                        container?.addEventListener('click', function() {
+                                            if (video && video.paused) {
+                                                video.play();
+                                                if (overlay) overlay.style.display = 'none';
+                                            } else if (video) {
+                                                video.pause();
+                                                if (overlay) overlay.style.display = 'flex';
+                                            }
+                                        });
+
+                                        if (video) {
+                                            video.addEventListener('ended', function() {
+                                                if (overlay) overlay.style.display = 'flex';
+                                            });
+                                        }
+                                    });
+                                </script>
+                            }
+                            else if (!string.IsNullOrEmpty(videoUrl))
+                            {
+                                @* YouTube video with thumbnail and play button *@
+                                var videoId = "";
+                                if (videoUrl.Contains("youtu.be/"))
+                                {
+                                    videoId = videoUrl.Split("youtu.be/")[1].Split('?')[0];
+                                }
+                                else if (videoUrl.Contains("youtube.com/watch?v="))
+                                {
+                                    videoId = videoUrl.Split("v=")[1].Split('&')[0];
+                                }
+
+                                @if (!string.IsNullOrEmpty(videoId))
+                                {
+                                    <!-- YouTube Thumbnail -->
+                                    <img src="https://img.youtube.com/vi/@videoId/maxresdefault.jpg"
+                                         alt="Video Thumbnail"
+                                         class="absolute inset-0 w-full h-full object-cover"
+                                         id="ytThumbnailDesktop@(videoId)" />
+
+                                    <!-- Play Button Overlay -->
+                                    <div class="absolute inset-0 flex items-center justify-center bg-black/30 transition-opacity group-hover:bg-black/40" id="ytOverlayDesktop@(videoId)">
+                                        @if (!string.IsNullOrEmpty(playButtonIconUrl))
+                                        {
+                                            <img src="@playButtonIconUrl" alt="Play" class="w-20 h-20 sm:w-24 sm:h-24 hover:scale-110 transition-transform" />
+                                        }
+                                        else
+                                        {
+                                            <div class="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white/90 flex items-center justify-center hover:bg-white transition-all">
+                                                <svg class="w-10 h-10 sm:w-12 sm:h-12 text-[#0767B3] ml-1" fill="currentColor" viewBox="0 0 24 24">
+                                                    <path d="M8 5v14l11-7z"/>
+                                                </svg>
+                                            </div>
+                                        }
+                                    </div>
+
+                                    <!-- Hidden iframe -->
+                                    <div id="ytPlayerDesktop@(videoId)" class="hidden absolute inset-0 w-full h-full"></div>
+
+                                    <script>
+                                        document.getElementById('ytOverlayDesktop@(videoId)').addEventListener('click', function() {
+                                            const thumbnail = document.getElementById('ytThumbnailDesktop@(videoId)');
+                                            const overlay = document.getElementById('ytOverlayDesktop@(videoId)');
+                                            const playerDiv = document.getElementById('ytPlayerDesktop@(videoId)');
+
+                                            thumbnail.style.display = 'none';
+                                            overlay.style.display = 'none';
+                                            playerDiv.classList.remove('hidden');
+                                            playerDiv.innerHTML = '<iframe class="w-full h-full" src="https://www.youtube.com/embed/@videoId?autoplay=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
+                                        });
+                                    </script>
+                                }
+                            }
+                            else
+                            {
+                                @* Placeholder *@
+                                <div class="absolute inset-0 flex items-center justify-center bg-gray-300">
+                                    <span class="text-gray-500">No video available</span>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    }
+}
