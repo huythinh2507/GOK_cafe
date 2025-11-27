@@ -8,13 +8,13 @@ module.exports = {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#8B4513',
-          light: '#A0522D',
-          dark: '#654321',
+          DEFAULT: '#0767B3',
+          light: '#0e7fd1',
+          dark: '#054f82',
         },
         secondary: {
-          DEFAULT: '#D2691E',
-          light: '#F4A460',
+          DEFAULT: '#0a8ed9',
+          light: '#3ba6e6',
         },
       },
       fontFamily: {

@@ -1,0 +1,69 @@
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@{
+    var footerItems = new List<dynamic>();
+
+    // Get OnFooter section from Home children
+    if (UmbracoContext?.Content != null)
+    {
+        var homeNode = UmbracoContext.Content.GetAtRoot().FirstOrDefault(x => x.ContentType.Alias == "home" || x.ContentType.Alias == "homepage");
+        if (homeNode != null)
+        {
+            var onFooterNode = homeNode.Children.FirstOrDefault(x => x.ContentType.Alias == "onFooter");
+            if (onFooterNode != null)
+            {
+                // Get OnFooterItem children (up to 4 items)
+                var footerItemNodes = onFooterNode.Children.Where(x => x.ContentType.Alias == "onFooterItem");
+                foreach (var item in footerItemNodes.Take(4))
+                {
+                    var icon = item.Value<Umbraco.Cms.Core.Models.PublishedContent.IPublishedContent>("icon");
+                    var iconUrl = icon != null ? icon.Url() : "";
+
+                    footerItems.Add(new
+                    {
+                        Title = item.Value<string>("title") ?? item.Name,
+                        Description = item.Value<string>("description") ?? "",
+                        Icon = iconUrl
+                    });
+                }
+            }
+        }
+    }
+}
+
+<!-- OnFooter Section -->
+@if (footerItems.Any())
+{
+    <section class="py-0">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+            @{
+                var index = 0;
+            }
+            @foreach (var item in footerItems)
+            {
+                var bgClass = index % 2 == 0 ? "bg-gray-200" : "bg-gray-100";
+                <div class="@bgClass py-12 px-8 text-center">
+                    <!-- Icon -->
+                    <div class="flex items-center justify-center mb-4">
+                        @if (!string.IsNullOrEmpty(item.Icon))
+                        {
+                            <img src="@item.Icon" alt="@item.Title" class="w-4 h-4 object-contain" />
+                        }
+                        else
+                        {
+                            <div class="w-4 h-4 bg-gray-300 rounded-full flex items-center justify-center">
+                                <i class="fas fa-info text-gray-500 text-2xl"></i>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Title -->
+                    <h3 class="text-base font-semibold text-gray-900 mb-2">@item.Title</h3>
+
+                    <!-- Description -->
+                    <p class="text-sm text-gray-600">@item.Description</p>
+                </div>
+                index++;
+            }
+        </div>
+    </section>
+}

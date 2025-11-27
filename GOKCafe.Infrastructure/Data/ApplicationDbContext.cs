@@ -25,6 +25,8 @@ public class ApplicationDbContext : DbContext
     public DbSet<InfoCard> InfoCards { get; set; }
     public DbSet<ContactInfo> ContactInfos { get; set; }
     public DbSet<ServiceFeature> ServiceFeatures { get; set; }
+    public DbSet<Cart> Carts { get; set; }
+    public DbSet<CartItem> CartItems { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -48,6 +50,8 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<InfoCard>().HasQueryFilter(e => !e.IsDeleted);
         modelBuilder.Entity<ContactInfo>().HasQueryFilter(e => !e.IsDeleted);
         modelBuilder.Entity<ServiceFeature>().HasQueryFilter(e => !e.IsDeleted);
+        modelBuilder.Entity<Cart>().HasQueryFilter(e => !e.IsDeleted);
+        modelBuilder.Entity<CartItem>().HasQueryFilter(e => !e.IsDeleted);
     }
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
