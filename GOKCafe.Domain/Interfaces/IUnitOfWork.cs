@@ -19,6 +19,8 @@ public interface IUnitOfWork : IDisposable
     IRepository<InfoCard> InfoCards { get; }
     IRepository<ContactInfo> ContactInfos { get; }
     IRepository<ServiceFeature> ServiceFeatures { get; }
+    IRepository<FlavourProfile> FlavourProfiles { get; }
+    IRepository<Equipment> Equipments { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     Task BeginTransactionAsync();

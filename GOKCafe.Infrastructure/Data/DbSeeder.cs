@@ -18,6 +18,12 @@ public static class DbSeeder
         {
             await SeedHomePageEntities(context);
         }
+
+        // Seed FlavourProfiles and Equipment if not exist
+        if (!context.FlavourProfiles.Any())
+        {
+            await SeedFlavourProfilesAndEquipment(context);
+        }
     }
 
     private static async Task SeedCategoriesAndProducts(ApplicationDbContext context)
@@ -499,6 +505,160 @@ public static class DbSeeder
         };
 
         await context.ServiceFeatures.AddRangeAsync(serviceFeatures);
+
+        await context.SaveChangesAsync();
+    }
+
+    private static async Task SeedFlavourProfilesAndEquipment(ApplicationDbContext context)
+    {
+        // Seed FlavourProfiles
+        var flavourProfiles = new List<FlavourProfile>
+        {
+            new FlavourProfile
+            {
+                Id = Guid.NewGuid(),
+                Name = "Balanced",
+                Description = "Well-rounded with harmonious flavors",
+                DisplayOrder = 1,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new FlavourProfile
+            {
+                Id = Guid.NewGuid(),
+                Name = "Bold and Bitter",
+                Description = "Strong, intense flavors with pronounced bitterness",
+                DisplayOrder = 2,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new FlavourProfile
+            {
+                Id = Guid.NewGuid(),
+                Name = "Chocolatey and Nutty",
+                Description = "Rich chocolate notes with nutty undertones",
+                DisplayOrder = 3,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new FlavourProfile
+            {
+                Id = Guid.NewGuid(),
+                Name = "Delicate and Complex",
+                Description = "Subtle flavors with layered complexity",
+                DisplayOrder = 4,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new FlavourProfile
+            {
+                Id = Guid.NewGuid(),
+                Name = "Experimental",
+                Description = "Unique and unconventional flavor combinations",
+                DisplayOrder = 5,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new FlavourProfile
+            {
+                Id = Guid.NewGuid(),
+                Name = "Fruity and Punchy",
+                Description = "Bright fruit notes with vibrant acidity",
+                DisplayOrder = 6,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            }
+        };
+
+        await context.FlavourProfiles.AddRangeAsync(flavourProfiles);
+
+        // Seed Equipment
+        var equipments = new List<Equipment>
+        {
+            new Equipment
+            {
+                Id = Guid.NewGuid(),
+                Name = "Aeropress",
+                Description = "Portable brewing device for smooth coffee",
+                DisplayOrder = 1,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new Equipment
+            {
+                Id = Guid.NewGuid(),
+                Name = "Channі",
+                Description = "Traditional Vietnamese coffee filter",
+                DisplayOrder = 2,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new Equipment
+            {
+                Id = Guid.NewGuid(),
+                Name = "Cold Brew",
+                Description = "Immersion brewing for cold coffee concentrate",
+                DisplayOrder = 3,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new Equipment
+            {
+                Id = Guid.NewGuid(),
+                Name = "Espresso",
+                Description = "Pressurized extraction for concentrated coffee",
+                DisplayOrder = 4,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new Equipment
+            {
+                Id = Guid.NewGuid(),
+                Name = "French Press",
+                Description = "Full immersion brewing with metal filter",
+                DisplayOrder = 5,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new Equipment
+            {
+                Id = Guid.NewGuid(),
+                Name = "Inverted Aeropress",
+                Description = "Aeropress brewing method with extended steeping",
+                DisplayOrder = 6,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new Equipment
+            {
+                Id = Guid.NewGuid(),
+                Name = "Moka Pot",
+                Description = "Stovetop espresso-style brewing",
+                DisplayOrder = 7,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new Equipment
+            {
+                Id = Guid.NewGuid(),
+                Name = "Pourover",
+                Description = "Manual drip brewing for clean flavors",
+                DisplayOrder = 8,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            },
+            new Equipment
+            {
+                Id = Guid.NewGuid(),
+                Name = "South Indian Filter",
+                Description = "Traditional South Indian coffee filter",
+                DisplayOrder = 9,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            }
+        };
+
+        await context.Equipments.AddRangeAsync(equipments);
 
         await context.SaveChangesAsync();
     }

@@ -1,4 +1,6 @@
 using GOKCafe.Application.DTOs.Common;
+using GOKCafe.Application.DTOs.Equipment;
+using GOKCafe.Application.DTOs.FlavourProfile;
 using GOKCafe.Application.DTOs.Product;
 using GOKCafe.Application.Services.Interfaces;
 using GOKCafe.Domain.Entities;
@@ -22,7 +24,14 @@ public class ProductService : IProductService
     }
 
     public async Task<ApiResponse<PaginatedResponse<ProductDto>>> GetProductsAsync(
-        int pageNumber, int pageSize, List<Guid>? categoryIds = null, bool? isFeatured = null, string? search = null)
+        int pageNumber,
+        int pageSize,
+        List<Guid>? categoryIds = null,
+        bool? isFeatured = null,
+        string? search = null,
+        List<Guid>? flavourProfileIds = null,
+        List<Guid>? equipmentIds = null,
+        bool? inStock = null)
     {
         try
         {
@@ -32,7 +41,14 @@ public class ProductService : IProductService
                 : "all";
             var featuredKey = isFeatured.HasValue ? isFeatured.Value.ToString() : "all";
             var searchKey = !string.IsNullOrWhiteSpace(search) ? search.ToLower() : "none";
-            var cacheKey = $"{ProductListCacheKeyPrefix}page:{pageNumber}:size:{pageSize}:cats:{categoryIdsKey}:feat:{featuredKey}:search:{searchKey}";
+            var flavourProfileIdsKey = flavourProfileIds != null && flavourProfileIds.Any()
+                ? string.Join("-", flavourProfileIds.OrderBy(x => x))
+                : "all";
+            var equipmentIdsKey = equipmentIds != null && equipmentIds.Any()
+                ? string.Join("-", equipmentIds.OrderBy(x => x))
+                : "all";
+            var inStockKey = inStock.HasValue ? inStock.Value.ToString() : "all";
+            var cacheKey = $"{ProductListCacheKeyPrefix}page:{pageNumber}:size:{pageSize}:cats:{categoryIdsKey}:feat:{featuredKey}:search:{searchKey}:flavours:{flavourProfileIdsKey}:equip:{equipmentIdsKey}:stock:{inStockKey}";
 
             // Try to get from cache
             var cachedResponse = await _cacheService.GetAsync<ApiResponse<PaginatedResponse<ProductDto>>>(cacheKey);
@@ -43,6 +59,10 @@ public class ProductService : IProductService
             var query = _unitOfWork.Products.GetQueryable()
                 .Include(p => p.Category)
                 .Include(p => p.ProductImages)
+                .Include(p => p.ProductFlavourProfiles)
+                    .ThenInclude(pfp => pfp.FlavourProfile)
+                .Include(p => p.ProductEquipments)
+                    .ThenInclude(pe => pe.Equipment)
                 .Where(p => p.IsActive);
 
             // Filter by multiple categories
@@ -60,6 +80,28 @@ public class ProductService : IProductService
                 query = query.Where(p =>
                     p.Name.ToLower().Contains(searchLower) ||
                     (p.Description != null && p.Description.ToLower().Contains(searchLower)));
+            }
+
+            // Filter by flavour profiles
+            if (flavourProfileIds != null && flavourProfileIds.Any())
+            {
+                query = query.Where(p => p.ProductFlavourProfiles
+                    .Any(pfp => flavourProfileIds.Contains(pfp.FlavourProfileId)));
+            }
+
+            // Filter by equipment
+            if (equipmentIds != null && equipmentIds.Any())
+            {
+                query = query.Where(p => p.ProductEquipments
+                    .Any(pe => equipmentIds.Contains(pe.EquipmentId)));
+            }
+
+            // Filter by stock availability
+            if (inStock.HasValue)
+            {
+                query = inStock.Value
+                    ? query.Where(p => p.StockQuantity > 0)
+                    : query.Where(p => p.StockQuantity <= 0);
             }
 
             var totalCount = await query.CountAsync();
@@ -89,6 +131,22 @@ public class ProductService : IProductService
                         AltText = pi.AltText,
                         DisplayOrder = pi.DisplayOrder,
                         IsPrimary = pi.IsPrimary
+                    }).ToList(),
+                    FlavourProfiles = p.ProductFlavourProfiles.Select(pfp => new FlavourProfileDto
+                    {
+                        Id = pfp.FlavourProfile.Id,
+                        Name = pfp.FlavourProfile.Name,
+                        Description = pfp.FlavourProfile.Description,
+                        DisplayOrder = pfp.FlavourProfile.DisplayOrder,
+                        IsActive = pfp.FlavourProfile.IsActive
+                    }).ToList(),
+                    Equipments = p.ProductEquipments.Select(pe => new EquipmentDto
+                    {
+                        Id = pe.Equipment.Id,
+                        Name = pe.Equipment.Name,
+                        Description = pe.Equipment.Description,
+                        DisplayOrder = pe.Equipment.DisplayOrder,
+                        IsActive = pe.Equipment.IsActive
                     }).ToList()
                 }).ToListAsync();
 
@@ -130,6 +188,10 @@ public class ProductService : IProductService
             var product = await _unitOfWork.Products.GetQueryable()
                 .Include(p => p.Category)
                 .Include(p => p.ProductImages)
+                .Include(p => p.ProductFlavourProfiles)
+                    .ThenInclude(pfp => pfp.FlavourProfile)
+                .Include(p => p.ProductEquipments)
+                    .ThenInclude(pe => pe.Equipment)
                 .FirstOrDefaultAsync(p => p.Id == id);
 
             if (product == null)
@@ -175,13 +237,49 @@ public class ProductService : IProductService
                 IsActive = true
             };
 
+            // Add flavour profile relationships
+            if (dto.FlavourProfileIds != null && dto.FlavourProfileIds.Any())
+            {
+                foreach (var flavourProfileId in dto.FlavourProfileIds)
+                {
+                    product.ProductFlavourProfiles.Add(new ProductFlavourProfile
+                    {
+                        ProductId = product.Id,
+                        FlavourProfileId = flavourProfileId
+                    });
+                }
+            }
+
+            // Add equipment relationships
+            if (dto.EquipmentIds != null && dto.EquipmentIds.Any())
+            {
+                foreach (var equipmentId in dto.EquipmentIds)
+                {
+                    product.ProductEquipments.Add(new ProductEquipment
+                    {
+                        ProductId = product.Id,
+                        EquipmentId = equipmentId
+                    });
+                }
+            }
+
             await _unitOfWork.Products.AddAsync(product);
             await _unitOfWork.SaveChangesAsync();
 
             // Invalidate product list cache
             await _cacheService.RemoveByPrefixAsync(ProductListCacheKeyPrefix);
 
-            var productDto = MapToDto(product);
+            // Load the product with relationships for the response
+            var createdProduct = await _unitOfWork.Products.GetQueryable()
+                .Include(p => p.Category)
+                .Include(p => p.ProductImages)
+                .Include(p => p.ProductFlavourProfiles)
+                    .ThenInclude(pfp => pfp.FlavourProfile)
+                .Include(p => p.ProductEquipments)
+                    .ThenInclude(pe => pe.Equipment)
+                .FirstOrDefaultAsync(p => p.Id == product.Id);
+
+            var productDto = MapToDto(createdProduct!);
             return ApiResponse<ProductDto>.SuccessResult(productDto, "Product created successfully");
         }
         catch (Exception ex)
@@ -196,7 +294,11 @@ public class ProductService : IProductService
     {
         try
         {
-            var product = await _unitOfWork.Products.GetByIdAsync(id);
+            var product = await _unitOfWork.Products.GetQueryable()
+                .Include(p => p.ProductFlavourProfiles)
+                .Include(p => p.ProductEquipments)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
             if (product == null)
                 return ApiResponse<ProductDto>.FailureResult("Product not found");
 
@@ -211,6 +313,34 @@ public class ProductService : IProductService
             product.IsFeatured = dto.IsFeatured;
             product.CategoryId = dto.CategoryId;
 
+            // Update flavour profile relationships
+            product.ProductFlavourProfiles.Clear();
+            if (dto.FlavourProfileIds != null && dto.FlavourProfileIds.Any())
+            {
+                foreach (var flavourProfileId in dto.FlavourProfileIds)
+                {
+                    product.ProductFlavourProfiles.Add(new ProductFlavourProfile
+                    {
+                        ProductId = product.Id,
+                        FlavourProfileId = flavourProfileId
+                    });
+                }
+            }
+
+            // Update equipment relationships
+            product.ProductEquipments.Clear();
+            if (dto.EquipmentIds != null && dto.EquipmentIds.Any())
+            {
+                foreach (var equipmentId in dto.EquipmentIds)
+                {
+                    product.ProductEquipments.Add(new ProductEquipment
+                    {
+                        ProductId = product.Id,
+                        EquipmentId = equipmentId
+                    });
+                }
+            }
+
             _unitOfWork.Products.Update(product);
             await _unitOfWork.SaveChangesAsync();
 
@@ -218,7 +348,17 @@ public class ProductService : IProductService
             await _cacheService.RemoveAsync($"{ProductCacheKeyPrefix}{id}");
             await _cacheService.RemoveByPrefixAsync(ProductListCacheKeyPrefix);
 
-            var productDto = MapToDto(product);
+            // Load the product with all relationships for the response
+            var updatedProduct = await _unitOfWork.Products.GetQueryable()
+                .Include(p => p.Category)
+                .Include(p => p.ProductImages)
+                .Include(p => p.ProductFlavourProfiles)
+                    .ThenInclude(pfp => pfp.FlavourProfile)
+                .Include(p => p.ProductEquipments)
+                    .ThenInclude(pe => pe.Equipment)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            var productDto = MapToDto(updatedProduct!);
             return ApiResponse<ProductDto>.SuccessResult(productDto, "Product updated successfully");
         }
         catch (Exception ex)
@@ -254,6 +394,76 @@ public class ProductService : IProductService
         }
     }
 
+    public async Task<ApiResponse<ProductFiltersDto>> GetProductFiltersAsync()
+    {
+        try
+        {
+            const string cacheKey = "product:filters";
+
+            // Try to get from cache
+            var cachedResponse = await _cacheService.GetAsync<ApiResponse<ProductFiltersDto>>(cacheKey);
+            if (cachedResponse != null)
+                return cachedResponse;
+
+            // Get all active flavour profiles
+            var flavourProfiles = await _unitOfWork.FlavourProfiles.GetQueryable()
+                .Where(fp => fp.IsActive)
+                .OrderBy(fp => fp.DisplayOrder)
+                .Select(fp => new FlavourProfileDto
+                {
+                    Id = fp.Id,
+                    Name = fp.Name,
+                    Description = fp.Description,
+                    DisplayOrder = fp.DisplayOrder,
+                    IsActive = fp.IsActive
+                })
+                .ToListAsync();
+
+            // Get all active equipment
+            var equipments = await _unitOfWork.Equipments.GetQueryable()
+                .Where(e => e.IsActive)
+                .OrderBy(e => e.DisplayOrder)
+                .Select(e => new EquipmentDto
+                {
+                    Id = e.Id,
+                    Name = e.Name,
+                    Description = e.Description,
+                    DisplayOrder = e.DisplayOrder,
+                    IsActive = e.IsActive
+                })
+                .ToListAsync();
+
+            // Get stock availability counts
+            var products = _unitOfWork.Products.GetQueryable().Where(p => p.IsActive);
+            var inStockCount = await products.CountAsync(p => p.StockQuantity > 0);
+            var outOfStockCount = await products.CountAsync(p => p.StockQuantity <= 0);
+
+            var filtersDto = new ProductFiltersDto
+            {
+                FlavourProfiles = flavourProfiles,
+                Equipments = equipments,
+                Availability = new AvailabilityDto
+                {
+                    InStockCount = inStockCount,
+                    OutOfStockCount = outOfStockCount
+                }
+            };
+
+            var result = ApiResponse<ProductFiltersDto>.SuccessResult(filtersDto);
+
+            // Cache the result
+            await _cacheService.SetAsync(cacheKey, result, CacheExpiration);
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            return ApiResponse<ProductFiltersDto>.FailureResult(
+                "An error occurred while retrieving product filters",
+                new List<string> { ex.Message });
+        }
+    }
+
     private ProductDto MapToDto(Product product)
     {
         return new ProductDto
@@ -277,7 +487,23 @@ public class ProductService : IProductService
                 AltText = pi.AltText,
                 DisplayOrder = pi.DisplayOrder,
                 IsPrimary = pi.IsPrimary
-            }).ToList() ?? new List<ProductImageDto>()
+            }).ToList() ?? new List<ProductImageDto>(),
+            FlavourProfiles = product.ProductFlavourProfiles?.Select(pfp => new FlavourProfileDto
+            {
+                Id = pfp.FlavourProfile.Id,
+                Name = pfp.FlavourProfile.Name,
+                Description = pfp.FlavourProfile.Description,
+                DisplayOrder = pfp.FlavourProfile.DisplayOrder,
+                IsActive = pfp.FlavourProfile.IsActive
+            }).ToList() ?? new List<FlavourProfileDto>(),
+            Equipments = product.ProductEquipments?.Select(pe => new EquipmentDto
+            {
+                Id = pe.Equipment.Id,
+                Name = pe.Equipment.Name,
+                Description = pe.Equipment.Description,
+                DisplayOrder = pe.Equipment.DisplayOrder,
+                IsActive = pe.Equipment.IsActive
+            }).ToList() ?? new List<EquipmentDto>()
         };
     }
 

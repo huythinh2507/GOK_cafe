@@ -4,9 +4,13 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace GOKCafe.Web.Controllers.Api
 {
-    [Route("api/categories")]
+    /// <summary>
+    /// Manages category operations in the GOK Cafe Web system
+    /// </summary>
+    [Route("api/v1/categories")]
     [ApiController]
-    public class CategoryApiController : Controller
+    [ApiExplorerSettings(GroupName = "Categories API")]
+    public class CategoryApiController : ControllerBase
     {
         private readonly ICategoryService _categoryService;
         private readonly ILogger<CategoryApiController> _logger;
@@ -22,7 +26,10 @@ namespace GOKCafe.Web.Controllers.Api
         /// <summary>
         /// Get all categories
         /// </summary>
+        /// <returns>A list of all categories</returns>
         [HttpGet]
+        [ProducesResponseType<ApiResponse<IEnumerable<CategoryDto>>>(StatusCodes.Status200OK)]
+        [ProducesResponseType<ApiResponse<object>>(StatusCodes.Status500InternalServerError)]
         public IActionResult GetAllCategories()
         {
             try
@@ -43,7 +50,12 @@ namespace GOKCafe.Web.Controllers.Api
         /// <summary>
         /// Get category by ID
         /// </summary>
+        /// <param name="id">The unique identifier of the category</param>
+        /// <returns>The category with the specified ID</returns>
         [HttpGet("{id:guid}")]
+        [ProducesResponseType<ApiResponse<CategoryDto>>(StatusCodes.Status200OK)]
+        [ProducesResponseType<ApiResponse<object>>(StatusCodes.Status404NotFound)]
+        [ProducesResponseType<ApiResponse<object>>(StatusCodes.Status500InternalServerError)]
         public IActionResult GetCategoryById(Guid id)
         {
             try
@@ -67,7 +79,12 @@ namespace GOKCafe.Web.Controllers.Api
         /// <summary>
         /// Get category by slug
         /// </summary>
+        /// <param name="slug">The URL-friendly slug of the category</param>
+        /// <returns>The category with the specified slug</returns>
         [HttpGet("slug/{slug}")]
+        [ProducesResponseType<ApiResponse<CategoryDto>>(StatusCodes.Status200OK)]
+        [ProducesResponseType<ApiResponse<object>>(StatusCodes.Status404NotFound)]
+        [ProducesResponseType<ApiResponse<object>>(StatusCodes.Status500InternalServerError)]
         public IActionResult GetCategoryBySlug(string slug)
         {
             try
