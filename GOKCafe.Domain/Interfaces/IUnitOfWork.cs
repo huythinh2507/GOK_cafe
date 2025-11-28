@@ -23,6 +23,7 @@ public interface IUnitOfWork : IDisposable
     IRepository<Equipment> Equipments { get; }
     IRepository<Cart> Carts { get; }
     IRepository<CartItem> CartItems { get; }
+    IRepository<RevokedToken> RevokedTokens { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     Task BeginTransactionAsync();

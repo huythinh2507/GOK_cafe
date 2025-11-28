@@ -32,6 +32,7 @@ public class UnitOfWork : IUnitOfWork
         Equipments = new Repository<Equipment>(_context);
         Carts = new Repository<Cart>(_context);
         CartItems = new Repository<CartItem>(_context);
+        RevokedTokens = new Repository<RevokedToken>(_context);
     }
 
     public IRepository<User> Users { get; }
@@ -53,6 +54,7 @@ public class UnitOfWork : IUnitOfWork
     public IRepository<Equipment> Equipments { get; }
     public IRepository<Cart> Carts { get; }
     public IRepository<CartItem> CartItems { get; }
+    public IRepository<RevokedToken> RevokedTokens { get; }
 
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {

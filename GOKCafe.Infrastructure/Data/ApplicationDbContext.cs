@@ -31,6 +31,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<ProductEquipment> ProductEquipments { get; set; }
     public DbSet<Cart> Carts { get; set; }
     public DbSet<CartItem> CartItems { get; set; }
+    public DbSet<RevokedToken> RevokedTokens { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
