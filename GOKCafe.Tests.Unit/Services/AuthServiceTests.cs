@@ -23,7 +23,7 @@ public class AuthServiceTests
         _mockConfiguration = new Mock<IConfiguration>();
 
         // Setup configuration for JWT
-        _mockConfiguration.Setup(c => c["Jwt:Key"]).Returns("SuperSecretKeyForTestingPurposes12345678");
+        _mockConfiguration.Setup(c => c["Jwt:SecretKey"]).Returns("SuperSecretKeyForTestingPurposes12345678");
         _mockConfiguration.Setup(c => c["Jwt:Issuer"]).Returns("TestIssuer");
         _mockConfiguration.Setup(c => c["Jwt:Audience"]).Returns("TestAudience");
         _mockConfiguration.Setup(c => c["Jwt:ExpirationHours"]).Returns("24");
@@ -56,6 +56,7 @@ public class AuthServiceTests
             .Returns(new List<User>().AsQueryable());
 
         _mockUnitOfWork.Setup(u => u.Users).Returns(mockUserRepo.Object);
+        _mockUnitOfWork.Setup(u => u.SaveChangesAsync(default)).ReturnsAsync(1);
         _mockPasswordHasher.Setup(p => p.HashPassword(It.IsAny<string>()))
             .Returns("hashed_password");
 
@@ -95,6 +96,7 @@ public class AuthServiceTests
             .Returns(new List<User> { existingUser }.AsQueryable());
 
         _mockUnitOfWork.Setup(u => u.Users).Returns(mockUserRepo.Object);
+        _mockUnitOfWork.Setup(u => u.SaveChangesAsync(default)).ReturnsAsync(1);
 
         // Act
         var result = await _authService.RegisterAsync(registerDto);
@@ -135,6 +137,7 @@ public class AuthServiceTests
             .Returns(new List<User> { user }.AsQueryable());
 
         _mockUnitOfWork.Setup(u => u.Users).Returns(mockUserRepo.Object);
+        _mockUnitOfWork.Setup(u => u.SaveChangesAsync(default)).ReturnsAsync(1);
         _mockPasswordHasher.Setup(p => p.VerifyPassword(loginDto.Password, user.PasswordHash))
             .Returns(true);
 
@@ -163,6 +166,7 @@ public class AuthServiceTests
             .Returns(new List<User>().AsQueryable());
 
         _mockUnitOfWork.Setup(u => u.Users).Returns(mockUserRepo.Object);
+        _mockUnitOfWork.Setup(u => u.SaveChangesAsync(default)).ReturnsAsync(1);
 
         // Act
         var result = await _authService.LoginAsync(loginDto);
@@ -195,6 +199,7 @@ public class AuthServiceTests
             .Returns(new List<User> { user }.AsQueryable());
 
         _mockUnitOfWork.Setup(u => u.Users).Returns(mockUserRepo.Object);
+        _mockUnitOfWork.Setup(u => u.SaveChangesAsync(default)).ReturnsAsync(1);
         _mockPasswordHasher.Setup(p => p.VerifyPassword(loginDto.Password, user.PasswordHash))
             .Returns(false);
 
@@ -229,13 +234,14 @@ public class AuthServiceTests
             .Returns(new List<User> { user }.AsQueryable());
 
         _mockUnitOfWork.Setup(u => u.Users).Returns(mockUserRepo.Object);
+        _mockUnitOfWork.Setup(u => u.SaveChangesAsync(default)).ReturnsAsync(1);
 
         // Act
         var result = await _authService.LoginAsync(loginDto);
 
         // Assert
         Assert.False(result.Success);
-        Assert.Contains("Account", result.Message);
+        Assert.Contains("Account deactivated", result.Message);
     }
 
     #endregion
@@ -414,7 +420,7 @@ public class AuthServiceTests
 
         // Assert
         Assert.False(result.Success);
-        Assert.Contains("Current password is incorrect", result.Message);
+        Assert.Contains("Invalid current password", result.Message);
         _mockUnitOfWork.Verify(u => u.Users.Update(It.IsAny<User>()), Times.Never);
     }
 
