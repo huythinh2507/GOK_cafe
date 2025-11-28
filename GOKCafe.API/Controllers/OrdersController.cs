@@ -1,7 +1,9 @@
 using GOKCafe.Application.DTOs.Common;
 using GOKCafe.Application.DTOs.Order;
 using GOKCafe.Application.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace GOKCafe.API.Controllers;
 
@@ -21,7 +23,7 @@ public class OrdersController : ControllerBase
     }
 
     /// <summary>
-    /// Get all orders with pagination and filters
+    /// Get all orders with pagination and filters (Admin only)
     /// </summary>
     /// <param name="pageNumber">The page number for pagination (default: 1)</param>
     /// <param name="pageSize">The number of items per page (default: 10)</param>
@@ -36,6 +38,33 @@ public class OrdersController : ControllerBase
         [FromQuery] string? status = null)
     {
         var result = await _orderService.GetOrdersAsync(pageNumber, pageSize, status);
+        return result.Success ? Ok(result) : BadRequest(result);
+    }
+
+    /// <summary>
+    /// Get authenticated user's order history
+    /// </summary>
+    /// <param name="pageNumber">The page number for pagination (default: 1)</param>
+    /// <param name="pageSize">The number of items per page (default: 10)</param>
+    /// <param name="status">Optional filter for order status (Pending, Confirmed, Processing, Shipped, Delivered, Cancelled)</param>
+    /// <returns>A paginated list of the user's orders</returns>
+    [Authorize]
+    [HttpGet("my-orders")]
+    [ProducesResponseType<ApiResponse<PaginatedResponse<OrderDto>>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ApiResponse<PaginatedResponse<OrderDto>>>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ApiResponse<PaginatedResponse<OrderDto>>>(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetMyOrders(
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string? status = null)
+    {
+        var userId = GetUserId();
+        if (!userId.HasValue)
+        {
+            return Unauthorized(ApiResponse<PaginatedResponse<OrderDto>>.FailureResult("User authentication required"));
+        }
+
+        var result = await _orderService.GetUserOrdersAsync(userId.Value, pageNumber, pageSize, status);
         return result.Success ? Ok(result) : BadRequest(result);
     }
 
@@ -113,4 +142,14 @@ public class OrdersController : ControllerBase
         var result = await _orderService.CancelOrderAsync(id);
         return result.Success ? Ok(result) : BadRequest(result);
     }
+
+    #region Helper Methods
+
+    private Guid? GetUserId()
+    {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        return Guid.TryParse(userIdClaim, out var userId) ? userId : null;
+    }
+
+    #endregion
 }

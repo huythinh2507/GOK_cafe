@@ -9,6 +9,7 @@ public class Product : BaseEntity
     public decimal? DiscountPrice { get; set; }
     public string? ImageUrl { get; set; }
     public int StockQuantity { get; set; }
+    public int ReservedQuantity { get; set; } = 0; // Stock reserved for pending orders
     public bool IsActive { get; set; } = true;
     public bool IsFeatured { get; set; }
     public Guid CategoryId { get; set; }
