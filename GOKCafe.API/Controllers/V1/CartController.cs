@@ -1,5 +1,6 @@
 using GOKCafe.Application.DTOs.Cart;
 using GOKCafe.Application.DTOs.Common;
+using GOKCafe.Application.DTOs.Order;
 using GOKCafe.Application.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -142,6 +143,27 @@ public class CartController : ControllerBase
         }
 
         var result = await _cartService.GetCartItemCountAsync(userId, sessionId);
+        return result.Success ? Ok(result) : BadRequest(result);
+    }
+
+    /// <summary>
+    /// Checkout from cart - converts cart items to order with stock reservation
+    /// </summary>
+    /// <param name="dto">Checkout information (customer details, shipping, payment)</param>
+    /// <param name="sessionId">Session ID for anonymous users (optional if authenticated)</param>
+    [HttpPost("checkout")]
+    [ProducesResponseType<ApiResponse<OrderDto>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ApiResponse<OrderDto>>(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> CheckoutFromCart([FromBody] CheckoutDto dto, [FromQuery] string? sessionId = null)
+    {
+        var userId = GetUserId();
+
+        if (!userId.HasValue && string.IsNullOrEmpty(sessionId))
+        {
+            return BadRequest(ApiResponse<OrderDto>.FailureResult("Either authentication or sessionId is required"));
+        }
+
+        var result = await _cartService.CheckoutFromCartAsync(userId, sessionId, dto);
         return result.Success ? Ok(result) : BadRequest(result);
     }
 

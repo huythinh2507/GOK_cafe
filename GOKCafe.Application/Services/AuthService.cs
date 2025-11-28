@@ -144,6 +144,54 @@ public class AuthService : IAuthService
         }
     }
 
+    public async Task<ApiResponse<bool>> LogoutAsync(string token, Guid userId)
+    {
+        try
+        {
+            // Extract expiration from token
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var jwtToken = tokenHandler.ReadJwtToken(token);
+            var expiresAt = jwtToken.ValidTo;
+
+            // Add token to revoked tokens list
+            var revokedToken = new RevokedToken
+            {
+                Id = Guid.NewGuid(),
+                Token = token,
+                RevokedAt = DateTime.UtcNow,
+                ExpiresAt = expiresAt,
+                UserId = userId,
+                Reason = "User logout"
+            };
+
+            await _unitOfWork.RevokedTokens.AddAsync(revokedToken);
+            await _unitOfWork.SaveChangesAsync();
+
+            return ApiResponse<bool>.SuccessResult(true, "Logout successful");
+        }
+        catch (Exception ex)
+        {
+            return ApiResponse<bool>.FailureResult(
+                "An error occurred during logout",
+                new List<string> { ex.Message });
+        }
+    }
+
+    public async Task<bool> IsTokenRevokedAsync(string token)
+    {
+        try
+        {
+            var revokedToken = await _unitOfWork.RevokedTokens.GetQueryable()
+                .FirstOrDefaultAsync(rt => rt.Token == token && rt.ExpiresAt > DateTime.UtcNow);
+
+            return revokedToken != null;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
     public async Task<ApiResponse<UserDto>> GetProfileAsync(Guid userId)
     {
         try

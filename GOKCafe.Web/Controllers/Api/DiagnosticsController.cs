@@ -3,8 +3,12 @@ using Umbraco.Cms.Core.Web;
 
 namespace GOKCafe.Web.Controllers.Api
 {
-    [Route("api/diagnostics")]
+    /// <summary>
+    /// Provides diagnostic information for the Umbraco CMS content structure
+    /// </summary>
+    [Route("api/v1/diagnostics")]
     [ApiController]
+    [ApiExplorerSettings(GroupName = "Diagnostics API")]
     public class DiagnosticsController : ControllerBase
     {
         private readonly IUmbracoContextAccessor _umbracoContextAccessor;
@@ -18,7 +22,12 @@ namespace GOKCafe.Web.Controllers.Api
             _logger = logger;
         }
 
+        /// <summary>
+        /// Get the Umbraco content tree structure
+        /// </summary>
+        /// <returns>The content tree with root nodes and their children</returns>
         [HttpGet("content-tree")]
+        [ProducesResponseType<object>(StatusCodes.Status200OK)]
         public IActionResult GetContentTree()
         {
             if (!_umbracoContextAccessor.TryGetUmbracoContext(out var umbracoContext))
