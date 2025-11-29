@@ -19,5 +19,10 @@ namespace GOKCafe.Web.Models.DTOs
         public int DisplayOrder { get; set; }
         public DateTime CreatedDate { get; set; }
         public DateTime? UpdatedDate { get; set; }
+
+        // Additional product detail properties
+        public string Region { get; set; } = string.Empty;
+        public string Process { get; set; } = string.Empty;
+        public string TastingNote { get; set; } = string.Empty;
     }
 }

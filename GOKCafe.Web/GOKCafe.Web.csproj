@@ -28,10 +28,4 @@
     <RazorCompileOnBuild>false</RazorCompileOnBuild>
     <RazorCompileOnPublish>false</RazorCompileOnPublish>
   </PropertyGroup>
-
-  <!-- Build Tailwind CSS on Build and Publish -->
-  <Target Name="BuildTailwindCSS" BeforeTargets="Build">
-    <Exec Command="tailwindcss-windows-x64.exe -i ./wwwroot/css/input.css -o ./wwwroot/css/output.css --minify" WorkingDirectory="$(ProjectDir)" />
-  </Target>
-
 </Project>

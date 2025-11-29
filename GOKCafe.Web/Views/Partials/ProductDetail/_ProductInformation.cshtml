@@ -1,0 +1,184 @@
+@model GOKCafe.Web.Models.DTOs.ProductDto
+
+@{
+    // Format price with thousands separator and use period for thousands
+    var priceMin = Model.Price.ToString("#,0", new System.Globalization.CultureInfo("en-US")).Replace(",", ".");
+    var priceMax = Model.DiscountPrice.HasValue ? Model.DiscountPrice.Value.ToString("#,0", new System.Globalization.CultureInfo("en-US")).Replace(",", ".") : "";
+
+    // Get additional properties
+    var region = Model.Region;
+    var process = Model.Process;
+    var tastingNote = !string.IsNullOrEmpty(Model.TastingNote) ? Model.TastingNote : Model.ShortDescription;
+
+    // Stock status
+    var stockStatus = Model.StockQuantity > 0 ? "In stock" : "Out of stock";
+    var stockStatusClass = Model.StockQuantity > 0 ? "text-[#22C55E]" : "text-red-600";
+}
+
+<div class="w-full">
+    <!-- Top Section: Image and Information (650px height) -->
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="flex flex-col lg:flex-row lg:gap-12" style="min-height: 650px;">
+
+            <!-- Left Column: Product Image -->
+            <div class="flex-shrink-0">
+                <div class="flex items-center justify-start">
+                    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                    {
+                        <img src="@Model.ImageUrl"
+                             alt="@Model.Name"
+                             class="max-h-[650px] w-auto object-contain" />
+                    }
+                    else
+                    {
+                        <div class="w-full h-full bg-gray-200 flex items-center justify-center">
+                            <svg class="w-24 h-24 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Right Column: Product Information -->
+            <div class="flex flex-col justify-between w-full">
+
+            <!-- Top Section: Product Details -->
+            <div class="flex flex-col space-y-4">
+                <!-- Category Badge -->
+                @if (!string.IsNullOrEmpty(Model.CategoryName))
+                {
+                    <div>
+                        <span class="text-sm font-medium text-gray-500">
+                            @Model.CategoryName
+                        </span>
+                    </div>
+                }
+
+                <!-- Product Name -->
+                <h1 class="text-3xl font-semibold text-gray-900 leading-tight">
+                    @Model.Name
+                </h1>
+
+                <!-- Price -->
+                <div class="flex items-baseline gap-2">
+                    @if (!string.IsNullOrEmpty(priceMax) && Model.DiscountPrice.HasValue)
+                    {
+                        <span class="text-2xl font-semibold text-primary">
+                            @priceMin VND - @priceMax VND
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="text-2xl font-semibold text-primary">
+                            @priceMin VND
+                        </span>
+                    }
+                </div>
+
+                <!-- Tasting Note -->
+                @if (!string.IsNullOrEmpty(tastingNote))
+                {
+                    <div>
+                        <span class="font-semibold text-gray-900">Tasting note:</span>
+                        <span class="text-gray-700"> @tastingNote</span>
+                    </div>
+                }
+
+                <!-- Region -->
+                @if (!string.IsNullOrEmpty(region))
+                {
+                    <div class="flex items-baseline">
+                        <span class="font-semibold text-gray-900 mr-2">Region:</span>
+                        <span class="text-gray-700">@region</span>
+                    </div>
+                }
+
+                <!-- Process -->
+                @if (!string.IsNullOrEmpty(process))
+                {
+                    <div class="flex items-baseline">
+                        <span class="font-semibold text-gray-900 mr-2">Process:</span>
+                        <span class="text-gray-700">@process</span>
+                    </div>
+                }
+
+                <!-- Description -->
+                @if (!string.IsNullOrEmpty(Model.Description))
+                {
+                    <div class="text-gray-700 leading-relaxed text-base">
+                        @Html.Raw(Model.Description)
+                    </div>
+                }
+
+                <!-- Stock Status -->
+                <div class="flex items-center gap-2">
+                    @if (Model.StockQuantity > 0)
+                    {
+                        <svg class="w-5 h-5" fill="#22C55E" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                        </svg>
+                        <span class="font-semibold text-[#22C55E]">@stockStatus</span>
+                    }
+                    else
+                    {
+                        <svg class="w-5 h-5" fill="#EF4444" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                        </svg>
+                        <span class="font-semibold text-red-600">@stockStatus</span>
+                    }
+                </div>
+            </div>
+
+            <!-- Bottom Section: Packaging and Actions -->
+            <div class="flex flex-col space-y-4">
+                <!-- Packaging Size Selection -->
+                <div class="space-y-3">
+                <label class="block font-semibold text-gray-900 text-base">Select packaging size:</label>
+                <div class="flex flex-wrap gap-3">
+                    <button class="px-6 py-2.5 bg-gray-200 hover:bg-primary hover:text-white transition-colors font-medium text-gray-900 focus:outline-none focus:bg-primary focus:text-white">
+                        200 g
+                    </button>
+                    <button class="px-6 py-2.5 bg-gray-200 hover:bg-primary hover:text-white transition-colors font-medium text-gray-900 focus:outline-none focus:bg-primary focus:text-white">
+                        340 g
+                    </button>
+                    <button class="px-6 py-2.5 bg-gray-200 hover:bg-primary hover:text-white transition-colors font-medium text-gray-900 focus:outline-none focus:bg-primary focus:text-white">
+                        500 g
+                    </button>
+                    <button class="px-6 py-2.5 bg-gray-200 hover:bg-primary hover:text-white transition-colors font-medium text-gray-900 focus:outline-none focus:bg-primary focus:text-white">
+                        1 kg
+                    </button>
+                </div>
+            </div>
+
+            <!-- Quantity and Actions -->
+            <div class="flex flex-wrap items-center gap-3 pt-4">
+                <!-- Quantity Input -->
+                <input type="number"
+                       value="0"
+                       min="0"
+                       max="@Model.StockQuantity"
+                       class="w-32 px-3 py-2.5 text-center border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary font-medium text-gray-900" />
+
+                <!-- Add to Cart Button -->
+                <button class="flex items-center justify-center gap-2 px-6 py-2.5 bg-white border-2 border-primary text-primary hover:bg-blue-50 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                        @(Model.StockQuantity <= 0 ? "disabled" : "")>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    Add to Cart
+                </button>
+
+                <!-- Buy Now Button -->
+                <button class="px-8 py-2.5 bg-primary text-white hover:bg-primary/90 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                        @(Model.StockQuantity <= 0 ? "disabled" : "")>
+                    Buy Now
+                </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

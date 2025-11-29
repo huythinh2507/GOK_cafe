@@ -28,7 +28,7 @@ namespace GOKCafe.Web.Services.Implementations
                 return Enumerable.Empty<ProductDto>();
 
             var products = root
-                .DescendantsOfType("product")
+                .DescendantsOfType("productInformation")
                 .Where(x => x.Value<bool>("isActive") && x.Value<bool>("isFeatured"))
                 .OrderBy(x => x.Value<int>("displayOrder"))
                 .Take(count)
@@ -48,7 +48,7 @@ namespace GOKCafe.Web.Services.Implementations
                 return Enumerable.Empty<ProductDto>();
 
             var products = root
-                .DescendantsOfType("product")
+                .DescendantsOfType("productInformation")
                 .Where(x => x.Value<bool>("isActive"))
                 .OrderBy(x => x.Value<int>("displayOrder"))
                 .Select(MapToProductDto)
@@ -119,8 +119,12 @@ namespace GOKCafe.Web.Services.Implementations
 
         private ProductDto MapToProductDto(IPublishedContent product)
         {
-            var imageUrl = product.Value<IPublishedContent>("imageUrl")?.Url() ?? string.Empty;
-            var category = product.Value<IPublishedContent>("category");
+            // Use productImage property for main image
+            var imageUrl = product.Value<IPublishedContent>("productImage")?.Url() ?? string.Empty;
+
+            // Get category - can be a content picker or dropdown
+            var categoryContent = product.Value<IPublishedContent>("productCategory");
+            var categoryString = product.Value<string>("productCategory") ?? string.Empty;
 
             // Get gallery images if any
             var galleryImages = product.Value<IEnumerable<IPublishedContent>>("productImages")?
@@ -131,22 +135,25 @@ namespace GOKCafe.Web.Services.Implementations
             return new ProductDto
             {
                 Id = product.Key,
-                Name = product.Value<string>("name") ?? string.Empty,
-                Slug = product.Value<string>("slug") ?? string.Empty,
+                Name = product.Value<string>("productName") ?? product.Name ?? string.Empty,
+                Slug = product.UrlSegment ?? string.Empty,
                 Description = product.Value<string>("description") ?? string.Empty,
                 ShortDescription = product.Value<string>("shortDescription") ?? string.Empty,
-                Price = product.Value<decimal>("price"),
-                DiscountPrice = product.Value<decimal?>("discountPrice"),
+                Price = product.Value<decimal>("priceMin"),
+                DiscountPrice = product.Value<decimal?>("priceMax"),
                 ImageUrl = imageUrl,
                 ProductImages = galleryImages,
                 StockQuantity = product.Value<int>("stockQuantity"),
                 IsActive = product.Value<bool>("isActive"),
                 IsFeatured = product.Value<bool>("isFeatured"),
-                CategoryId = category?.Key ?? Guid.Empty,
-                CategoryName = category?.Name ?? string.Empty,
+                CategoryId = categoryContent?.Key ?? Guid.Empty,
+                CategoryName = categoryContent?.Name ?? categoryString,
                 DisplayOrder = product.Value<int>("displayOrder"),
                 CreatedDate = product.CreateDate,
-                UpdatedDate = product.UpdateDate
+                UpdatedDate = product.UpdateDate,
+                Region = product.Value<string>("region") ?? string.Empty,
+                Process = product.Value<string>("process") ?? string.Empty,
+                TastingNote = product.Value<string>("tastingNote") ?? string.Empty
             };
         }
     }

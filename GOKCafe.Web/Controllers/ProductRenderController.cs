@@ -7,13 +7,13 @@ using Umbraco.Cms.Web.Common.Controllers;
 
 namespace GOKCafe.Web.Controllers
 {
-    public class ProductController : RenderController
+    public class ProductDetailController : RenderController
     {
         private readonly IProductService _productService;
         private readonly ICategoryService _categoryService;
 
-        public ProductController(
-            ILogger<ProductController> logger,
+        public ProductDetailController(
+            ILogger<ProductDetailController> logger,
             ICompositeViewEngine compositeViewEngine,
             IUmbracoContextAccessor umbracoContextAccessor,
             IProductService productService,
@@ -26,12 +26,27 @@ namespace GOKCafe.Web.Controllers
 
         public override IActionResult Index()
         {
-            // This is for individual product detail page
             var currentPage = CurrentPage;
             if (currentPage == null)
                 return NotFound();
 
-            var product = _productService.GetProductById(currentPage.Key);
+            Models.DTOs.ProductDto? product = null;
+
+            // Check if current page has productInformation as child
+            var productInfoNode = currentPage.Children?
+                .FirstOrDefault(x => x.ContentType.Alias == "productInformation");
+
+            if (productInfoNode != null)
+            {
+                // Get product from child node
+                product = _productService.GetProductById(productInfoNode.Key);
+            }
+            else
+            {
+                // Try to get product from current page (in case we're on the productInformation node)
+                product = _productService.GetProductById(currentPage.Key);
+            }
+
             if (product == null)
                 return NotFound();
 
@@ -39,13 +54,33 @@ namespace GOKCafe.Web.Controllers
                 ? _categoryService.GetCategoryById(product.CategoryId)
                 : null;
 
-            // Get related products from same category
-            var relatedProducts = product.CategoryId != Guid.Empty
-                ? _productService.GetProductsByCategory(product.CategoryId)
-                    .Where(p => p.Id != product.Id)
-                    .Take(4)
-                    .ToList()
-                : new List<Models.DTOs.ProductDto>();
+            // Get recommended products from Umbraco content tree
+            var relatedProducts = new List<Models.DTOs.ProductDto>();
+            var recommendProductNodes = currentPage.Children?.Where(x => x.ContentType.Alias == "recommendProduct");
+
+            if (recommendProductNodes != null && recommendProductNodes.Any())
+            {
+                foreach (var recommendNode in recommendProductNodes.Take(4))
+                {
+                    // RecommendProduct has its own properties: productName, price, productImage
+                    var productName = recommendNode.Value<string>("productName") ?? recommendNode.Name;
+                    var price = recommendNode.Value<decimal>("price");
+                    var productImage = recommendNode.Value<Umbraco.Cms.Core.Models.PublishedContent.IPublishedContent>("productImage");
+                    var imageUrl = productImage?.Url() ?? string.Empty;
+
+                    // Create a ProductDto from RecommendProduct data
+                    var recommendedProduct = new Models.DTOs.ProductDto
+                    {
+                        Id = recommendNode.Key,
+                        Name = productName,
+                        Price = price,
+                        ImageUrl = imageUrl,
+                        Slug = recommendNode.UrlSegment ?? string.Empty
+                    };
+
+                    relatedProducts.Add(recommendedProduct);
+                }
+            }
 
             var viewModel = new ProductDetailViewModel
             {
@@ -54,7 +89,10 @@ namespace GOKCafe.Web.Controllers
                 RelatedProducts = relatedProducts
             };
 
-            return View("~/Views/Product.cshtml", viewModel);
+            ViewData["ProductDetailViewModel"] = viewModel;
+
+            // Return CurrentTemplate with the current page model, not our custom viewModel
+            return CurrentTemplate(CurrentPage);
         }
     }
 }
