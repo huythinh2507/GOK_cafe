@@ -1,5 +1,6 @@
 using GOKCafe.Application.DTOs.Cart;
 using GOKCafe.Application.DTOs.Common;
+using GOKCafe.Application.DTOs.Order;
 
 namespace GOKCafe.Application.Services.Interfaces;
 
@@ -11,4 +12,5 @@ public interface ICartService
     Task<ApiResponse<bool>> RemoveCartItemAsync(Guid? userId, string? sessionId, Guid cartItemId);
     Task<ApiResponse<bool>> ClearCartAsync(Guid? userId, string? sessionId);
     Task<ApiResponse<int>> GetCartItemCountAsync(Guid? userId, string? sessionId);
+    Task<ApiResponse<OrderDto>> CheckoutFromCartAsync(Guid? userId, string? sessionId, CheckoutDto dto);
 }

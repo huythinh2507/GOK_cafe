@@ -28,8 +28,11 @@ public class UnitOfWork : IUnitOfWork
         InfoCards = new Repository<InfoCard>(_context);
         ContactInfos = new Repository<ContactInfo>(_context);
         ServiceFeatures = new Repository<ServiceFeature>(_context);
+        FlavourProfiles = new Repository<FlavourProfile>(_context);
+        Equipments = new Repository<Equipment>(_context);
         Carts = new Repository<Cart>(_context);
         CartItems = new Repository<CartItem>(_context);
+        RevokedTokens = new Repository<RevokedToken>(_context);
     }
 
     public IRepository<User> Users { get; }
@@ -47,8 +50,11 @@ public class UnitOfWork : IUnitOfWork
     public IRepository<InfoCard> InfoCards { get; }
     public IRepository<ContactInfo> ContactInfos { get; }
     public IRepository<ServiceFeature> ServiceFeatures { get; }
+    public IRepository<FlavourProfile> FlavourProfiles { get; }
+    public IRepository<Equipment> Equipments { get; }
     public IRepository<Cart> Carts { get; }
     public IRepository<CartItem> CartItems { get; }
+    public IRepository<RevokedToken> RevokedTokens { get; }
 
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {

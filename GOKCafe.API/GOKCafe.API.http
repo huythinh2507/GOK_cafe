@@ -1,6 +1,68 @@
 @GOKCafe.API_HostAddress = http://localhost:5142
 @categoryId = {{$guid}}
 @productId = {{$guid}}
+@token = your-jwt-token-here
+
+###########################################################
+# AUTHENTICATION API
+###########################################################
+
+### Register New User
+POST {{GOKCafe.API_HostAddress}}/api/v1/auth/register
+Content-Type: application/json
+
+{
+  "email": "john.doe@example.com",
+  "password": "SecurePass123!",
+  "firstName": "John",
+  "lastName": "Doe",
+  "phoneNumber": "+1234567890",
+  "address": "123 Main St, New York, NY 10001"
+}
+
+### Login
+POST {{GOKCafe.API_HostAddress}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "john.doe@example.com",
+  "password": "SecurePass123!"
+}
+
+### Logout (Requires Authentication)
+POST {{GOKCafe.API_HostAddress}}/api/v1/auth/logout
+Authorization: Bearer {{token}}
+
+### Get User Profile (Requires Authentication)
+GET {{GOKCafe.API_HostAddress}}/api/v1/auth/profile
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### Update User Profile (Requires Authentication)
+PUT {{GOKCafe.API_HostAddress}}/api/v1/auth/profile
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "firstName": "John Updated",
+  "lastName": "Doe Updated",
+  "phoneNumber": "+1234567890",
+  "address": "456 Oak Avenue, New York, NY 10002"
+}
+
+### Change Password (Requires Authentication)
+POST {{GOKCafe.API_HostAddress}}/api/v1/auth/change-password
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "currentPassword": "SecurePass123!",
+  "newPassword": "NewSecurePass456!"
+}
+
+### Deactivate Account (Requires Authentication)
+DELETE {{GOKCafe.API_HostAddress}}/api/v1/auth/deactivate
+Authorization: Bearer {{token}}
 
 ###########################################################
 # CATEGORIES API
@@ -109,25 +171,117 @@ Content-Type: application/json
 DELETE {{GOKCafe.API_HostAddress}}/api/products/{{productId}}
 
 ###########################################################
+# CART API
+###########################################################
+
+### Get Cart (Anonymous User)
+GET {{GOKCafe.API_HostAddress}}/api/v1/cart?sessionId=test-session-123
+Accept: application/json
+
+### Get Cart (Authenticated User)
+GET {{GOKCafe.API_HostAddress}}/api/v1/cart
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### Add Item to Cart (Anonymous)
+POST {{GOKCafe.API_HostAddress}}/api/v1/cart/items?sessionId=test-session-123
+Content-Type: application/json
+
+{
+  "productId": "{{productId}}",
+  "quantity": 2
+}
+
+### Add Item to Cart (Authenticated)
+POST {{GOKCafe.API_HostAddress}}/api/v1/cart/items
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "productId": "{{productId}}",
+  "quantity": 1
+}
+
+### Update Cart Item Quantity
+PUT {{GOKCafe.API_HostAddress}}/api/v1/cart/items/{{$guid}}?sessionId=test-session-123
+Content-Type: application/json
+
+{
+  "quantity": 3
+}
+
+### Remove Item from Cart
+DELETE {{GOKCafe.API_HostAddress}}/api/v1/cart/items/{{$guid}}?sessionId=test-session-123
+
+### Clear Cart
+DELETE {{GOKCafe.API_HostAddress}}/api/v1/cart?sessionId=test-session-123
+
+### Get Cart Item Count
+GET {{GOKCafe.API_HostAddress}}/api/v1/cart/count?sessionId=test-session-123
+
+### Checkout from Cart (Anonymous)
+POST {{GOKCafe.API_HostAddress}}/api/v1/cart/checkout?sessionId=test-session-123
+Content-Type: application/json
+
+{
+  "customerName": "John Doe",
+  "customerEmail": "john.doe@example.com",
+  "customerPhone": "+1234567890",
+  "shippingAddress": "123 Main St, New York, NY 10001",
+  "notes": "Please deliver between 2-4 PM",
+  "paymentMethod": "CreditCard",
+  "shippingFee": 5.00
+}
+
+### Checkout from Cart (Authenticated)
+POST {{GOKCafe.API_HostAddress}}/api/v1/cart/checkout
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "customerName": "John Doe",
+  "customerEmail": "john.doe@example.com",
+  "customerPhone": "+1234567890",
+  "shippingAddress": "123 Main St, New York, NY 10001",
+  "notes": "Please deliver between 2-4 PM",
+  "paymentMethod": "CreditCard",
+  "shippingFee": 5.00
+}
+
+###########################################################
 # ORDERS API
 ###########################################################
 
-### Get All Orders (Paginated)
-GET {{GOKCafe.API_HostAddress}}/api/orders?pageNumber=1&pageSize=10
+### Get All Orders - Admin (Paginated)
+GET {{GOKCafe.API_HostAddress}}/api/v1/orders?pageNumber=1&pageSize=10
+Accept: application/json
+
+### Get My Orders - User Order History (Requires Authentication)
+GET {{GOKCafe.API_HostAddress}}/api/v1/orders/my-orders?pageNumber=1&pageSize=10
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### Get My Orders by Status (Requires Authentication)
+GET {{GOKCafe.API_HostAddress}}/api/v1/orders/my-orders?pageNumber=1&pageSize=10&status=Delivered
+Authorization: Bearer {{token}}
 Accept: application/json
 
 ### Get Orders by Status
-GET {{GOKCafe.API_HostAddress}}/api/orders?pageNumber=1&pageSize=10&status=Pending
+GET {{GOKCafe.API_HostAddress}}/api/v1/orders?pageNumber=1&pageSize=10&status=Pending
 Accept: application/json
 
 ### Get Order by ID
 # Replace with actual GUID from database
-GET {{GOKCafe.API_HostAddress}}/api/orders/{{$guid}}
+GET {{GOKCafe.API_HostAddress}}/api/v1/orders/{{$guid}}
+Accept: application/json
+
+### Get Order by Order Number
+GET {{GOKCafe.API_HostAddress}}/api/v1/orders/number/ORD-20251127-ABC12345
 Accept: application/json
 
 ### Create Order
 # Replace productId with actual product GUIDs from database
-POST {{GOKCafe.API_HostAddress}}/api/orders
+POST {{GOKCafe.API_HostAddress}}/api/v1/orders
 Content-Type: application/json
 
 {
@@ -147,13 +301,13 @@ Content-Type: application/json
 
 ### Update Order Status
 # Replace with actual order GUID
-PATCH {{GOKCafe.API_HostAddress}}/api/orders/{{$guid}}/status
+PATCH {{GOKCafe.API_HostAddress}}/api/v1/orders/{{$guid}}/status
 Content-Type: application/json
 
 "Confirmed"
 
 ### Cancel Order
 # Replace with actual order GUID
-POST {{GOKCafe.API_HostAddress}}/api/orders/{{$guid}}/cancel
+POST {{GOKCafe.API_HostAddress}}/api/v1/orders/{{$guid}}/cancel
 
 ###

@@ -42,19 +42,16 @@ namespace GOKCafe.Web.Controllers
             var products = _productService.GetProducts(pageNumber, pageSize, categoryId, searchTerm);
             var categories = _categoryService.GetAllCategories().ToList();
 
-            var viewModel = new ProductListViewModel
-            {
-                PageTitle = currentPage.Value<string>("pageTitle") ?? currentPage.Name,
-                Introduction = currentPage.Value<string>("introduction") ?? string.Empty,
-                Products = products,
-                Categories = categories,
-                SelectedCategoryId = !string.IsNullOrEmpty(categoryId) && Guid.TryParse(categoryId, out var catId)
-                    ? catId
-                    : null,
-                SearchTerm = searchTerm
-            };
+            // Pass data to view via ViewData (Umbraco Native Pattern)
+            ViewData["Products"] = products;
+            ViewData["Categories"] = categories;
+            ViewData["SelectedCategoryId"] = !string.IsNullOrEmpty(categoryId) && Guid.TryParse(categoryId, out var catId)
+                ? catId
+                : (Guid?)null;
+            ViewData["SearchTerm"] = searchTerm;
 
-            return View("~/Views/ProductList.cshtml", viewModel);
+            // Return CurrentTemplate with CurrentPage for Umbraco routing
+            return CurrentTemplate(CurrentPage);
         }
     }
 }

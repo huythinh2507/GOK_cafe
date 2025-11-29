@@ -44,3 +44,26 @@ public class CartItemDto
     public decimal TotalPrice { get; set; }
     public int StockQuantity { get; set; } // Available stock
 }
+
+public class CheckoutDto
+{
+    [Required]
+    public string CustomerName { get; set; } = string.Empty;
+
+    [Required]
+    [EmailAddress]
+    public string CustomerEmail { get; set; } = string.Empty;
+
+    [Required]
+    [Phone]
+    public string CustomerPhone { get; set; } = string.Empty;
+
+    public string? ShippingAddress { get; set; }
+
+    public string? Notes { get; set; }
+
+    [Required]
+    public string PaymentMethod { get; set; } = string.Empty; // Cash, CreditCard, DebitCard, OnlinePayment
+
+    public decimal ShippingFee { get; set; } = 0;
+}

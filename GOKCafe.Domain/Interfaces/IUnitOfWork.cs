@@ -19,8 +19,11 @@ public interface IUnitOfWork : IDisposable
     IRepository<InfoCard> InfoCards { get; }
     IRepository<ContactInfo> ContactInfos { get; }
     IRepository<ServiceFeature> ServiceFeatures { get; }
+    IRepository<FlavourProfile> FlavourProfiles { get; }
+    IRepository<Equipment> Equipments { get; }
     IRepository<Cart> Carts { get; }
     IRepository<CartItem> CartItems { get; }
+    IRepository<RevokedToken> RevokedTokens { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     Task BeginTransactionAsync();

@@ -1,5 +1,6 @@
 using GOKCafe.Application.DTOs.Cart;
 using GOKCafe.Application.DTOs.Common;
+using GOKCafe.Application.DTOs.Order;
 using GOKCafe.Application.Services.Interfaces;
 using GOKCafe.Domain.Entities;
 using GOKCafe.Domain.Interfaces;
@@ -210,6 +211,129 @@ public class CartService : ICartService
         catch (Exception ex)
         {
             return ApiResponse<int>.FailureResult($"Error getting cart item count: {ex.Message}");
+        }
+    }
+
+    public async Task<ApiResponse<OrderDto>> CheckoutFromCartAsync(Guid? userId, string? sessionId, CheckoutDto dto)
+    {
+        try
+        {
+            // Get cart with items
+            var cart = await GetOrCreateCartAsync(userId, sessionId);
+
+            if (!cart.CartItems.Any())
+            {
+                return ApiResponse<OrderDto>.FailureResult("Cart is empty. Cannot proceed with checkout.");
+            }
+
+            // Start a transaction for stock reservation and order creation
+            await _unitOfWork.BeginTransactionAsync();
+
+            try
+            {
+                // Validate stock availability and calculate totals
+                decimal subtotal = 0;
+                var orderItems = new List<CreateOrderItemDto>();
+                var errors = new List<string>();
+
+                foreach (var cartItem in cart.CartItems)
+                {
+                    var product = await _unitOfWork.Products
+                        .GetQueryable()
+                        .FirstOrDefaultAsync(p => p.Id == cartItem.ProductId);
+
+                    if (product == null)
+                    {
+                        errors.Add($"Product {cartItem.ProductId} not found");
+                        continue;
+                    }
+
+                    // Calculate available stock (total stock - reserved stock)
+                    var availableStock = product.StockQuantity - product.ReservedQuantity;
+
+                    if (availableStock < cartItem.Quantity)
+                    {
+                        errors.Add($"{product.Name}: Only {availableStock} items available (you requested {cartItem.Quantity})");
+                        continue;
+                    }
+
+                    // Reserve stock for this order
+                    product.ReservedQuantity += cartItem.Quantity;
+                    _unitOfWork.Products.Update(product);
+
+                    // Calculate price
+                    var price = cartItem.DiscountPrice ?? cartItem.UnitPrice;
+                    subtotal += price * cartItem.Quantity;
+
+                    orderItems.Add(new CreateOrderItemDto
+                    {
+                        ProductId = cartItem.ProductId,
+                        Quantity = cartItem.Quantity
+                    });
+                }
+
+                if (errors.Any())
+                {
+                    await _unitOfWork.RollbackTransactionAsync();
+                    return ApiResponse<OrderDto>.FailureResult(
+                        "Stock validation failed",
+                        errors);
+                }
+
+                // Calculate tax (10% as example - you can make this configurable)
+                var tax = subtotal * 0.10m;
+                var totalAmount = subtotal + tax + dto.ShippingFee;
+
+                // Create order
+                var createOrderDto = new CreateOrderDto
+                {
+                    CustomerName = dto.CustomerName,
+                    CustomerEmail = dto.CustomerEmail,
+                    CustomerPhone = dto.CustomerPhone,
+                    ShippingAddress = dto.ShippingAddress,
+                    Notes = dto.Notes,
+                    PaymentMethod = dto.PaymentMethod,
+                    Items = orderItems
+                };
+
+                // Use OrderService to create the order (pass userId to link order to user)
+                var orderService = new OrderService(_unitOfWork);
+                var orderResult = await orderService.CreateOrderAsync(createOrderDto, userId);
+
+                if (!orderResult.Success)
+                {
+                    await _unitOfWork.RollbackTransactionAsync();
+                    return ApiResponse<OrderDto>.FailureResult(
+                        "Failed to create order",
+                        orderResult.Errors);
+                }
+
+                // Clear cart after successful checkout
+                foreach (var item in cart.CartItems)
+                {
+                    item.IsDeleted = true;
+                    item.UpdatedAt = DateTime.UtcNow;
+                }
+                cart.UpdatedAt = DateTime.UtcNow;
+                await _unitOfWork.SaveChangesAsync();
+
+                await _unitOfWork.CommitTransactionAsync();
+
+                return ApiResponse<OrderDto>.SuccessResult(
+                    orderResult.Data!,
+                    $"Checkout successful! Order #{orderResult.Data!.OrderNumber} has been created.");
+            }
+            catch (Exception ex)
+            {
+                await _unitOfWork.RollbackTransactionAsync();
+                throw new Exception($"Transaction failed: {ex.Message}", ex);
+            }
+        }
+        catch (Exception ex)
+        {
+            return ApiResponse<OrderDto>.FailureResult(
+                "An error occurred during checkout",
+                new List<string> { ex.Message });
         }
     }
 

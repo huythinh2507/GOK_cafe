@@ -1,8 +1,12 @@
-﻿@using Umbraco.Cms.Web.Common.PublishedModels;
+@using Umbraco.Cms.Web.Common.PublishedModels;
 @inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
 @using GOKCafe.Web.Models.ViewModels
 @using GOKCafe.Web.Models.DTOs
+@using Umbraco.Cms.Core.Models.PublishedContent
+@using Umbraco.Extensions
+@inject Umbraco.Cms.Web.Common.UmbracoHelper UmbracoHelper
 @{
+
     Layout = "_Layout";
 
     // Get viewModel from ViewData (passed from controller)
@@ -10,15 +14,42 @@
 
     // Set page title
     ViewData["Title"] = viewModel?.Product?.Name ?? Model?.Name ?? "Product Details";
+
+    // Try multiple approaches to find ProductList page
+    IPublishedContent productListPage = null;
+
+    // Approach 1: Check ancestors
+    productListPage = Model?.Ancestors().FirstOrDefault(x => x.ContentType.Alias == "productList");
+
+    // Approach 2: If not found, search from root
+    if (productListPage == null)
+    {
+        productListPage = Model?.Root().Descendants().FirstOrDefault(x => x.ContentType.Alias == "productList");
+    }
+
+    // Approach 3: Use ContentAtRoot to search all content
+    if (productListPage == null)
+    {
+        productListPage = UmbracoHelper.ContentAtRoot().FirstOrDefault(x => x.ContentType.Alias == "productList");
+    }
 }
 
 @if (viewModel?.Product != null)
 {
+    @* Breadcrumbs *@
+    @await Html.PartialAsync("~/Views/Partials/Shared/_Breadcrumbs.cshtml", Model)
+
     <!-- Product Information Partial -->
     @await Html.PartialAsync("~/Views/Partials/ProductDetail/_ProductInformation.cshtml", viewModel.Product)
 
     <!-- Related/Recommended Products Section -->
     @await Html.PartialAsync("~/Views/Partials/ProductDetail/_RecommendProduct.cshtml", viewModel.RelatedProducts)
+
+    @* Products Banner Carousel - Get banner from ProductList page *@
+    @await Html.PartialAsync("~/Views/Partials/Products/ProductsBanner.cshtml", productListPage)
+
+    @* OnFooter Section *@
+    @await Html.PartialAsync("~/Views/Partials/Homepage/_OnFooter.cshtml", Model)
 }
 else
 {

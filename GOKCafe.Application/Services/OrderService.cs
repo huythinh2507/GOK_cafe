@@ -54,6 +54,45 @@ public class OrderService : IOrderService
         }
     }
 
+    public async Task<ApiResponse<PaginatedResponse<OrderDto>>> GetUserOrdersAsync(
+        Guid userId, int pageNumber, int pageSize, string? status = null)
+    {
+        try
+        {
+            var orders = await _unitOfWork.Orders.GetAllAsync();
+            var query = orders.AsQueryable().Where(o => o.UserId == userId);
+
+            if (!string.IsNullOrEmpty(status) && Enum.TryParse<OrderStatus>(status, true, out var orderStatus))
+            {
+                query = query.Where(o => o.Status == orderStatus);
+            }
+
+            var totalCount = query.Count();
+            var items = query
+                .OrderByDescending(o => o.CreatedAt)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .Select(o => MapToDto(o))
+                .ToList();
+
+            var response = new PaginatedResponse<OrderDto>
+            {
+                Items = items,
+                TotalCount = totalCount,
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
+
+            return ApiResponse<PaginatedResponse<OrderDto>>.SuccessResult(response);
+        }
+        catch (Exception ex)
+        {
+            return ApiResponse<PaginatedResponse<OrderDto>>.FailureResult(
+                "An error occurred while retrieving user orders",
+                new List<string> { ex.Message });
+        }
+    }
+
     public async Task<ApiResponse<OrderDto>> GetOrderByIdAsync(Guid id)
     {
         try
@@ -92,7 +131,7 @@ public class OrderService : IOrderService
         }
     }
 
-    public async Task<ApiResponse<OrderDto>> CreateOrderAsync(CreateOrderDto dto)
+    public async Task<ApiResponse<OrderDto>> CreateOrderAsync(CreateOrderDto dto, Guid? userId = null)
     {
         try
         {
@@ -143,6 +182,7 @@ public class OrderService : IOrderService
             {
                 Id = Guid.NewGuid(),
                 OrderNumber = orderNumber,
+                UserId = userId, // Link order to authenticated user
                 CustomerName = dto.CustomerName,
                 CustomerEmail = dto.CustomerEmail,
                 CustomerPhone = dto.CustomerPhone,

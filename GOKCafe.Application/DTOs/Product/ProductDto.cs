@@ -1,3 +1,6 @@
+using GOKCafe.Application.DTOs.Equipment;
+using GOKCafe.Application.DTOs.FlavourProfile;
+
 namespace GOKCafe.Application.DTOs.Product;
 
 public class ProductDto
@@ -15,6 +18,8 @@ public class ProductDto
     public Guid CategoryId { get; set; }
     public string CategoryName { get; set; } = string.Empty;
     public List<ProductImageDto> Images { get; set; } = new();
+    public List<FlavourProfileDto> FlavourProfiles { get; set; } = new();
+    public List<EquipmentDto> Equipments { get; set; } = new();
 }
 
 public class ProductImageDto
@@ -36,6 +41,8 @@ public class CreateProductDto
     public int StockQuantity { get; set; }
     public bool IsFeatured { get; set; }
     public Guid CategoryId { get; set; }
+    public List<Guid> FlavourProfileIds { get; set; } = new();
+    public List<Guid> EquipmentIds { get; set; } = new();
 }
 
 public class UpdateProductDto
@@ -49,4 +56,6 @@ public class UpdateProductDto
     public bool IsActive { get; set; }
     public bool IsFeatured { get; set; }
     public Guid CategoryId { get; set; }
+    public List<Guid> FlavourProfileIds { get; set; } = new();
+    public List<Guid> EquipmentIds { get; set; } = new();
 }

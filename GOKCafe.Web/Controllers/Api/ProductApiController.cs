@@ -4,9 +4,13 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace GOKCafe.Web.Controllers.Api
 {
-    [Route("api/products")]
+    /// <summary>
+    /// Manages product operations in the GOK Cafe Web system
+    /// </summary>
+    [Route("api/v1/products")]
     [ApiController]
-    public class ProductApiController : Controller
+    [ApiExplorerSettings(GroupName = "Products API")]
+    public class ProductApiController : ControllerBase
     {
         private readonly IProductService _productService;
         private readonly ILogger<ProductApiController> _logger;
@@ -22,7 +26,14 @@ namespace GOKCafe.Web.Controllers.Api
         /// <summary>
         /// Get all products with pagination
         /// </summary>
+        /// <param name="pageNumber">The page number for pagination (default: 1)</param>
+        /// <param name="pageSize">The number of items per page (default: 12)</param>
+        /// <param name="categoryId">Optional category ID to filter products</param>
+        /// <param name="searchTerm">Optional search term for product name or description</param>
+        /// <returns>A paginated list of products matching the filters</returns>
         [HttpGet]
+        [ProducesResponseType<ApiResponse<PaginatedResponse<ProductDto>>>(StatusCodes.Status200OK)]
+        [ProducesResponseType<ApiResponse<object>>(StatusCodes.Status500InternalServerError)]
         public IActionResult GetProducts(
             [FromQuery] int pageNumber = 1,
             [FromQuery] int pageSize = 12,
@@ -47,7 +58,11 @@ namespace GOKCafe.Web.Controllers.Api
         /// <summary>
         /// Get featured products
         /// </summary>
+        /// <param name="count">The number of featured products to return (default: 8)</param>
+        /// <returns>A list of featured products</returns>
         [HttpGet("featured")]
+        [ProducesResponseType<ApiResponse<IEnumerable<ProductDto>>>(StatusCodes.Status200OK)]
+        [ProducesResponseType<ApiResponse<object>>(StatusCodes.Status500InternalServerError)]
         public IActionResult GetFeaturedProducts([FromQuery] int count = 8)
         {
             try
@@ -68,7 +83,12 @@ namespace GOKCafe.Web.Controllers.Api
         /// <summary>
         /// Get product by ID
         /// </summary>
+        /// <param name="id">The unique identifier of the product</param>
+        /// <returns>The product with the specified ID</returns>
         [HttpGet("{id:guid}")]
+        [ProducesResponseType<ApiResponse<ProductDto>>(StatusCodes.Status200OK)]
+        [ProducesResponseType<ApiResponse<object>>(StatusCodes.Status404NotFound)]
+        [ProducesResponseType<ApiResponse<object>>(StatusCodes.Status500InternalServerError)]
         public IActionResult GetProductById(Guid id)
         {
             try
@@ -92,7 +112,12 @@ namespace GOKCafe.Web.Controllers.Api
         /// <summary>
         /// Get product by slug
         /// </summary>
+        /// <param name="slug">The URL-friendly slug of the product</param>
+        /// <returns>The product with the specified slug</returns>
         [HttpGet("slug/{slug}")]
+        [ProducesResponseType<ApiResponse<ProductDto>>(StatusCodes.Status200OK)]
+        [ProducesResponseType<ApiResponse<object>>(StatusCodes.Status404NotFound)]
+        [ProducesResponseType<ApiResponse<object>>(StatusCodes.Status500InternalServerError)]
         public IActionResult GetProductBySlug(string slug)
         {
             try
@@ -116,7 +141,11 @@ namespace GOKCafe.Web.Controllers.Api
         /// <summary>
         /// Get products by category
         /// </summary>
+        /// <param name="categoryId">The unique identifier of the category</param>
+        /// <returns>A list of products in the specified category</returns>
         [HttpGet("category/{categoryId:guid}")]
+        [ProducesResponseType<ApiResponse<IEnumerable<ProductDto>>>(StatusCodes.Status200OK)]
+        [ProducesResponseType<ApiResponse<object>>(StatusCodes.Status500InternalServerError)]
         public IActionResult GetProductsByCategory(Guid categoryId)
         {
             try

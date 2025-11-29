@@ -53,6 +53,29 @@ public class AuthController : ControllerBase
     }
 
     /// <summary>
+    /// Logout and invalidate current JWT token
+    /// </summary>
+    /// <returns>Success status</returns>
+    [HttpPost("logout")]
+    [Authorize]
+    [ProducesResponseType<ApiResponse<bool>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ApiResponse<bool>>(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType<ApiResponse<bool>>(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> Logout()
+    {
+        var userId = GetCurrentUserId();
+        var token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+
+        if (string.IsNullOrEmpty(token))
+        {
+            return BadRequest(ApiResponse<bool>.FailureResult("No token provided"));
+        }
+
+        var result = await _authService.LogoutAsync(token, userId);
+        return result.Success ? Ok(result) : BadRequest(result);
+    }
+
+    /// <summary>
     /// Get current user profile (requires authentication)
     /// </summary>
     /// <returns>User profile information</returns>
