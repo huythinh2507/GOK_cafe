@@ -1,16 +1,6 @@
-@import "tailwindcss";
-
-/* Theme customization */
-@theme {
-  --color-primary: #0767B3;
-  --color-primary-light: #0e7fd1;
-  --color-primary-dark: #054f82;
-  --color-secondary: #0a8ed9;
-  --color-secondary-light: #3ba6e6;
-
-  --font-sans: 'Poppins', system-ui, sans-serif;
-  --font-heading: 'Poppins', system-ui, sans-serif;
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* Custom styles for GOK Cafe */
 @layer base {
@@ -27,97 +17,54 @@
 @layer components {
   /* Button styles */
   .btn-primary {
-    background-color: var(--color-primary);
-    color: white;
-    font-weight: 600;
-    padding: 0.5rem 1.5rem;
-    border-radius: 0.5rem;
-    transition: background-color 0.2s;
+    @apply bg-[#0767B3] text-white font-semibold px-6 py-2 rounded-lg transition-colors;
   }
 
   .btn-primary:hover {
-    background-color: var(--color-primary-dark);
+    @apply bg-[#054f82];
   }
 
   .btn-secondary {
-    background-color: var(--color-secondary);
-    color: white;
-    font-weight: 600;
-    padding: 0.5rem 1.5rem;
-    border-radius: 0.5rem;
-    transition: background-color 0.2s;
+    @apply bg-[#0a8ed9] text-white font-semibold px-6 py-2 rounded-lg transition-colors;
   }
 
   .btn-secondary:hover {
-    background-color: var(--color-secondary-light);
+    @apply bg-[#3ba6e6];
   }
 
   .btn-outline {
-    border: 2px solid var(--color-primary);
-    color: var(--color-primary);
-    font-weight: 600;
-    padding: 0.5rem 1.5rem;
-    border-radius: 0.5rem;
-    transition: all 0.2s;
+    @apply border-2 border-[#0767B3] text-[#0767B3] font-semibold px-6 py-2 rounded-lg transition-all;
   }
 
   .btn-outline:hover {
-    background-color: var(--color-primary);
-    color: white;
+    @apply bg-[#0767B3] text-white;
   }
 
   /* Card styles */
   .card {
-    background-color: white;
-    border-radius: 0.5rem;
-    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
-    overflow: hidden;
-    transition: box-shadow 0.2s;
+    @apply bg-white rounded-lg shadow overflow-hidden transition-shadow;
   }
 
   .card:hover {
-    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+    @apply shadow-xl;
   }
 
   .product-card {
-    @extend .card;
+    @apply bg-white rounded-lg shadow overflow-hidden transition-shadow;
   }
 
   /* Container */
   .container-custom {
-    max-width: 1280px;
-    margin-left: auto;
-    margin-right: auto;
-    padding-left: 1rem;
-    padding-right: 1rem;
-  }
-
-  @media (min-width: 640px) {
-    .container-custom {
-      padding-left: 1.5rem;
-      padding-right: 1.5rem;
-    }
-  }
-
-  @media (min-width: 1024px) {
-    .container-custom {
-      padding-left: 2rem;
-      padding-right: 2rem;
-    }
+    @apply max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8;
   }
 
   /* Input styles */
   .input-field {
-    width: 100%;
-    padding: 0.5rem 1rem;
-    border: 1px solid rgb(209 213 219);
-    border-radius: 0.5rem;
+    @apply w-full px-4 py-2 border border-gray-300 rounded-lg;
   }
 
   .input-field:focus {
-    outline: 2px solid var(--color-primary);
-    outline-offset: 2px;
-    border-color: transparent;
+    @apply outline-2 outline-[#0767B3] outline-offset-2 border-transparent;
   }
 }
 
@@ -141,49 +88,5 @@
 
   .group:hover .group-hover\:bg-black\/40 {
     background-color: rgba(0, 0, 0, 0.4);
-  }
-
-  /* Natural Section Typography */
-  .text-\[20px\] {
-    font-size: 20px;
-  }
-
-  .text-\[16px\] {
-    font-size: 16px;
-  }
-
-  .text-\[12px\] {
-    font-size: 12px;
-  }
-
-  /* Natural Section Button Padding */
-  .px-\[48px\] {
-    padding-left: 48px;
-    padding-right: 48px;
-  }
-
-  .py-\[18px\] {
-    padding-top: 18px;
-    padding-bottom: 18px;
-  }
-
-  .px-\[36px\] {
-    padding-left: 36px;
-    padding-right: 36px;
-  }
-
-  .py-\[14px\] {
-    padding-top: 14px;
-    padding-bottom: 14px;
-  }
-
-  .px-\[24px\] {
-    padding-left: 24px;
-    padding-right: 24px;
-  }
-
-  .py-\[10px\] {
-    padding-top: 10px;
-    padding-bottom: 10px;
   }
 }

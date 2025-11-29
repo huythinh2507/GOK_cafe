@@ -1,0 +1,68 @@
+@using Umbraco.Cms.Web.Common.PublishedModels;
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@using GOKCafe.Web.Models.ViewModels
+@using GOKCafe.Web.Models.DTOs
+@using Umbraco.Cms.Core.Models.PublishedContent
+@using Umbraco.Extensions
+@inject Umbraco.Cms.Web.Common.UmbracoHelper UmbracoHelper
+@{
+
+    Layout = "_Layout";
+
+    // Get viewModel from ViewData (passed from controller)
+    var viewModel = ViewData["ProductDetailViewModel"] as ProductDetailViewModel;
+
+    // Set page title
+    ViewData["Title"] = viewModel?.Product?.Name ?? Model?.Name ?? "Product Details";
+
+    // Try multiple approaches to find ProductList page
+    IPublishedContent productListPage = null;
+
+    // Approach 1: Check ancestors
+    productListPage = Model?.Ancestors().FirstOrDefault(x => x.ContentType.Alias == "productList");
+
+    // Approach 2: If not found, search from root
+    if (productListPage == null)
+    {
+        productListPage = Model?.Root().Descendants().FirstOrDefault(x => x.ContentType.Alias == "productList");
+    }
+
+    // Approach 3: Use ContentAtRoot to search all content
+    if (productListPage == null)
+    {
+        productListPage = UmbracoHelper.ContentAtRoot().FirstOrDefault(x => x.ContentType.Alias == "productList");
+    }
+}
+
+@if (viewModel?.Product != null)
+{
+    @* Breadcrumbs *@
+    @await Html.PartialAsync("~/Views/Partials/Shared/_Breadcrumbs.cshtml", Model)
+
+    <!-- Product Information Partial -->
+    @await Html.PartialAsync("~/Views/Partials/ProductDetail/_ProductInformation.cshtml", viewModel.Product)
+
+    <!-- Related/Recommended Products Section -->
+    @await Html.PartialAsync("~/Views/Partials/ProductDetail/_RecommendProduct.cshtml", viewModel.RelatedProducts)
+
+    @* Products Banner Carousel - Get banner from ProductList page *@
+    @await Html.PartialAsync("~/Views/Partials/Products/ProductsBanner.cshtml", productListPage)
+
+    @* OnFooter Section *@
+    @await Html.PartialAsync("~/Views/Partials/Homepage/_OnFooter.cshtml", Model)
+}
+else
+{
+    <div class="container mx-auto px-4 py-16 text-center">
+        <div class="bg-red-50 border border-red-200 text-red-800 px-6 py-8 rounded-lg inline-block">
+            <svg class="w-16 h-16 mx-auto mb-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <h2 class="text-2xl font-bold mb-2">Product Not Found</h2>
+            <p class="mb-4">The product you are looking for does not exist or has been removed.</p>
+            <a href="/products" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors">
+                View All Products
+            </a>
+        </div>
+    </div>
+}
