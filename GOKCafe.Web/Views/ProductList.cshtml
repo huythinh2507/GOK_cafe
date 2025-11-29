@@ -1,4 +1,4 @@
-﻿@using Umbraco.Cms.Core.Models.PublishedContent
+@using Umbraco.Cms.Core.Models.PublishedContent
 @using Umbraco.Extensions
 @using GOKCafe.Web.Models.DTOs
 @inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
@@ -6,4 +6,14 @@
     Layout = "_Layout.cshtml";
 }
 
-Product List Page
+@* Breadcrumbs *@
+@await Html.PartialAsync("~/Views/Partials/Shared/_Breadcrumbs.cshtml", Model)
+
+@* Products Banner Carousel *@
+@await Html.PartialAsync("~/Views/Partials/Products/ProductsBanner.cshtml", Model)
+
+@* Products Grid *@
+@await Html.PartialAsync("~/Views/Partials/Products/ProductsGrid.cshtml", Model)
+
+@* OnFooter Section *@
+@await Html.PartialAsync("~/Views/Partials/Homepage/_OnFooter.cshtml", Model)
