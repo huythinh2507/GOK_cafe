@@ -1,0 +1,98 @@
+﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@{
+    var sectionTitle = "BEST SELLERS";
+    var sectionHeading = "OUR TEA COLLECTION";
+    var buttonText = "Shop All Tea";
+    var buttonUrl = "/tea-products";
+    var products = new List<dynamic>();
+
+    // Get Show All Tea Item section from Home children
+    if (UmbracoContext?.Content != null)
+    {
+        var homeNode = UmbracoContext.Content.GetAtRoot().FirstOrDefault(x => x.ContentType.Alias == "home" || x.ContentType.Alias == "homepage");
+        if (homeNode != null)
+        {
+            var showAllTeaNode = homeNode.Children.FirstOrDefault(x => x.ContentType.Alias == "showAllTea");
+            if (showAllTeaNode != null)
+            {
+                // Get section properties from parent node (if they exist)
+                var tempTitle = showAllTeaNode.Value<string>("sectionTitle");
+                if (!string.IsNullOrEmpty(tempTitle)) sectionTitle = tempTitle;
+
+                var tempHeading = showAllTeaNode.Value<string>("sectionHeading");
+                if (!string.IsNullOrEmpty(tempHeading)) sectionHeading = tempHeading;
+
+                var tempButtonText = showAllTeaNode.Value<string>("buttonText");
+                if (!string.IsNullOrEmpty(tempButtonText)) buttonText = tempButtonText;
+
+                var tempButtonUrl = showAllTeaNode.Value<string>("buttonUrl");
+                if (!string.IsNullOrEmpty(tempButtonUrl)) buttonUrl = tempButtonUrl;
+
+                // Get ShowAllTeaItem children
+                var teaItems = showAllTeaNode.Children.Where(x => x.ContentType.Alias == "showAllTeaItem");
+                foreach (var item in teaItems.Take(4))
+                {
+                    // Try both "tealImage" and "teaImage" field names
+                    var teaImage = item.Value<Umbraco.Cms.Core.Models.PublishedContent.IPublishedContent>("tealImage")
+                                ?? item.Value<Umbraco.Cms.Core.Models.PublishedContent.IPublishedContent>("teaImage");
+                    var teaImageUrl = teaImage != null ? teaImage.Url() : "";
+
+                    products.Add(new
+                    {
+                        Name = item.Value<string>("title") ?? item.Name,
+                        Image = teaImageUrl,
+                        Price = item.Value<string>("price") ?? "32,000 VNĐ",
+                        Url = item.Url()
+                    });
+                }
+            }
+        }
+    }
+}
+
+<!-- Show All Tea Item Section -->
+<section class="py-12 bg-white">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Section Header -->
+        <div class="text-center mb-4">
+            <p class="text-2xl text-primary font-medium uppercase tracking-wide mb-2">@sectionTitle</p>
+            <h2 class="text-4xl md:text-5xl font-semibold text-gray-900">@sectionHeading</h2>
+        </div>
+
+        <!-- Products Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-4">
+            @foreach (var product in products)
+            {
+                var hasValidUrl = !string.IsNullOrEmpty(product.Url) && product.Url != "#";
+                <div class="group">
+                    <!-- Product Image -->
+                    <div class="overflow-hidden mb-4 flex items-center justify-center bg-[#E8DCC4] w-full h-[480px] ">
+                        @if (!string.IsNullOrEmpty(product.Image))
+                        {
+                            <img src="@product.Image" alt="@product.Name" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                        }
+                        else
+                        {
+                            <div class="w-full h-full bg-[#E8DCC4] flex items-center justify-center">
+                                <i class="fas fa-mug-hot text-6xl text-gray-400"></i>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Product Info -->
+                    <div class="text-center">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">@product.Name</h3>
+                        <p class="text-gray-600">From <span class="font-semibold">@product.Price</span></p>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Shop All Button -->
+        <div class="text-center">
+            <a href="@buttonUrl" class="inline-block px-8 py-3 border-2 border-primary text-primary font-semibold hover:bg-primary hover:text-white transition-all duration-300">
+                @buttonText
+            </a>
+        </div>
+    </div>
+</section>

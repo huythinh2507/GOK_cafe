@@ -1,0 +1,80 @@
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@{
+    var siteName = "GOK Cafe";
+    var logoUrl = "";
+
+    // Try to get Header document from Home children
+    if (UmbracoContext?.Content != null)
+    {
+        // Get Home node first
+        var homeNode = UmbracoContext.Content.GetAtRoot().FirstOrDefault(x => x.ContentType.Alias == "home" || x.ContentType.Alias == "homepage");
+        if (homeNode != null)
+        {
+            // Get Header from Home's children
+            var headerNode = homeNode.Children.FirstOrDefault(x => x.ContentType.Alias == "header");
+            if (headerNode != null)
+            {
+                // Get logo from Header document type
+                var logoMedia = headerNode.Value<Umbraco.Cms.Core.Models.PublishedContent.IPublishedContent>("logo");
+                if (logoMedia != null)
+                {
+                    logoUrl = logoMedia.Url();
+                }
+            }
+        }
+    }
+}
+
+<!-- Header -->
+<header class="bg-gray-50 border-b border-gray-200">
+    <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-20">
+            <!-- Mobile menu button -->
+            <button type="button" class="md:hidden text-gray-700 hover:text-primary focus:outline-none" onclick="toggleMobileMenu()">
+                <i class="fas fa-bars text-2xl"></i>
+            </button>
+            <!-- Left Navigation -->
+            <div class="hidden md:flex items-center md:gap-3 lg:gap-12">
+                <a href="/" class="text-gray-700 hover:text-primary font-medium transition-colors uppercase text-base">Home</a>
+                <a href="/visions" class="text-gray-700 hover:text-primary font-medium transition-colors uppercase  text-base">Visions</a>
+                <a href="/products" class="text-gray-700 hover:text-primary font-medium transition-colors uppercase  text-base">Products</a>
+            </div>
+
+            <!-- Center Logo -->
+            <a href="/" class="flex items-center">
+                @if (!string.IsNullOrEmpty(logoUrl))
+                {
+                    <img src="@logoUrl" alt="@siteName" class="h-10" />
+                }
+                else
+                {
+                    <span class="text-2xl font-bold text-blue-700 font-heading">@siteName</span>
+                }
+            </a>
+
+            <!-- Right Navigation -->
+            <div class="md:flex items-center md:gap-3 lg:gap-12">
+            <div class="hidden md:flex items-center md:gap-3 lg:gap-12">
+                <a href="/partners" class="text-gray-700 hover:text-primary font-medium transition-colors uppercase  text-base">Partners</a>
+                <a href="/contact" class="text-gray-700 hover:text-primary font-medium transition-colors uppercase  text-base">Contact</a>
+                <a href="/blog" class="text-gray-700 hover:text-primary font-medium transition-colors uppercase  text-base">Blog</a>
+            </div>
+            <button type="button" class="text-gray-700 hover:text-primary transition-colors">
+                <i class="fas fa-search text-lg"></i>
+            </button>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation -->
+        <div id="mobileMenu" class="hidden lg:hidden pb-4">
+            <div class="flex flex-col space-y-3">
+                <a href="/" class="text-gray-700 hover:text-primary font-medium transition-colors py-2 uppercase text-sm">Home</a>
+                <a href="/visions" class="text-gray-700 hover:text-primary font-medium transition-colors py-2 uppercase text-sm">Visions</a>
+                <a href="/products" class="text-gray-700 hover:text-primary font-medium transition-colors py-2 uppercase text-sm">Products</a>
+                <a href="/partners" class="text-gray-700 hover:text-primary font-medium transition-colors py-2 uppercase text-sm">Partners</a>
+                <a href="/contact" class="text-gray-700 hover:text-primary font-medium transition-colors py-2 uppercase text-sm">Contact</a>
+                <a href="/blog" class="text-gray-700 hover:text-primary font-medium transition-colors py-2 uppercase text-sm">Blog</a>
+            </div>
+        </div>
+    </nav>
+</header>

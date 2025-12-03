@@ -1,0 +1,72 @@
+﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@{
+    Layout = null;
+    var siteName = "GOK Cafe";
+
+    // Try to get settings from Umbraco
+    if (UmbracoContext?.Content != null)
+    {
+        var settingsNode = UmbracoContext.Content.GetAtRoot().FirstOrDefault(x => x.ContentType.Alias == "settings");
+        if (settingsNode != null)
+        {
+            siteName = settingsNode.Value<string>("siteName") ?? "GOK Cafe";
+        }
+    }
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - @siteName</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="16x16" href="~/logoGK.png" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="~/css/output.css" asp-append-version="true" />
+
+    <!-- Umbraco UI Library -->
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@("@")umbraco-ui/uui@("@")1.8.0/dist/uui.js"></script>
+
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body class="flex flex-col min-h-screen bg-gray-50">
+    @await Html.PartialAsync("~/Views/Partials/Shared/_Header.cshtml")
+
+    <!-- Main Content -->
+    <main class="flex-grow">
+        @RenderBody()
+    </main>
+
+    @await Html.PartialAsync("~/Views/Partials/Shared/_Footer.cshtml")
+
+    <!-- Scripts -->
+    <script>
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('hidden');
+        }
+    </script>
+
+    <!-- API Service - Must load first -->
+    <script src="~/js/api-service.js" asp-append-version="true"></script>
+
+    <!-- Application Scripts -->
+    <script src="~/js/main.js" asp-append-version="true"></script>
+    <script src="~/js/cart.js" asp-append-version="true"></script>
+    <script src="~/js/product.js" asp-append-version="true"></script>
+    <script src="~/js/product-feed-integration.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

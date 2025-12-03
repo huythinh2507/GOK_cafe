@@ -1,0 +1,62 @@
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@{
+    var blogItems = new List<dynamic>();
+
+    // Get ListBlog section from Home children
+    if (UmbracoContext?.Content != null)
+    {
+        var homeNode = UmbracoContext.Content.GetAtRoot().FirstOrDefault(x => x.ContentType.Alias == "home" || x.ContentType.Alias == "homepage");
+        if (homeNode != null)
+        {
+            var listBlogNode = homeNode.Children.FirstOrDefault(x => x.ContentType.Alias == "listBlog");
+            if (listBlogNode != null)
+            {
+                // Get BlogItem children (up to 3 items)
+                var blogItemNodes = listBlogNode.Children.Where(x => x.ContentType.Alias == "blogItem");
+                foreach (var item in blogItemNodes.Take(3))
+                {
+                    var backgroundImage = item.Value<Umbraco.Cms.Core.Models.PublishedContent.IPublishedContent>("backgroundImage");
+                    var backgroundImageUrl = backgroundImage != null ? backgroundImage.Url() : "";
+
+                    blogItems.Add(new
+                    {
+                        Title = item.Value<string>("title") ?? item.Name,
+                        BackgroundImage = backgroundImageUrl,
+                        Url = item.Url()
+                    });
+                }
+            }
+        }
+    }
+}
+
+<!-- Blog List Section -->
+<section class="py-0 bg-white">
+    <div class="container mx-auto px-4 sm:px-0 lg:px-0">
+        <!-- Blog Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 justify-items-center gap-4">
+            @foreach (var blog in blogItems)
+            {
+                <div class="group relative overflow-hidden cursor-pointer w-full" style=" height: 450px;">
+                    <!-- Background Image with overlay -->
+                    <div class="absolute inset-0 bg-cover bg-center" style="background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('@blog.BackgroundImage');">
+                        @if (string.IsNullOrEmpty(blog.BackgroundImage))
+                        {
+                            <div class="w-full h-full bg-gray-400"></div>
+                        }
+                    </div>
+
+                    <!-- Content -->
+                    <div class="relative h-full flex flex-col justify-end p-4 text-white">
+                        <h3 class="text-lg font-medium mb-3 leading-snug" style="max-width: 280px;">@blog.Title</h3>
+                        <a href="@blog.Url" class="inline-flex items-center text-white text-sm font-normal group-hover:gap-3 transition-all">
+                            <span>Read more</span>
+                            <span class="ml-2 text-xl">&rarr;</span>
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
