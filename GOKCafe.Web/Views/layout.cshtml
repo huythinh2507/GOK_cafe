@@ -1,5 +1,6 @@
-@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
 @{
+    Layout = null;
     var siteName = "GOK Cafe";
 
     // Try to get settings from Umbraco
@@ -31,6 +32,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="~/css/output.css" asp-append-version="true" />
 
     <!-- Umbraco UI Library -->
@@ -55,7 +57,15 @@
             menu.classList.toggle('hidden');
         }
     </script>
+
+    <!-- API Service - Must load first -->
+    <script src="~/js/api-service.js" asp-append-version="true"></script>
+
+    <!-- Application Scripts -->
     <script src="~/js/main.js" asp-append-version="true"></script>
+    <script src="~/js/cart.js" asp-append-version="true"></script>
+    <script src="~/js/product.js" asp-append-version="true"></script>
+    <script src="~/js/product-feed-integration.js" asp-append-version="true"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>

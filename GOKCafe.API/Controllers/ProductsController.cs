@@ -157,4 +157,19 @@ public class ProductsController : ControllerBase
         var result = await _odooService.SyncProductsFromOdooAsync();
         return result.Success ? Ok(result) : BadRequest(result);
     }
+
+    /// <summary>
+    /// Test endpoint to get featured products
+    /// </summary>
+    /// <returns>Featured products for testing</returns>
+    [HttpGet("test/featured")]
+    [ProducesResponseType<ApiResponse<object>>(StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetFeaturedProductsTest()
+    {
+        var result = await _productService.GetProductsAsync(
+            pageNumber: 1,
+            pageSize: 8,
+            isFeatured: true);
+        return Ok(result);
+    }
 }
