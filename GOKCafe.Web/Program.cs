@@ -1,4 +1,5 @@
 using GOKCafe.Web.Helpers;
+using Umbraco.Commerce.Extensions;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +23,10 @@ builder.CreateUmbracoBuilder()
     .AddBackOffice()
     .AddWebsite()
     .AddComposers()
+    .AddUmbracoCommerce(umbracoCommerceBuilder =>
+    {
+        umbracoCommerceBuilder.AddCommerceProductFeeds();
+    })
     .Build();
 
 WebApplication app = builder.Build();
