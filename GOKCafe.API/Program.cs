@@ -37,6 +37,10 @@ builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IHomeService, HomeService>();
 builder.Services.AddScoped<ICartService, CartService>();
+builder.Services.AddScoped<IOdooService, OdooService>();
+
+// Register HttpClient for external API calls
+builder.Services.AddHttpClient();
 
 // Configure JWT Authentication
 var jwtSettings = builder.Configuration.GetSection("Jwt");
