@@ -10,14 +10,15 @@ namespace GOKCafe.API.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/v1/[controller]")]
-[ApiExplorerSettings(GroupName = "Products API")]
 public class ProductsController : ControllerBase
 {
     private readonly IProductService _productService;
+    private readonly IOdooService _odooService;
 
-    public ProductsController(IProductService productService)
+    public ProductsController(IProductService productService, IOdooService odooService)
     {
         _productService = productService;
+        _odooService = odooService;
     }
 
     /// <summary>
@@ -128,6 +129,32 @@ public class ProductsController : ControllerBase
     public async Task<IActionResult> DeleteProduct(Guid id)
     {
         var result = await _productService.DeleteProductAsync(id);
+        return result.Success ? Ok(result) : BadRequest(result);
+    }
+
+    /// <summary>
+    /// Fetch products from Odoo (preview only, does not save to database)
+    /// </summary>
+    /// <returns>List of products from Odoo</returns>
+    [HttpGet("odoo/fetch")]
+    [ProducesResponseType<ApiResponse<object>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ApiResponse<object>>(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> FetchProductsFromOdoo()
+    {
+        var result = await _odooService.FetchProductsFromOdooAsync();
+        return result.Success ? Ok(result) : BadRequest(result);
+    }
+
+    /// <summary>
+    /// Synchronize products from Odoo to GOKCafe database
+    /// </summary>
+    /// <returns>Sync result with statistics</returns>
+    [HttpPost("odoo/sync")]
+    [ProducesResponseType<ApiResponse<object>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ApiResponse<object>>(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> SyncProductsFromOdoo()
+    {
+        var result = await _odooService.SyncProductsFromOdooAsync();
         return result.Success ? Ok(result) : BadRequest(result);
     }
 }
