@@ -42,7 +42,7 @@ namespace GOKCafe.Web.Controllers
 
             // Get dynamic data
             var featuredCount = homepage.Value<int>("featuredProductsCount");
-            if (featuredCount == 0) featuredCount = 8;
+            if (featuredCount == 0) featuredCount = 4; // Increased from 8 to 12
 
             try
             {
@@ -52,7 +52,7 @@ namespace GOKCafe.Web.Controllers
                 var productsResponse = _productService.GetProductsAsync(
                     pageNumber: 1,
                     pageSize: featuredCount,
-                    isFeatured: true
+                    isFeatured: null // Changed from true to null to get all products
                 ).GetAwaiter().GetResult();
 
                 _logger.LogInformation($"[Homepage] Products Response - Success: {productsResponse.Success}, Count: {productsResponse.Data?.Items.Count ?? 0}");

@@ -1,7 +1,7 @@
 @inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
 @{
     var siteName = "GOK Cafe";
-    var logoUrl = "";
+    var logoUrl = "/media/kp3l0tpg/logo.png"; // Default header logo
 
     // Try to get Header document from Home children
     if (UmbracoContext?.Content != null)
@@ -26,7 +26,7 @@
 }
 
 <!-- Header -->
-<header class="bg-gray-50 border-b border-gray-200">
+<header id="stickyHeader" class="sticky top-0 z-50 bg-gray-50 border-b border-gray-200 transition-shadow duration-300">
     <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-20">
             <!-- Mobile menu button -->
@@ -42,14 +42,7 @@
 
             <!-- Center Logo -->
             <a href="/" class="flex items-center">
-                @if (!string.IsNullOrEmpty(logoUrl))
-                {
-                    <img src="@logoUrl" alt="@siteName" class="h-10" />
-                }
-                else
-                {
-                    <span class="text-2xl font-bold text-blue-700 font-heading">@siteName</span>
-                }
+                <img src="@logoUrl" alt="@siteName" class="h-10" />
             </a>
 
             <!-- Right Navigation -->
@@ -78,3 +71,20 @@
         </div>
     </nav>
 </header>
+
+<script>
+    // Add shadow to sticky header when scrolling
+    window.addEventListener('scroll', function() {
+        const header = document.getElementById('stickyHeader');
+        if (window.scrollY > 0) {
+            header.classList.add('shadow-md');
+        } else {
+            header.classList.remove('shadow-md');
+        }
+    });
+
+    function toggleMobileMenu() {
+        const menu = document.getElementById('mobileMenu');
+        menu.classList.toggle('hidden');
+    }
+</script>

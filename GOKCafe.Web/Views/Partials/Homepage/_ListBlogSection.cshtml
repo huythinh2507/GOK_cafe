@@ -28,6 +28,17 @@
             }
         }
     }
+
+    // Fallback data if no Umbraco content
+    if (!blogItems.Any())
+    {
+        blogItems = new List<dynamic>
+        {
+            new { Title = "The Art of Coffee Brewing: A Journey Through Time", BackgroundImage = "/media/vfinddti/itemblog1.png", Url = "/blog" },
+            new { Title = "From Bean to Cup: Our Sustainable Coffee Story", BackgroundImage = "/media/jzjnjy5g/itemblog2.png", Url = "/blog" },
+            new { Title = "Discovering the Perfect Blend: A Guide to Coffee Flavors", BackgroundImage = "/media/ofqh1tnr/itemblog3.png", Url = "/blog" }
+        };
+    }
 }
 
 <!-- Blog List Section -->

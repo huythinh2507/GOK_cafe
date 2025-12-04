@@ -5,7 +5,7 @@
     var bannerDescription = "Our mission is to provide sustainably sourced, hand-picked quality coffee. Great coffee is our passion and we want to share it with you.";
     var bannerButtonText = "Shop Now";
     var bannerButtonUrl = "/products";
-    var bannerImageUrl = "";
+    var bannerImageUrl = "/media/0wfpc5u5/banner.png"; // Default banner image
 
     // Try to get Banner document from Home children (same as Header)
     if (UmbracoContext?.Content != null)
@@ -39,18 +39,10 @@
 <!-- Banner Section -->
 <section class="relative h-[800px] md:h-[600px] flex items-center justify-start overflow-hidden">
     <!-- Background Image -->
-    @if (!string.IsNullOrEmpty(bannerImageUrl))
-    {
-        <div class="absolute inset-0 z-0">
-            <img src="@bannerImageUrl" alt="Banner" class="w-full h-full object-cover" />
-            <div class="absolute inset-0 bg-black opacity-40"></div>
-        </div>
-    }
-    else
-    {
-        <!-- Fallback gradient background -->
-        <div class="absolute inset-0 bg-gradient-to-r from-gray-800 to-gray-600 z-0"></div>
-    }
+    <div class="absolute inset-0 z-0">
+        <img src="@bannerImageUrl" alt="Banner" class="w-full h-full object-cover" />
+        <div class="absolute inset-0 bg-black opacity-40"></div>
+    </div>
 
     <!-- Content -->
     <div class="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 mt-12 md:mt-0">

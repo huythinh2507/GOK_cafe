@@ -12,26 +12,31 @@
     // Debug: Log product count to see if data is coming from database
     var productCount = products?.Count ?? 0;
     var debugInfo = ViewData["DebugInfo"]?.ToString() ?? "No debug info";
-    var errorInfo = ViewData["ErrorInfo"]?.ToString() ?? "No error info";
+    var errorInfo = ViewData["ErrorInfo"]?.ToString() ?? "No errors";
 }
 
+<script>
+    console.log('=== OUR COFFEE SECTION DEBUG ===');
+    console.log('Product Count:', @productCount);
+    console.log('Debug Info:', '@debugInfo');
+    console.log('Error Info:', '@errorInfo');
+    @if (products.Any())
+    {
+        <text>
+        console.log('Products:', @Html.Raw(System.Text.Json.JsonSerializer.Serialize(products.Select(p => new { p.Id, p.Name, p.Price, p.ImageUrl }))));
+        </text>
+    }
+    console.log('================================');
+</script>
+
 <!-- Our Coffee Section -->
-<section class="py-12 bg-white">
+<section class="pb-12 bg-white">
     <div class="container mx-auto px-4 sm:px-6 lg:px-8">
         <!-- Section Header -->
         <div class="text-center mb-4">
             <p class="text-2xl text-primary font-medium uppercase tracking-wide mb-2">@sectionTitle</p>
             <h2 class="text-4xl md:text-5xl font-semibold text-gray-900">@sectionHeading</h2>
-            <!-- Debug info -->
-            <p class="text-sm text-gray-500 mt-2">Số sản phẩm từ API: @productCount</p>
-            <p class="text-xs text-red-600 mt-1">Debug: @debugInfo</p>
-            @if (errorInfo != "No errors")
-            {
-                <details class="text-xs text-red-600 mt-1">
-                    <summary>Error Details (click to expand)</summary>
-                    <pre class="text-left bg-gray-100 p-2 mt-2">@errorInfo</pre>
-                </details>
-            }
+           
         </div>
 
         <!-- Products Grid -->
@@ -42,7 +47,7 @@
                 {
                     <div class="group justify-center">
                         <!-- Product Image -->
-                        <div class="overflow-hidden mb-4 flex items-center justify-center bg-gray-100 h-[420px]">
+                        <div class="overflow-hidden mb-4 flex items-center justify-center bg-gray-100 w-full h-[480px]">
                             @if (!string.IsNullOrEmpty(product.ImageUrl))
                             {
                                 <img src="@product.ImageUrl" alt="@product.Name" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
@@ -66,52 +71,34 @@
         }
         else
         {
-            <!-- Fallback products if no data from Umbraco -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
-                <div class="group">
-                    <div class="bg-gray-100 rounded-lg overflow-hidden mb-4 aspect-square flex items-center justify-center">
-                        <div class="w-full h-full bg-gray-200 flex items-center justify-center">
-                            <i class="fas fa-coffee text-6xl text-gray-400"></i>
-                        </div>
+            <!-- Fallback products if no data from database -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-6">
+                <div class="group justify-center">
+                    <div class="overflow-hidden mb-4 flex items-center justify-center bg-gray-100 h-[420px]">
+                        <img src="/media/tkddexzl/colombiadarkroast.png" alt="Colombia Dark Roast" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                     </div>
-                    <div class="text-center">
+                    <div class="text-center w-full">
                         <h3 class="text-lg font-semibold text-gray-900 mb-2">Colombia Dark Roast</h3>
                         <p class="text-gray-600">From <span class="font-semibold">682,000 VNĐ</span></p>
                     </div>
                 </div>
 
-                <div class="group">
-                    <div class="bg-gray-100 rounded-lg overflow-hidden mb-4 aspect-square flex items-center justify-center">
-                        <div class="w-full h-full bg-gray-200 flex items-center justify-center">
-                            <i class="fas fa-coffee text-6xl text-gray-400"></i>
-                        </div>
+                <div class="group justify-center">
+                    <div class="overflow-hidden mb-4 flex items-center justify-center bg-gray-100 h-[420px]">
+                        <img src="/media/zqdncqg0/swisswaterdecaf.png" alt="Swiss Water Decaf" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                     </div>
-                    <div class="text-center">
+                    <div class="text-center w-full">
                         <h3 class="text-lg font-semibold text-gray-900 mb-2">Swiss Water Decaf</h3>
                         <p class="text-gray-600">From <span class="font-semibold">682,000 VNĐ</span></p>
                     </div>
                 </div>
 
-                <div class="group">
-                    <div class="bg-gray-100 rounded-lg overflow-hidden mb-4 aspect-square flex items-center justify-center">
-                        <div class="w-full h-full bg-gray-200 flex items-center justify-center">
-                            <i class="fas fa-coffee text-6xl text-gray-400"></i>
-                        </div>
+                <div class="group justify-center">
+                    <div class="overflow-hidden mb-4 flex items-center justify-center bg-gray-100 h-[420px]">
+                        <img src="/media/xiihorp0/holidayblend.png" alt="Holiday Blend" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                     </div>
-                    <div class="text-center">
+                    <div class="text-center w-full">
                         <h3 class="text-lg font-semibold text-gray-900 mb-2">Holiday Blend</h3>
-                        <p class="text-gray-600">From <span class="font-semibold">682,000 VNĐ</span></p>
-                    </div>
-                </div>
-
-                <div class="group">
-                    <div class="bg-gray-100 rounded-lg overflow-hidden mb-4 aspect-square flex items-center justify-center">
-                        <div class="w-full h-full bg-gray-200 flex items-center justify-center">
-                            <i class="fas fa-coffee text-6xl text-gray-400"></i>
-                        </div>
-                    </div>
-                    <div class="text-center">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-2">House Blend</h3>
                         <p class="text-gray-600">From <span class="font-semibold">682,000 VNĐ</span></p>
                     </div>
                 </div>
