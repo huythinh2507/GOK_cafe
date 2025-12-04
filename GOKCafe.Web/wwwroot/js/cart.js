@@ -5,20 +5,26 @@
 // ========================================
 class CartPage {
     constructor() {
-        this.cartItems = this.loadCart();
+        this.cartData = null;
         this.init();
     }
 
-    loadCart() {
-        const cart = localStorage.getItem('gok_cart');
-        return cart ? JSON.parse(cart) : [];
+    async loadCart() {
+        try {
+            const response = await window.apiService.getCart();
+            if (response.success) {
+                this.cartData = response.data;
+                return this.cartData;
+            }
+        } catch (error) {
+            console.error('Failed to load cart:', error);
+            this.cartData = { items: [], subtotal: 0, total: 0 };
+        }
+        return this.cartData;
     }
 
-    saveCart() {
-        localStorage.setItem('gok_cart', JSON.stringify(this.cartItems));
-    }
-
-    init() {
+    async init() {
+        await this.loadCart();
         this.renderCart();
         this.attachEventListeners();
     }
@@ -27,17 +33,17 @@ class CartPage {
         // Quantity updates
         document.querySelectorAll('.cart-quantity-input').forEach(input => {
             input.addEventListener('change', (e) => {
-                const productId = e.target.dataset.productId;
+                const cartItemId = e.target.dataset.cartItemId;
                 const quantity = parseInt(e.target.value);
-                this.updateQuantity(productId, quantity);
+                this.updateQuantity(cartItemId, quantity);
             });
         });
 
         // Remove buttons
         document.querySelectorAll('.btn-remove-item').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                const productId = e.target.closest('.btn-remove-item').dataset.productId;
-                this.removeItem(productId);
+                const cartItemId = e.target.closest('.btn-remove-item').dataset.cartItemId;
+                this.removeItem(cartItemId);
             });
         });
 
@@ -64,7 +70,7 @@ class CartPage {
         const cartContainer = document.querySelector('#cart-items-container');
         if (!cartContainer) return;
 
-        if (this.cartItems.length === 0) {
+        if (!this.cartData || this.cartData.items.length === 0) {
             cartContainer.innerHTML = `
                 <div class="alert alert-info text-center">
                     <i class="fas fa-shopping-cart fa-3x mb-3"></i>
@@ -73,45 +79,52 @@ class CartPage {
                     <a href="/products" class="btn btn-primary">Browse Products</a>
                 </div>
             `;
-            this.updateCartSummary(0, 0);
+            this.updateCartSummary(0, 0, 0, 0);
             return;
         }
 
-        // TODO: Fetch product details from API
-        // For now, render with placeholder data
-        const cartHTML = this.cartItems.map(item => this.renderCartItem(item)).join('');
+        const cartHTML = this.cartData.items.map(item => this.renderCartItem(item)).join('');
         cartContainer.innerHTML = cartHTML;
 
-        this.calculateTotals();
+        this.updateCartSummary(
+            this.cartData.subtotal || 0,
+            this.cartData.tax || 0,
+            this.cartData.shipping || 0,
+            this.cartData.total || 0
+        );
         this.attachEventListeners();
     }
 
     renderCartItem(item) {
-        // Placeholder rendering - should fetch actual product data
+        const productImage = item.productImageUrl || '/images/placeholder-product.jpg';
+        const productName = item.productName || 'Product Name';
+        const unitPrice = item.unitPrice || 0;
+        const subtotal = item.subtotal || (unitPrice * item.quantity);
+
         return `
-            <div class="cart-item mb-3" data-product-id="${item.productId}">
+            <div class="cart-item mb-3" data-cart-item-id="${item.id}">
                 <div class="row align-items-center">
                     <div class="col-md-2">
-                        <img src="/images/placeholder-product.jpg" alt="Product" class="img-fluid rounded" />
+                        <img src="${productImage}" alt="${productName}" class="img-fluid rounded" />
                     </div>
                     <div class="col-md-4">
-                        <h5>Product Name</h5>
-                        <p class="text-muted">Product details</p>
+                        <h5>${productName}</h5>
+                        <p class="text-muted">${item.productDescription || ''}</p>
                     </div>
                     <div class="col-md-2">
-                        <p class="mb-0"><strong>$10.00</strong></p>
+                        <p class="mb-0"><strong>$${unitPrice.toFixed(2)}</strong></p>
                     </div>
                     <div class="col-md-2">
                         <input type="number" class="form-control cart-quantity-input"
                                value="${item.quantity}" min="1" max="99"
-                               data-product-id="${item.productId}" />
+                               data-cart-item-id="${item.id}" />
                     </div>
                     <div class="col-md-1">
-                        <p class="mb-0"><strong>$${(10 * item.quantity).toFixed(2)}</strong></p>
+                        <p class="mb-0"><strong>$${subtotal.toFixed(2)}</strong></p>
                     </div>
                     <div class="col-md-1">
                         <button class="btn btn-sm btn-danger btn-remove-item"
-                                data-product-id="${item.productId}">
+                                data-cart-item-id="${item.id}">
                             <i class="fas fa-trash"></i>
                         </button>
                     </div>
@@ -120,40 +133,46 @@ class CartPage {
         `;
     }
 
-    updateQuantity(productId, quantity) {
-        const item = this.cartItems.find(i => i.productId === productId);
-        if (item) {
-            item.quantity = quantity;
-            this.saveCart();
-            this.calculateTotals();
+    async updateQuantity(cartItemId, quantity) {
+        try {
+            const response = await window.apiService.updateCartItem(cartItemId, quantity);
+            if (response.success) {
+                this.cartData = response.data;
+                this.renderCart();
+                this.showNotification('Cart updated', 'success');
+            }
+        } catch (error) {
+            console.error('Failed to update cart:', error);
+            this.showNotification('Failed to update cart', 'danger');
         }
     }
 
-    removeItem(productId) {
-        this.cartItems = this.cartItems.filter(i => i.productId !== productId);
-        this.saveCart();
-        this.renderCart();
-        this.showNotification('Item removed from cart', 'info');
+    async removeItem(cartItemId) {
+        try {
+            const response = await window.apiService.removeCartItem(cartItemId);
+            if (response.success) {
+                await this.loadCart();
+                this.renderCart();
+                this.showNotification('Item removed from cart', 'info');
+            }
+        } catch (error) {
+            console.error('Failed to remove item:', error);
+            this.showNotification('Failed to remove item', 'danger');
+        }
     }
 
-    clearCart() {
-        this.cartItems = [];
-        this.saveCart();
-        this.renderCart();
-        this.showNotification('Cart cleared', 'info');
-    }
-
-    calculateTotals() {
-        // Placeholder calculation
-        const subtotal = this.cartItems.reduce((total, item) => {
-            return total + (10 * item.quantity); // Replace with actual price
-        }, 0);
-
-        const tax = subtotal * 0.1; // 10% tax
-        const shipping = subtotal > 50 ? 0 : 5; // Free shipping over $50
-        const total = subtotal + tax + shipping;
-
-        this.updateCartSummary(subtotal, tax, shipping, total);
+    async clearCart() {
+        try {
+            const response = await window.apiService.clearCart();
+            if (response.success) {
+                await this.loadCart();
+                this.renderCart();
+                this.showNotification('Cart cleared', 'info');
+            }
+        } catch (error) {
+            console.error('Failed to clear cart:', error);
+            this.showNotification('Failed to clear cart', 'danger');
+        }
     }
 
     updateCartSummary(subtotal, tax = 0, shipping = 0, total = 0) {

@@ -1,44 +1,18 @@
+@using GOKCafe.Application.DTOs.Product
 @inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
 @{
     var sectionTitle = "TOP PICKS FOR YOU";
     var sectionHeading = "OUR COFFEE";
     var buttonText = "Shop All Coffee";
     var buttonUrl = "/products";
-    var products = new List<dynamic>();
 
-    // Get Our Coffee section from Home children
-    if (UmbracoContext?.Content != null)
-    {
-        var homeNode = UmbracoContext.Content.GetAtRoot().FirstOrDefault(x => x.ContentType.Alias == "home" || x.ContentType.Alias == "homepage");
-        if (homeNode != null)
-        {
-            var ourCoffeeNode = homeNode.Children.FirstOrDefault(x => x.ContentType.Alias == "ourCoffee");
-            if (ourCoffeeNode != null)
-            {
-                // Get section properties
-                sectionTitle = ourCoffeeNode.Value<string>("sectionTitle") ?? sectionTitle;
-                sectionHeading = ourCoffeeNode.Value<string>("sectionHeading") ?? sectionHeading;
-                buttonText = ourCoffeeNode.Value<string>("buttonText") ?? buttonText;
-                buttonUrl = ourCoffeeNode.Value<string>("buttonUrl") ?? buttonUrl;
+    // Get products from ViewData (direct from Application layer service - no HTTP API!)
+    var products = ViewData["FeaturedProducts"] as List<ProductDto> ?? new List<ProductDto>();
 
-                // Get OurCoffeeItem children
-                var coffeeItems = ourCoffeeNode.Children.Where(x => x.ContentType.Alias == "ourCoffeeItem");
-                foreach (var item in coffeeItems.Take(4))
-                {
-                    var coffeeImage = item.Value<Umbraco.Cms.Core.Models.PublishedContent.IPublishedContent>("coffeeItemImage");
-                    var coffeeImageUrl = coffeeImage != null ? coffeeImage.Url() : "";
-
-                    products.Add(new
-                    {
-                        Name = item.Value<string>("title") ?? item.Name,
-                        Image = coffeeImageUrl,
-                        Price = item.Value<string>("price") ?? "682,000 VNĐ",
-                        Url = item.Url()
-                    });
-                }
-            }
-        }
-    }
+    // Debug: Log product count to see if data is coming from database
+    var productCount = products?.Count ?? 0;
+    var debugInfo = ViewData["DebugInfo"]?.ToString() ?? "No debug info";
+    var errorInfo = ViewData["ErrorInfo"]?.ToString() ?? "No error info";
 }
 
 <!-- Our Coffee Section -->
@@ -48,6 +22,16 @@
         <div class="text-center mb-4">
             <p class="text-2xl text-primary font-medium uppercase tracking-wide mb-2">@sectionTitle</p>
             <h2 class="text-4xl md:text-5xl font-semibold text-gray-900">@sectionHeading</h2>
+            <!-- Debug info -->
+            <p class="text-sm text-gray-500 mt-2">Số sản phẩm từ API: @productCount</p>
+            <p class="text-xs text-red-600 mt-1">Debug: @debugInfo</p>
+            @if (errorInfo != "No errors")
+            {
+                <details class="text-xs text-red-600 mt-1">
+                    <summary>Error Details (click to expand)</summary>
+                    <pre class="text-left bg-gray-100 p-2 mt-2">@errorInfo</pre>
+                </details>
+            }
         </div>
 
         <!-- Products Grid -->
@@ -59,9 +43,9 @@
                     <div class="group justify-center">
                         <!-- Product Image -->
                         <div class="overflow-hidden mb-4 flex items-center justify-center bg-gray-100 h-[420px]">
-                            @if (!string.IsNullOrEmpty(product.Image))
+                            @if (!string.IsNullOrEmpty(product.ImageUrl))
                             {
-                                <img src="@product.Image" alt="@product.Name" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                                <img src="@product.ImageUrl" alt="@product.Name" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
                             }
                             else
                             {
@@ -74,7 +58,7 @@
                         <!-- Product Info -->
                         <div class="text-center w-full">
                             <h3 class="text-lg font-semibold text-gray-900 mb-2">@product.Name</h3>
-                            <p class="text-gray-600">From <span class="font-semibold">@product.Price</span></p>
+                            <p class="text-gray-600">From <span class="font-semibold">@product.Price.ToString("N0") VNĐ</span></p>
                         </div>
                     </div>
                 }

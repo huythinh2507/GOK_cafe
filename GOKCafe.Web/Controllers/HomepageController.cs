@@ -1,5 +1,6 @@
+using GOKCafe.Application.DTOs.Product;
+using GOKCafe.Application.Services.Interfaces;
 using GOKCafe.Web.Models.ViewModels;
-using GOKCafe.Web.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewEngines;
 using Umbraco.Cms.Core.Models.PublishedContent;
@@ -15,6 +16,7 @@ namespace GOKCafe.Web.Controllers
         private readonly IProductService _productService;
         private readonly ICategoryService _categoryService;
         private readonly IUmbracoContextAccessor _umbracoContextAccessor;
+        private readonly ILogger<HomepageController> _logger;
 
         public HomepageController(
             ILogger<HomepageController> logger,
@@ -27,6 +29,7 @@ namespace GOKCafe.Web.Controllers
             _productService = productService;
             _categoryService = categoryService;
             _umbracoContextAccessor = umbracoContextAccessor;
+            _logger = logger;
         }
 
         public override IActionResult Index()
@@ -41,41 +44,61 @@ namespace GOKCafe.Web.Controllers
             var featuredCount = homepage.Value<int>("featuredProductsCount");
             if (featuredCount == 0) featuredCount = 8;
 
-            var featuredProducts = _productService.GetFeaturedProducts(featuredCount).ToList();
-            var categories = _categoryService.GetAllCategories().ToList();
+            try
+            {
+                _logger.LogInformation($"[Homepage] Fetching {featuredCount} featured products");
 
-            // Pass data to view via ViewData so view can access it
-            ViewData["FeaturedProducts"] = featuredProducts;
-            ViewData["Categories"] = categories;
+                // Call directly to Application layer service (no HTTP API)
+                var productsResponse = _productService.GetProductsAsync(
+                    pageNumber: 1,
+                    pageSize: featuredCount,
+                    isFeatured: true
+                ).GetAwaiter().GetResult();
+
+                _logger.LogInformation($"[Homepage] Products Response - Success: {productsResponse.Success}, Count: {productsResponse.Data?.Items.Count ?? 0}");
+
+                var categoriesResponse = _categoryService.GetAllCategoriesAsync()
+                    .GetAwaiter().GetResult();
+
+                // Extract data from API responses
+                var featuredProducts = productsResponse.Success && productsResponse.Data != null
+                    ? productsResponse.Data.Items.ToList()
+                    : new List<ProductDto>();
+
+                var categories = categoriesResponse.Success && categoriesResponse.Data != null
+                    ? categoriesResponse.Data.ToList()
+                    : new List<GOKCafe.Application.DTOs.Category.CategoryDto>();
+
+                // Debug info
+                var debugMsg = $"Success: {productsResponse.Success}, Message: {productsResponse.Message}, Count: {featuredProducts.Count}";
+                var errorMsg = productsResponse.Errors != null && productsResponse.Errors.Any()
+                    ? string.Join(", ", productsResponse.Errors)
+                    : "No errors";
+
+                ViewData["DebugInfo"] = debugMsg;
+                ViewData["ErrorInfo"] = errorMsg;
+
+                _logger.LogInformation($"[Homepage] Debug: {debugMsg}");
+                if (errorMsg != "No errors")
+                {
+                    _logger.LogError($"[Homepage] Errors: {errorMsg}");
+                }
+
+                // Pass data to view via ViewData so view can access it
+                ViewData["FeaturedProducts"] = featuredProducts;
+                ViewData["Categories"] = categories;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "[Homepage] Exception occurred while fetching data");
+                ViewData["DebugInfo"] = $"Exception: {ex.Message}";
+                ViewData["ErrorInfo"] = ex.ToString();
+                ViewData["FeaturedProducts"] = new List<ProductDto>();
+                ViewData["Categories"] = new List<GOKCafe.Application.DTOs.Category.CategoryDto>();
+            }
 
             // Return CurrentTemplate with CurrentPage for Umbraco routing
             return CurrentTemplate(CurrentPage);
-        }
-
-        private SiteSettings GetSiteSettings()
-        {
-            if (!_umbracoContextAccessor.TryGetUmbracoContext(out var umbracoContext))
-                return new SiteSettings();
-
-            var settingsNode = umbracoContext.Content?
-                .GetAtRoot()
-                .FirstOrDefault(x => x.ContentType.Alias == "settings");
-
-            if (settingsNode == null)
-                return new SiteSettings();
-
-            return new SiteSettings
-            {
-                SiteName = settingsNode.Value<string>("siteName") ?? "GOK Cafe",
-                LogoUrl = settingsNode.Value<IPublishedContent>("logo")?.Url() ?? string.Empty,
-                Phone = settingsNode.Value<string>("phone") ?? string.Empty,
-                Email = settingsNode.Value<string>("email") ?? string.Empty,
-                Address = settingsNode.Value<string>("address") ?? string.Empty,
-                FacebookUrl = settingsNode.Value<string>("facebookUrl") ?? string.Empty,
-                InstagramUrl = settingsNode.Value<string>("instagramUrl") ?? string.Empty,
-                TwitterUrl = settingsNode.Value<string>("twitterUrl") ?? string.Empty,
-                CopyrightText = settingsNode.Value<string>("copyrightText") ?? $"© {DateTime.Now.Year} GOK Cafe. All rights reserved."
-            };
         }
     }
 }
