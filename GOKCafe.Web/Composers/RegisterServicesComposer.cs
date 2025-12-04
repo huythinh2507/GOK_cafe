@@ -4,9 +4,14 @@ using GOKCafe.Domain.Interfaces;
 using GOKCafe.Infrastructure.Data;
 using GOKCafe.Infrastructure.Repositories;
 using GOKCafe.Infrastructure.Services;
+using GOKCafe.Web.Services.Implementations;
 using Microsoft.EntityFrameworkCore;
 using Umbraco.Cms.Core.Composing;
 using Umbraco.Cms.Core.DependencyInjection;
+using WebProductService = GOKCafe.Web.Services.Interfaces.IProductService;
+using WebCategoryService = GOKCafe.Web.Services.Interfaces.ICategoryService;
+using AppProductService = GOKCafe.Application.Services.Interfaces.IProductService;
+using AppCategoryService = GOKCafe.Application.Services.Interfaces.ICategoryService;
 
 namespace GOKCafe.Web.Composers
 {
@@ -31,12 +36,17 @@ namespace GOKCafe.Web.Composers
             builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 
             // Register application services (direct from GOKCafe.Application)
-            builder.Services.AddScoped<IProductService, ProductService>();
-            builder.Services.AddScoped<ICategoryService, CategoryService>();
+            builder.Services.AddScoped<AppProductService, GOKCafe.Application.Services.ProductService>();
+            builder.Services.AddScoped<AppCategoryService, GOKCafe.Application.Services.CategoryService>();
             builder.Services.AddScoped<ICartService, CartService>();
             builder.Services.AddScoped<IOrderService, OrderService>();
             builder.Services.AddScoped<IHomeService, HomeService>();
             // Skip IOdooService registration - not needed for Umbraco Web
+
+            // Register Web layer services (Umbraco-specific)
+            builder.Services.AddScoped<GOKCafe.Web.Services.Interfaces.IApiHttpClient, GOKCafe.Web.Services.Implementations.ApiHttpClient>();
+            builder.Services.AddScoped<WebProductService, GOKCafe.Web.Services.Implementations.ProductService>();
+            builder.Services.AddScoped<WebCategoryService, GOKCafe.Web.Services.Implementations.CategoryService>();
 
             // Register HttpClient for external API calls (Odoo, etc.)
             builder.Services.AddHttpClient();

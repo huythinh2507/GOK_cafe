@@ -6,14 +6,28 @@
         .Children
         .FirstOrDefault(x => x.ContentType.Alias == "naturalSection");
 
+    // Default/fallback background images
+    var backgroundUrl = "/media/vinhkoqf/naturalbackground.png";
+    var backgroundUrlMobile = "/media/nosdc1bl/naturalbackgroundmobile.png";
+
     if (naturalSection != null)
     {
-        // Get background images
+        // Get background images from Umbraco (will override defaults if set)
         var backgroundImage = naturalSection.Value<Umbraco.Cms.Core.Models.PublishedContent.IPublishedContent>("backgroundImage");
-        var backgroundUrl = backgroundImage?.Url() ?? "";
+        if (backgroundImage != null)
+        {
+            backgroundUrl = backgroundImage.Url();
+        }
 
         var backgroundImageMobile = naturalSection.Value<Umbraco.Cms.Core.Models.PublishedContent.IPublishedContent>("backgroundImageMobile");
-        var backgroundUrlMobile = backgroundImageMobile?.Url() ?? backgroundUrl;
+        if (backgroundImageMobile != null)
+        {
+            backgroundUrlMobile = backgroundImageMobile.Url();
+        }
+    }
+
+    // Always render the section (even if naturalSection is null)
+    var shouldRender = true;
 
         <!-- Natural Cold Brew Section -->
         <section class="relative overflow-hidden font-heading" style="background-color: #D8D8D8;">
@@ -140,5 +154,4 @@
                 </div>
             </div>
         </section>
-    }
 }

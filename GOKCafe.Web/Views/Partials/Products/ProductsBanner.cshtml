@@ -31,6 +31,35 @@
             }
         }
     }
+
+    // Fallback data if no Umbraco content
+    if (!bannerItems.Any())
+    {
+        bannerItems = new List<dynamic>
+        {
+            new {
+                Title = "Colombia Wilton Benitez Geisha",
+                Description = "Discover our premium selection of specialty coffee beans, roasted to perfection.",
+                Image = "/media/o1djr0so/colombiawiltonbenitezgeisha.png",
+                ButtonText = "Shop Now",
+                ButtonUrl = "/products"
+            },
+            new {
+                Title = "House Blend Coffee",
+                Description = "Our signature blend, carefully crafted for the perfect cup every time.",
+                Image = "/media/4ingqhy4/productlist_banner_2.png",
+                ButtonText = "Explore",
+                ButtonUrl = "/products"
+            },
+            new {
+                Title = "Cold Brew Collection",
+                Description = "Smooth, refreshing, and ready to enjoy. Perfect for warm days.",
+                Image = "/media/hmgbnfqw/productlist_banner_3.png",
+                ButtonText = "Discover",
+                ButtonUrl = "/products"
+            }
+        };
+    }
 }
 
 @if (bannerItems.Any())

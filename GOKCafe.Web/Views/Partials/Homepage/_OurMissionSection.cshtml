@@ -1,5 +1,11 @@
 @inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
 @{
+    // Default values
+    var videoUrl = "https://www.youtube.com/watch?v=L7ahUGlB8S0"; // Default YouTube video
+    var videoMediaUrl = "";
+    var playButtonIconUrl = "/media/ttxfzhbj/playbuttonicon.png"; // Default play button
+    var missionItems = new List<Umbraco.Cms.Core.Models.PublishedContent.IPublishedContent>();
+
     // Get the OurMission from Home
     var ourMission = UmbracoContext?.Content?.GetAtRoot()
         .FirstOrDefault(x => x.ContentType.Alias == "homepage")?
@@ -8,16 +14,25 @@
 
     if (ourMission != null)
     {
-        var videoUrl = ourMission.Value<string>("videoUrl") ?? "";
+        var tempVideoUrl = ourMission.Value<string>("videoUrl");
+        if (!string.IsNullOrEmpty(tempVideoUrl)) videoUrl = tempVideoUrl;
+
         var videoMedia = ourMission.Value<Umbraco.Cms.Core.Models.PublishedContent.IPublishedContent>("videoMedia");
-        var videoMediaUrl = videoMedia?.Url() ?? "";
+        if (videoMedia != null) videoMediaUrl = videoMedia.Url();
 
         // Get play button icon
         var playButtonIcon = ourMission.Value<Umbraco.Cms.Core.Models.PublishedContent.IPublishedContent>("playButtonIcon");
-        var playButtonIconUrl = playButtonIcon?.Url() ?? "";
+        if (playButtonIcon != null) playButtonIconUrl = playButtonIcon.Url();
 
         // Get mission items (children of ourMission)
-        var missionItems = ourMission.Children.Where(x => x.IsVisible()).ToList();
+        missionItems = ourMission.Children.Where(x => x.IsVisible()).ToList();
+    }
+
+    // Always render the section
+    var shouldRender = true;
+
+    if (true)
+    {
 
         <!-- Our Mission Section -->
         <section class="bg-white font-heading py-4 sm:py-4 lg:py-12">
