@@ -39,7 +39,7 @@ public class OrderService : IOrderService
             var response = new PaginatedResponse<OrderDto>
             {
                 Items = items,
-                TotalCount = totalCount,
+                TotalItems = totalCount,
                 PageNumber = pageNumber,
                 PageSize = pageSize
             };
@@ -78,7 +78,7 @@ public class OrderService : IOrderService
             var response = new PaginatedResponse<OrderDto>
             {
                 Items = items,
-                TotalCount = totalCount,
+                TotalItems = totalCount,
                 PageNumber = pageNumber,
                 PageSize = pageSize
             };

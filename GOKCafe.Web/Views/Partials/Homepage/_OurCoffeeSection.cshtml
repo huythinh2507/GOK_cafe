@@ -11,8 +11,6 @@
 
     // Debug: Log product count to see if data is coming from database
     var productCount = products?.Count ?? 0;
-    var debugInfo = ViewData["DebugInfo"]?.ToString() ?? "No debug info";
-    var errorInfo = ViewData["ErrorInfo"]?.ToString() ?? "No error info";
 }
 
 <!-- Our Coffee Section -->
@@ -22,22 +20,13 @@
         <div class="text-center mb-4">
             <p class="text-2xl text-primary font-medium uppercase tracking-wide mb-2">@sectionTitle</p>
             <h2 class="text-4xl md:text-5xl font-semibold text-gray-900">@sectionHeading</h2>
-            <!-- Debug info -->
-            <p class="text-sm text-gray-500 mt-2">Số sản phẩm từ API: @productCount</p>
-            <p class="text-xs text-red-600 mt-1">Debug: @debugInfo</p>
-            @if (errorInfo != "No errors")
-            {
-                <details class="text-xs text-red-600 mt-1">
-                    <summary>Error Details (click to expand)</summary>
-                    <pre class="text-left bg-gray-100 p-2 mt-2">@errorInfo</pre>
-                </details>
-            }
+           
         </div>
 
         <!-- Products Grid -->
         @if (products.Any())
         {
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-6">
                 @foreach (var product in products)
                 {
                     <div class="group justify-center">

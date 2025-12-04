@@ -37,7 +37,7 @@ namespace GOKCafe.Web.Controllers.Api
                 message = result.Message,
                 errors = result.Errors,
                 productCount = result.Data?.Items.Count ?? 0,
-                totalCount = result.Data?.TotalCount ?? 0,
+                totalItems = result.Data?.TotalItems ?? 0,
                 products = result.Data?.Items
             });
         }
@@ -59,7 +59,7 @@ namespace GOKCafe.Web.Controllers.Api
                 success = result.Success,
                 message = result.Message,
                 productCount = result.Data?.Items.Count ?? 0,
-                totalCount = result.Data?.TotalCount ?? 0,
+                totalItems = result.Data?.TotalItems ?? 0,
                 products = result.Data?.Items
             });
         }
