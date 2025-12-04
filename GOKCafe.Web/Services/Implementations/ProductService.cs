@@ -1,81 +1,131 @@
 using GOKCafe.Web.Models.DTOs;
 using GOKCafe.Web.Services.Interfaces;
-using Umbraco.Cms.Core.Models.PublishedContent;
-using Umbraco.Cms.Core.Web;
 
 namespace GOKCafe.Web.Services.Implementations
 {
     public class ProductService : IProductService
     {
-        private readonly IUmbracoContextAccessor _umbracoContextAccessor;
+        private readonly IApiHttpClient _apiClient;
         private readonly ILogger<ProductService> _logger;
 
         public ProductService(
-            IUmbracoContextAccessor umbracoContextAccessor,
-            ILogger<ProductService> logger)
+            IApiHttpClient apiClient,
+            ILogger<ProductService> _logger)
         {
-            _umbracoContextAccessor = umbracoContextAccessor;
-            _logger = logger;
+            _apiClient = apiClient;
+            this._logger = _logger;
         }
 
         public IEnumerable<ProductDto> GetFeaturedProducts(int count = 8)
         {
-            if (!_umbracoContextAccessor.TryGetUmbracoContext(out var umbracoContext))
+            try
+            {
+                var response = _apiClient.GetProductsAsync(
+                    pageNumber: 1,
+                    pageSize: count,
+                    isFeatured: true
+                ).GetAwaiter().GetResult();
+
+                if (response.Success && response.Data != null)
+                {
+                    return response.Data.Items;
+                }
+
+                _logger.LogWarning("Failed to get featured products from API: {Message}", response.Message);
                 return Enumerable.Empty<ProductDto>();
-
-            var root = umbracoContext.Content?.GetAtRoot().FirstOrDefault();
-            if (root == null)
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting featured products");
                 return Enumerable.Empty<ProductDto>();
-
-            var products = root
-                .DescendantsOfType("productInformation")
-                .Where(x => x.Value<bool>("isActive") && x.Value<bool>("isFeatured"))
-                .OrderBy(x => x.Value<int>("displayOrder"))
-                .Take(count)
-                .Select(MapToProductDto)
-                .ToList();
-
-            return products ?? Enumerable.Empty<ProductDto>();
+            }
         }
 
         public IEnumerable<ProductDto> GetAllProducts()
         {
-            if (!_umbracoContextAccessor.TryGetUmbracoContext(out var umbracoContext))
+            try
+            {
+                var response = _apiClient.GetProductsAsync(
+                    pageNumber: 1,
+                    pageSize: 1000 // Get all products
+                ).GetAwaiter().GetResult();
+
+                if (response.Success && response.Data != null)
+                {
+                    return response.Data.Items;
+                }
+
+                _logger.LogWarning("Failed to get all products from API: {Message}", response.Message);
                 return Enumerable.Empty<ProductDto>();
-
-            var root = umbracoContext.Content?.GetAtRoot().FirstOrDefault();
-            if (root == null)
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting all products");
                 return Enumerable.Empty<ProductDto>();
-
-            var products = root
-                .DescendantsOfType("productInformation")
-                .Where(x => x.Value<bool>("isActive"))
-                .OrderBy(x => x.Value<int>("displayOrder"))
-                .Select(MapToProductDto)
-                .ToList();
-
-            return products ?? Enumerable.Empty<ProductDto>();
+            }
         }
 
         public IEnumerable<ProductDto> GetProductsByCategory(Guid categoryId)
         {
-            var allProducts = GetAllProducts();
-            return allProducts.Where(p => p.CategoryId == categoryId);
+            try
+            {
+                var response = _apiClient.GetProductsAsync(
+                    pageNumber: 1,
+                    pageSize: 1000,
+                    categoryIds: new List<Guid> { categoryId }
+                ).GetAwaiter().GetResult();
+
+                if (response.Success && response.Data != null)
+                {
+                    return response.Data.Items;
+                }
+
+                _logger.LogWarning("Failed to get products by category from API: {Message}", response.Message);
+                return Enumerable.Empty<ProductDto>();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting products by category {CategoryId}", categoryId);
+                return Enumerable.Empty<ProductDto>();
+            }
         }
 
         public ProductDto? GetProductById(Guid id)
         {
-            if (!_umbracoContextAccessor.TryGetUmbracoContext(out var umbracoContext))
-                return null;
+            try
+            {
+                var response = _apiClient.GetProductByIdAsync(id).GetAwaiter().GetResult();
 
-            var product = umbracoContext.Content?.GetById(id);
-            return product != null ? MapToProductDto(product) : null;
+                if (response.Success && response.Data != null)
+                {
+                    return response.Data;
+                }
+
+                _logger.LogWarning("Failed to get product {ProductId} from API: {Message}", id, response.Message);
+                return null;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting product {ProductId}", id);
+                return null;
+            }
         }
 
         public ProductDto? GetProductBySlug(string slug)
         {
-            var allProducts = GetAllProducts();
-            return allProducts.FirstOrDefault(p => p.Slug.Equals(slug, StringComparison.OrdinalIgnoreCase));
+            try
+            {
+                // API doesn't have slug endpoint, so get all and filter
+                var allProducts = GetAllProducts();
+                return allProducts.FirstOrDefault(p =>
+                    p.Slug.Equals(slug, StringComparison.OrdinalIgnoreCase) ||
+                    p.Name.Replace(" ", "-").Equals(slug, StringComparison.OrdinalIgnoreCase));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting product by slug {Slug}", slug);
+                return null;
+            }
         }
 
         public PaginatedResponse<ProductDto> GetProducts(
@@ -84,77 +134,55 @@ namespace GOKCafe.Web.Services.Implementations
             string? categoryId = null,
             string? searchTerm = null)
         {
-            var allProducts = GetAllProducts().AsEnumerable();
-
-            // Filter by category
-            if (!string.IsNullOrEmpty(categoryId) && Guid.TryParse(categoryId, out var catId))
+            try
             {
-                allProducts = allProducts.Where(p => p.CategoryId == catId);
+                List<Guid>? categoryIds = null;
+                if (!string.IsNullOrEmpty(categoryId) && Guid.TryParse(categoryId, out var catId))
+                {
+                    categoryIds = new List<Guid> { catId };
+                }
+
+                var response = _apiClient.GetProductsAsync(
+                    pageNumber: pageNumber,
+                    pageSize: pageSize,
+                    categoryIds: categoryIds,
+                    search: searchTerm
+                ).GetAwaiter().GetResult();
+
+                if (response.Success && response.Data != null)
+                {
+                    return new PaginatedResponse<ProductDto>
+                    {
+                        Items = response.Data.Items,
+                        PageNumber = response.Data.PageNumber,
+                        PageSize = response.Data.PageSize,
+                        TotalItems = response.Data.TotalItems,
+                        TotalPages = response.Data.TotalPages
+                    };
+                }
+
+                _logger.LogWarning("Failed to get products from API: {Message}", response.Message);
+                return new PaginatedResponse<ProductDto>
+                {
+                    Items = new List<ProductDto>(),
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+                    TotalItems = 0,
+                    TotalPages = 0
+                };
             }
-
-            // Filter by search term
-            if (!string.IsNullOrEmpty(searchTerm))
+            catch (Exception ex)
             {
-                allProducts = allProducts.Where(p =>
-                    p.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
-                    p.Description.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
-                    p.ShortDescription.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+                _logger.LogError(ex, "Error getting paginated products");
+                return new PaginatedResponse<ProductDto>
+                {
+                    Items = new List<ProductDto>(),
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+                    TotalItems = 0,
+                    TotalPages = 0
+                };
             }
-
-            var totalItems = allProducts.Count();
-            var items = allProducts
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .ToList();
-
-            return new PaginatedResponse<ProductDto>
-            {
-                Items = items,
-                PageNumber = pageNumber,
-                PageSize = pageSize,
-                TotalItems = totalItems,
-                TotalPages = (int)Math.Ceiling(totalItems / (double)pageSize)
-            };
-        }
-
-        private ProductDto MapToProductDto(IPublishedContent product)
-        {
-            // Use productImage property for main image
-            var imageUrl = product.Value<IPublishedContent>("productImage")?.Url() ?? string.Empty;
-
-            // Get category - can be a content picker or dropdown
-            var categoryContent = product.Value<IPublishedContent>("productCategory");
-            var categoryString = product.Value<string>("productCategory") ?? string.Empty;
-
-            // Get gallery images if any
-            var galleryImages = product.Value<IEnumerable<IPublishedContent>>("productImages")?
-                .Select(img => img.Url() ?? string.Empty)
-                .Where(url => !string.IsNullOrEmpty(url))
-                .ToList() ?? new List<string>();
-
-            return new ProductDto
-            {
-                Id = product.Key,
-                Name = product.Value<string>("productName") ?? product.Name ?? string.Empty,
-                Slug = product.UrlSegment ?? string.Empty,
-                Description = product.Value<string>("description") ?? string.Empty,
-                ShortDescription = product.Value<string>("shortDescription") ?? string.Empty,
-                Price = product.Value<decimal>("priceMin"),
-                DiscountPrice = product.Value<decimal?>("priceMax"),
-                ImageUrl = imageUrl,
-                ProductImages = galleryImages,
-                StockQuantity = product.Value<int>("stockQuantity"),
-                IsActive = product.Value<bool>("isActive"),
-                IsFeatured = product.Value<bool>("isFeatured"),
-                CategoryId = categoryContent?.Key ?? Guid.Empty,
-                CategoryName = categoryContent?.Name ?? categoryString,
-                DisplayOrder = product.Value<int>("displayOrder"),
-                CreatedDate = product.CreateDate,
-                UpdatedDate = product.UpdateDate,
-                Region = product.Value<string>("region") ?? string.Empty,
-                Process = product.Value<string>("process") ?? string.Empty,
-                TastingNote = product.Value<string>("tastingNote") ?? string.Empty
-            };
         }
     }
 }

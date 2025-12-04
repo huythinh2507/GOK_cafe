@@ -153,7 +153,7 @@ public class ProductService : IProductService
             var response = new PaginatedResponse<ProductDto>
             {
                 Items = items,
-                TotalCount = totalCount,
+                TotalItems = totalCount,
                 PageNumber = pageNumber,
                 PageSize = pageSize
             };

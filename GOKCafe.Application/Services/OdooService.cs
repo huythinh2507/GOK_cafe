@@ -102,9 +102,10 @@ public class OdooService : IOdooService
                 .Select(p => GenerateSlug($"{p.Name}-{p.Id}"))
                 .ToList();
 
-            var existingProducts = await _unitOfWork.Products
+            var allProducts = await _unitOfWork.Products.GetAllAsync();
+            var existingProducts = allProducts
                 .Where(p => slugs.Contains(p.Slug))
-                .ToDictionaryAsync(p => p.Slug, p => p);
+                .ToDictionary(p => p.Slug, p => p);
 
             _logger.LogInformation("Found {ExistingCount} existing products out of {TotalCount}",
                 existingProducts.Count, odooProductsResponse.Data.Count);
