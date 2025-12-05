@@ -55,7 +55,7 @@ public class ProductServiceTests
         result.Success.Should().BeTrue();
         result.Data.Should().NotBeNull();
         result.Data!.Items.Should().HaveCount(2);
-        result.Data.TotalCount.Should().Be(2);
+        result.Data.TotalItems.Should().Be(2);
     }
 
     [Fact]
