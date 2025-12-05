@@ -39,13 +39,20 @@
         }
     }
 
-    // Fallback data if no Umbraco content
+    // Fallback data if no Umbraco content - use static images
     if (!teaItems.Any())
     {
-        var fallbackItems = new[] { "Freshness", "Bubble Tea", "Flavorful", "Fruit Tea", "Sustainability" };
-        foreach (var name in fallbackItems)
+        var fallbackItems = new[]
         {
-            teaItems.Add(new { Name = name, Image = "", Url = "#" });
+            new { Name = "Freshness", Image = "/images/tea/freshness.jpg" },
+            new { Name = "Bubble Tea", Image = "/images/tea/bubble-tea.jpg" },
+            new { Name = "Flavorful", Image = "/images/tea/flavorful.jpg" },
+            new { Name = "Fruit Tea", Image = "/images/tea/fruit-tea.jpg" },
+            new { Name = "Sustainability", Image = "/images/tea/sustainability.jpg" }
+        };
+        foreach (var item in fallbackItems)
+        {
+            teaItems.Add(new { Name = item.Name, Image = item.Image, Url = "#" });
         }
     }
 }

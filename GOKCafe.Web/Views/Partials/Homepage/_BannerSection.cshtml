@@ -5,9 +5,11 @@
     var bannerDescription = "Our mission is to provide sustainably sourced, hand-picked quality coffee. Great coffee is our passion and we want to share it with you.";
     var bannerButtonText = "Shop Now";
     var bannerButtonUrl = "/products";
-    var bannerImageUrl = "";
 
-    // Try to get Banner document from Home children (same as Header)
+    // Use static image from wwwroot/images folder
+    var bannerImageUrl = "/images/banner/HC_1.jpg";
+
+    // Try to get Banner text content from Umbraco (if exists)
     if (UmbracoContext?.Content != null)
     {
         // Get Home node first
@@ -18,14 +20,7 @@
             var bannerNode = homeNode.Children.FirstOrDefault(x => x.ContentType.Alias == "banner");
             if (bannerNode != null)
             {
-                // Get banner image from Banner document type
-                var bannerImage = bannerNode.Value<Umbraco.Cms.Core.Models.PublishedContent.IPublishedContent>("bannerimage");
-                if (bannerImage != null)
-                {
-                    bannerImageUrl = bannerImage.Url();
-                }
-
-                // Get other banner properties if they exist
+                // Get text properties from Umbraco, but image from static folder
                 bannerTitle = bannerNode.Value<string>("bannerTitle") ?? bannerTitle;
                 bannerTitleHighlight = bannerNode.Value<string>("bannerTitleHighlight") ?? bannerTitleHighlight;
                 bannerDescription = bannerNode.Value<string>("bannerDescription") ?? bannerDescription;
@@ -37,20 +32,12 @@
 }
 
 <!-- Banner Section -->
+<!-- DEBUG: Banner Image URL = @bannerImageUrl -->
 <section class="relative h-[800px] md:h-[600px] flex items-center justify-start overflow-hidden">
     <!-- Background Image -->
-    @if (!string.IsNullOrEmpty(bannerImageUrl))
-    {
-        <div class="absolute inset-0 z-0">
-            <img src="@bannerImageUrl" alt="Banner" class="w-full h-full object-cover" />
-            <div class="absolute inset-0 bg-black opacity-40"></div>
-        </div>
-    }
-    else
-    {
-        <!-- Fallback gradient background -->
-        <div class="absolute inset-0 bg-gradient-to-r from-gray-800 to-gray-600 z-0"></div>
-    }
+    <div class="absolute inset-0 z-0" style="background-image: url('@bannerImageUrl'); background-size: cover; background-position: center;">
+        <div class="absolute inset-0 bg-black opacity-40"></div>
+    </div>
 
     <!-- Content -->
     <div class="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 mt-12 md:mt-0">

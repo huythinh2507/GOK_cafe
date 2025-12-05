@@ -45,6 +45,24 @@
             }
         }
     }
+
+    // Fallback partner logos if no Umbraco content
+    if (!partners.Any())
+    {
+        var fallbackPartners = new[]
+        {
+            new { Name = "Partner 1", Logo = "/images/partners/partner1.png" },
+            new { Name = "Partner 2", Logo = "/images/partners/partner2.png" },
+            new { Name = "Partner 3", Logo = "/images/partners/partner3.png" },
+            new { Name = "Partner 4", Logo = "/images/partners/partner4.png" },
+            new { Name = "Partner 5", Logo = "/images/partners/partner5.png" },
+            new { Name = "Partner 6", Logo = "/images/partners/partner6.png" }
+        };
+        foreach (var item in fallbackPartners)
+        {
+            partners.Add(new { Name = item.Name, Logo = item.Logo, Url = "#" });
+        }
+    }
 }
 
 <!-- Our Partners Section -->
