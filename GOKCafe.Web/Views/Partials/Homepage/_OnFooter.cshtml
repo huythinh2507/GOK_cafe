@@ -28,6 +28,18 @@
             }
         }
     }
+
+    // Fallback data if no Umbraco content
+    if (!footerItems.Any())
+    {
+        footerItems = new List<dynamic>
+        {
+            new { Title = "Shipped FREE and to your Door", Description = "with orders above 350,000 VND", Icon = "map-marker" },
+            new { Title = "Carefully delivered within 1-3 days", Description = "and packaged with love", Icon = "hand-holding-heart" },
+            new { Title = "From Seed to Cup", Description = "An experience starts with only the best ingredients", Icon = "leaf" },
+            new { Title = "We would love to help you", Description = "084 838 302 882", Icon = "life-ring" }
+        };
+    }
 }
 
 <!-- OnFooter Section -->
@@ -40,27 +52,29 @@
             }
             @foreach (var item in footerItems)
             {
-                var bgClass = index % 2 == 0 ? "bg-gray-200" : "bg-gray-100";
+                var bgClass = index % 2 == 0 ? "bg-gray-200" : "bg-white";
                 <div class="@bgClass py-12 px-8 text-center">
                     <!-- Icon -->
                     <div class="flex items-center justify-center mb-4">
-                        @if (!string.IsNullOrEmpty(item.Icon))
+                        @if (!string.IsNullOrEmpty(item.Icon) && item.Icon.StartsWith("http"))
                         {
-                            <img src="@item.Icon" alt="@item.Title" class="w-6 h-6 object-contain" />
+                            <img src="@item.Icon" alt="@item.Title" class="w-12 h-12 object-contain" />
+                        }
+                        else if (!string.IsNullOrEmpty(item.Icon))
+                        {
+                            <i class="fas fa-@item.Icon text-gray-800 text-4xl"></i>
                         }
                         else
                         {
-                            <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                                <i class="fas fa-info text-gray-500 text-2xl"></i>
-                            </div>
+                            <i class="fas fa-info-circle text-gray-800 text-4xl"></i>
                         }
                     </div>
 
                     <!-- Title -->
-                    <h3 class="text-base font-semibold text-gray-900 mb-2">@item.Title</h3>
+                    <h3 class="text-sm font-semibold text-gray-900 mb-2 tracking-wide">@item.Title</h3>
 
                     <!-- Description -->
-                    <p class="text-sm text-gray-600">@item.Description</p>
+                    <p class="text-xs text-gray-600">@item.Description</p>
                 </div>
                 index++;
             }

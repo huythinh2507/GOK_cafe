@@ -53,6 +53,7 @@
         }
     }
 
+<<<<<<< HEAD
     // Use featured products from database if no Umbraco content
     if (!products.Any() && featuredProducts.Any())
     {
@@ -78,6 +79,18 @@
                 Url = $"/products/{product.Slug}"
             });
         }
+=======
+    // Fallback data if no Umbraco content
+    if (!products.Any())
+    {
+        products = new List<dynamic>
+        {
+            new { Name = "Green Tea", Image = "/media/5jebon54/whiteitem.png", Price = "4 VNĐ", Url = "/products" },
+            new { Name = "Iced Matcha Latte", Image = "/media/gm0fp2nm/yellow.png", Price = "6 VNĐ", Url = "/products" },
+            new { Name = "Natural Cold Brew Coffee", Image = "/media/ifjfvzbj/red.png", Price = "5 VNĐ", Url = "/products" },
+            new { Name = "Espresso", Image = "/media/onjhscyv/whiteyellowitem.png", Price = "4 VNĐ", Url = "/products" }
+        };
+>>>>>>> f000082bc4425e15f9b7e53c0fa20b8a3c886147
     }
 }
 

@@ -19,6 +19,23 @@
         }
     }
 
+    // Fallback mock products if no Umbraco content
+    var mockProducts = new[]
+    {
+        new { Name = "Colombia Dark Roast", Image = "/media/tkddexzl/colombiadarkroast.png", Price = "682,000 VNĐ" },
+        new { Name = "Swiss Water Decaf", Image = "/media/zqdncqg0/swisswaterdecaf.png", Price = "682,000 VNĐ" },
+        new { Name = "Holiday Blend", Image = "/media/xiihorp0/holidayblend.png", Price = "682,000 VNĐ" },
+        new { Name = "House Blend", Image = "/media/p3mhqekq/houseblend.png", Price = "682,000 VNĐ" },
+        new { Name = "Colombia Wilton Benitez", Image = "/media/kgymu0pv/honeygreentea.png", Price = "850,000 VNĐ" },
+        new { Name = "Assam Black Tea", Image = "/media/aptfsaia/assamblacktea.png", Price = "320,000 VNĐ" },
+        new { Name = "Honey Milk Tea", Image = "/media/cvxlg5q1/honeymilktea.png", Price = "350,000 VNĐ" },
+        new { Name = "Bubble Tea", Image = "/media/ydfosnna/bubbletee.png", Price = "400,000 VNĐ" },
+        new { Name = "Green Tea", Image = "/media/5jebon54/whiteitem.png", Price = "280,000 VNĐ" },
+        new { Name = "Honey Green Tea", Image = "/media/kgymu0pv/honeygreentea.png", Price = "320,000 VNĐ" },
+        new { Name = "Carribe Coffee", Image = "/media/kgymu0pv/honeygreentea.png", Price = "620,000 VNĐ" },
+        new { Name = "Sweet Doughs", Image = "/media/nm0p0uau/sweetdoughs.png", Price = "180,000 VNĐ" }
+    };
+
     // Filter configuration data
     var filterConfig = new[]
     {
@@ -68,7 +85,7 @@
     // Helper function to render filter section
     void RenderFilterSection(string id, string title, string[] options, bool hasBottomBorder = true, bool[] checkedStates = null)
     {
-        <div class="@(hasBottomBorder ? "border-b border-gray-200 " : "")pb-4">
+        <div class="@(hasBottomBorder ? "border-b border-gray-200 pb-4" : "pb-4")">
             <button class="flex items-center justify-between w-full text-left font-semibold text-gray-900 mb-4" onclick="toggleFilter('@id')">
                 <span>@title</span>
                 <i class="fas fa-chevron-up" id="@id-icon"></i>
@@ -156,11 +173,42 @@
                 }
                 else
                 {
-                    <!-- No Products Found -->
-                    <div class="text-center py-12">
-                        <i class="fas fa-coffee text-6xl text-gray-300 mb-4"></i>
-                        <p class="text-gray-500 text-lg">No products found. Please add ProductCoffeeItem under ProductCoffee in Umbraco.</p>
-                        <p class="text-gray-400 text-sm mt-2">Debug: ProductCoffee node @(Model.Children.Any(x => x.ContentType.Alias == "productCoffee") ? "found" : "not found")</p>
+                    
+                    <!-- Fallback Mock Products Grid -->
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-8 mb-12">
+                        @foreach (var product in mockProducts)
+                        {
+                            <!-- Mock Product Card -->
+                            <div class="group">
+                                <!-- Product Image -->
+                                <div class="overflow-hidden mb-4 flex items-center justify-center bg-gray-100 h-[420px]">
+                                    <img src="@product.Image" alt="@product.Name" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                                </div>
+
+                                <!-- Product Info -->
+                                <div class="text-center w-full">
+                                    <h3 class="text-lg font-semibold text-gray-900 mb-2">@product.Name</h3>
+                                    <p class="text-gray-600">From <span class="font-semibold">@product.Price</span></p>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="flex justify-center items-center gap-2 mt-8">
+                        <button type="button" class="w-12 h-12 flex items-center justify-center border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors rounded cursor-pointer">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button type="button" class="w-12 h-12 flex items-center justify-center border-2 border-primary bg-primary text-white font-medium transition-colors rounded cursor-pointer">
+                            1
+                        </button>
+                        <button type="button" class="w-12 h-12 flex items-center justify-center border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors rounded cursor-pointer">
+                            2
+                        </button>
+                        <button type="button" class="w-12 h-12 flex items-center justify-center border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors rounded cursor-pointer">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
                     </div>
                 }
             </div>
