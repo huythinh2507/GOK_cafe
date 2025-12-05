@@ -3,18 +3,18 @@
     // Mock products only - no Umbraco
     var mockProducts = new[]
     {
-        new { Name = "Colombia Dark Roast", Image = "/media/tkddexzl/colombiadarkroast.png", Price = "682,000 VNĐ", Category = "Coffees" },
-        new { Name = "Swiss Water Decaf", Image = "/media/zqdncqg0/swisswaterdecaf.png", Price = "682,000 VNĐ", Category = "Coffees" },
-        new { Name = "Holiday Blend", Image = "/media/xiihorp0/holidayblend.png", Price = "682,000 VNĐ", Category = "Coffees" },
-        new { Name = "House Blend", Image = "/media/p3mhqekq/houseblend.png", Price = "682,000 VNĐ", Category = "Coffees" },
-        new { Name = "Colombia Wilton Benitez", Image = "/media/kgymu0pv/honeygreentea.png", Price = "850,000 VNĐ", Category = "Coffees" },
-        new { Name = "Assam Black Tea", Image = "/media/aptfsaia/assamblacktea.png", Price = "320,000 VNĐ", Category = "Bubble Tea" },
-        new { Name = "Honey Milk Tea", Image = "/media/cvxlg5q1/honeymilktea.png", Price = "350,000 VNĐ", Category = "Bubble Tea" },
-        new { Name = "Bubble Tea", Image = "/media/ydfosnna/bubbletee.png", Price = "400,000 VNĐ", Category = "Bubble Tea" },
-        new { Name = "Green Tea", Image = "/media/5jebon54/whiteitem.png", Price = "280,000 VNĐ", Category = "Bubble Tea" },
-        new { Name = "Honey Green Tea", Image = "/media/kgymu0pv/honeygreentea.png", Price = "320,000 VNĐ", Category = "Bubble Tea" },
-        new { Name = "Carribe Coffee", Image = "/media/kgymu0pv/honeygreentea.png", Price = "620,000 VNĐ", Category = "Coffees" },
-        new { Name = "Sweet Doughs", Image = "/media/nm0p0uau/sweetdoughs.png", Price = "180,000 VNĐ", Category = "Sweet Doughs" }
+        new {Id=1,  Name = "Colombia Dark Roast", Image = "/media/tkddexzl/colombiadarkroast.png", Price = "682,000 VNĐ", Category = "Coffees" },
+        new {Id=2, Name = "Swiss Water Decaf", Image = "/media/zqdncqg0/swisswaterdecaf.png", Price = "682,000 VNĐ", Category = "Coffees" },
+        new {Id=3, Name = "Holiday Blend", Image = "/media/xiihorp0/holidayblend.png", Price = "682,000 VNĐ", Category = "Coffees" },
+        new { Id=4,Name = "House Blend", Image = "/media/p3mhqekq/houseblend.png", Price = "682,000 VNĐ", Category = "Coffees" },
+        new {Id=5, Name = "Colombia Wilton Benitez", Image = "/media/kgymu0pv/honeygreentea.png", Price = "850,000 VNĐ", Category = "Coffees" },
+        new {Id=6, Name = "Assam Black Tea", Image = "/media/aptfsaia/assamblacktea.png", Price = "320,000 VNĐ", Category = "Bubble Tea" },
+        new { Id=7,Name = "Honey Milk Tea", Image = "/media/cvxlg5q1/honeymilktea.png", Price = "350,000 VNĐ", Category = "Bubble Tea" },
+        new {Id=8, Name = "Bubble Tea", Image = "/media/ydfosnna/bubbletee.png", Price = "400,000 VNĐ", Category = "Bubble Tea" },
+        new { Id=9,Name = "Green Tea", Image = "/media/5jebon54/whiteitem.png", Price = "280,000 VNĐ", Category = "Bubble Tea" },
+        new {Id=10, Name = "Honey Green Tea", Image = "/media/kgymu0pv/honeygreentea.png", Price = "320,000 VNĐ", Category = "Bubble Tea" },
+        new { Id=11,Name = "Carribe Coffee", Image = "/media/kgymu0pv/honeygreentea.png", Price = "620,000 VNĐ", Category = "Coffees" },
+        new {Id=12, Name = "Sweet Doughs", Image = "/media/nm0p0uau/sweetdoughs.png", Price = "180,000 VNĐ", Category = "Sweet Doughs" }
     };
 
     // Filter configuration data
@@ -112,8 +112,8 @@
                     {
                         <!-- Product Card -->
                         <div class="group">
-                            <!-- Product Image -->
-                            <div class="overflow-hidden mb-4 flex items-center justify-center bg-[#E8DCC4] w-full h-[420px] relative cursor-pointer">
+                            <!-- Product Image (Clickable) -->
+                            <a href="/productdetails?id=@product.Id" class="block overflow-hidden mb-4 flex items-center justify-center bg-[#E8DCC4] w-full h-[420px] relative cursor-pointer">
                                 @if (!string.IsNullOrEmpty(product.Image))
                                 {
                                     <img src="@product.Image" alt="@product.Name" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
@@ -124,7 +124,7 @@
                                         <i class="fas fa-coffee text-6xl text-gray-400"></i>
                                     </div>
                                 }
-                            </div>
+                            </a>
 
                             <!-- Product Info -->
                             <div class="text-center w-full mb-4">
