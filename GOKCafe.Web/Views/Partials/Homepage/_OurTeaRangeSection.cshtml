@@ -42,7 +42,7 @@
     // Fallback data if no Umbraco content - use static images
     if (!teaItems.Any())
     {
-<<<<<<< HEAD
+
         var fallbackItems = new[]
         {
             new { Name = "Freshness", Image = "/images/tea/freshness.jpg" },
@@ -55,7 +55,6 @@
         {
             teaItems.Add(new { Name = item.Name, Image = item.Image, Url = "#" });
         }
-=======
         teaItems = new List<dynamic>
         {
             new { Name = "Green Tea", Image = "/media/5jebon54/whiteitem.png", Url = "/products" },
@@ -65,7 +64,6 @@
             new { Name = "Honey Green Tea", Image = "/media/kgymu0pv/honeygreentea.png", Url = "/products" },
             new { Name = "Mango Green Tea Macchiato", Image = "/media/j31bg15n/mangogreenteamacchiato.png", Url = "/products" }
         };
->>>>>>> f000082bc4425e15f9b7e53c0fa20b8a3c886147
     }
 }
 
