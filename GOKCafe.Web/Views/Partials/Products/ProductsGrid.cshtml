@@ -85,7 +85,7 @@
     // Helper function to render filter section
     void RenderFilterSection(string id, string title, string[] options, bool hasBottomBorder = true, bool[] checkedStates = null)
     {
-        <div class="@(hasBottomBorder ? "border-b border-gray-200 " : "")pb-4">
+        <div class="@(hasBottomBorder ? "border-b border-gray-200 pb-4" : "pb-4")">
             <button class="flex items-center justify-between w-full text-left font-semibold text-gray-900 mb-4" onclick="toggleFilter('@id')">
                 <span>@title</span>
                 <i class="fas fa-chevron-up" id="@id-icon"></i>
