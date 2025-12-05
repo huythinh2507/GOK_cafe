@@ -26,7 +26,10 @@ namespace GOKCafe.Web.Services.Implementations
             int pageSize = 10,
             List<Guid>? categoryIds = null,
             bool? isFeatured = null,
-            string? search = null)
+            string? search = null,
+            List<Guid>? flavourProfileIds = null,
+            List<Guid>? equipmentIds = null,
+            bool? inStock = null)
         {
             try
             {
@@ -47,6 +50,21 @@ namespace GOKCafe.Web.Services.Implementations
                     foreach (var catId in categoryIds)
                         queryParams.Add($"categoryIds={catId}");
                 }
+
+                if (flavourProfileIds != null && flavourProfileIds.Any())
+                {
+                    foreach (var fpId in flavourProfileIds)
+                        queryParams.Add($"flavourProfileIds={fpId}");
+                }
+
+                if (equipmentIds != null && equipmentIds.Any())
+                {
+                    foreach (var eqId in equipmentIds)
+                        queryParams.Add($"equipmentIds={eqId}");
+                }
+
+                if (inStock.HasValue)
+                    queryParams.Add($"inStock={inStock.Value}");
 
                 var query = string.Join("&", queryParams);
                 var response = await _httpClient.GetAsync($"/api/v1/products?{query}");
@@ -74,6 +92,41 @@ namespace GOKCafe.Web.Services.Implementations
             {
                 _logger.LogError(ex, "Error fetching products from API");
                 return new ApiResponse<PaginatedResponse<ProductDto>>
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
+        public async Task<ApiResponse<ProductFiltersDto>> GetProductFiltersAsync()
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync("/api/v1/products/filters");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return new ApiResponse<ProductFiltersDto>
+                    {
+                        Success = false,
+                        Message = $"API error: {response.StatusCode}"
+                    };
+                }
+
+                var content = await response.Content.ReadAsStringAsync();
+                var result = JsonSerializer.Deserialize<ApiResponse<ProductFiltersDto>>(content, _jsonOptions);
+
+                return result ?? new ApiResponse<ProductFiltersDto>
+                {
+                    Success = false,
+                    Message = "Failed to deserialize response"
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching product filters from API");
+                return new ApiResponse<ProductFiltersDto>
                 {
                     Success = false,
                     Message = ex.Message
