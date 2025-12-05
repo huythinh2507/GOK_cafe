@@ -9,7 +9,7 @@
     var time = "7:00 - 22:30 (Monday - Sunday)";
     var buttonText = "View Map";
     var buttonUrl = "#";
-    var image = "";
+    var image = "/images/location/store-front.jpg"; // Default static image
 
     // Get Where To Find Us section from Home children
     if (UmbracoContext?.Content != null)
@@ -20,9 +20,12 @@
             var whereToFindUsNode = homeNode.Children.FirstOrDefault(x => x.ContentType.Alias == "whereToFindUs");
             if (whereToFindUsNode != null)
             {
-                // Get image
+                // Get image (override default if exists in Umbraco)
                 var imgContent = whereToFindUsNode.Value<Umbraco.Cms.Core.Models.PublishedContent.IPublishedContent>("image");
-                if (imgContent != null) image = imgContent.Url();
+                if (imgContent != null && !string.IsNullOrEmpty(imgContent.Url()))
+                {
+                    image = imgContent.Url();
+                }
 
                 // Get all text fields
                 var tempLocation = whereToFindUsNode.Value<string>("location");

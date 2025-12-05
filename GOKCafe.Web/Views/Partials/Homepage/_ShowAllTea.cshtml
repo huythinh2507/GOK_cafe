@@ -1,9 +1,13 @@
-﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+﻿@using GOKCafe.Application.DTOs.Product
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
 @{
     var sectionTitle = "BEST SELLERS";
     var sectionHeading = "OUR TEA COLLECTION";
     var buttonText = "Shop All Tea";
     var buttonUrl = "/tea-products";
+
+    // Get featured products from ViewData (already fetched by controller)
+    var featuredProducts = ViewData["FeaturedProducts"] as List<ProductDto> ?? new List<ProductDto>();
     var products = new List<dynamic>();
 
     // Get Show All Tea Item section from Home children
@@ -46,6 +50,33 @@
                     });
                 }
             }
+        }
+    }
+
+    // Use featured products from database if no Umbraco content
+    if (!products.Any() && featuredProducts.Any())
+    {
+        foreach (var product in featuredProducts.Take(4))
+        {
+            // Get primary image or first image
+            var imageUrl = product.ImageUrl;
+            if (string.IsNullOrEmpty(imageUrl) && product.Images.Any())
+            {
+                var primaryImage = product.Images.FirstOrDefault(x => x.IsPrimary);
+                imageUrl = primaryImage?.ImageUrl ?? product.Images.First().ImageUrl;
+            }
+
+            var formattedPrice = product.DiscountPrice.HasValue
+                ? $"{product.DiscountPrice.Value:N0} VNĐ"
+                : $"{product.Price:N0} VNĐ";
+
+            products.Add(new
+            {
+                Name = product.Name,
+                Image = imageUrl ?? "",
+                Price = $"From {formattedPrice}",
+                Url = $"/products/{product.Slug}"
+            });
         }
     }
 }
