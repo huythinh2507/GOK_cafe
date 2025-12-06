@@ -9,7 +9,8 @@
     // Get Our Partners section from Home children
     if (UmbracoContext?.Content != null)
     {
-        var homeNode = UmbracoContext.Content.GetAtRoot().FirstOrDefault(x => x.ContentType.Alias == "home" || x.ContentType.Alias == "homepage");
+        var homeNode = UmbracoContext.Content.GetAtRoot().FirstOrDefault(x => x.ContentType.Alias == "home" ||
+        x.ContentType.Alias == "homepage");
         if (homeNode != null)
         {
             var ourPartnersNode = homeNode.Children.FirstOrDefault(x => x.ContentType.Alias == "ourPartners");
@@ -50,14 +51,14 @@
     if (!partners.Any())
     {
         partners = new List<dynamic>
-        {
-            new { Name = "Trivago", Logo = "/media/x5jbjf0m/trivago.png", Url = "#" },
-            new { Name = "Expedia", Logo = "/media/5jebwhuw/expedia.png", Url = "#" },
-            new { Name = "Pringles", Logo = "/media/uapplwju/pringles.png", Url = "#" },
-            new { Name = "Wrangler", Logo = "/media/qudl4p4h/wrangler.png", Url = "#" },
-            new { Name = "Novartis", Logo = "/media/sjjkg2xg/novartis.png", Url = "#" },
-            new { Name = "Capital", Logo = "/media/zynhul4q/cappital.png", Url = "#" }
-        };
+{
+new { Name = "Trivago", Logo = "/media/x5jbjf0m/trivago.png", Url = "#" },
+new { Name = "Expedia", Logo = "/media/5jebwhuw/expedia.png", Url = "#" },
+new { Name = "Pringles", Logo = "/media/uapplwju/pringles.png", Url = "#" },
+new { Name = "Wrangler", Logo = "/media/qudl4p4h/wrangler.png", Url = "#" },
+new { Name = "Novartis", Logo = "/media/sjjkg2xg/novartis.png", Url = "#" },
+new { Name = "Capital", Logo = "/media/zynhul4q/cappital.png", Url = "#" }
+};
     }
 }
 
@@ -94,7 +95,8 @@
 
         <!-- Discover More Button -->
         <div class="text-center">
-            <a href="@buttonUrl" class="inline-block px-8 py-3 border-2 border-primary text-primary font-semibold hover:bg-primary hover:text-white transition-all duration-300">
+            <a href="@buttonUrl"
+                class="inline-block px-8 py-3 border-2 border-primary text-primary font-semibold hover:bg-primary hover:text-white transition-all duration-300">
                 @buttonText
             </a>
         </div>

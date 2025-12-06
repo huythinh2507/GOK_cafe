@@ -5,27 +5,23 @@
     var bannerDescription = "Our mission is to provide sustainably sourced, hand-picked quality coffee. Great coffee is our passion and we want to share it with you.";
     var bannerButtonText = "Shop Now";
     var bannerButtonUrl = "/products";
+
     var bannerImageUrl = "/media/0wfpc5u5/banner.png"; // Default banner image
 
-    // Try to get Banner document from Home children (same as Header)
+
+    // Try to get Banner text content from Umbraco (if exists)
     if (UmbracoContext?.Content != null)
     {
         // Get Home node first
-        var homeNode = UmbracoContext.Content.GetAtRoot().FirstOrDefault(x => x.ContentType.Alias == "home" || x.ContentType.Alias == "homepage");
+        var homeNode = UmbracoContext.Content.GetAtRoot().FirstOrDefault(x => x.ContentType.Alias == "home" ||
+        x.ContentType.Alias == "homepage");
         if (homeNode != null)
         {
             // Get Banner from Home's children
             var bannerNode = homeNode.Children.FirstOrDefault(x => x.ContentType.Alias == "banner");
             if (bannerNode != null)
             {
-                // Get banner image from Banner document type
-                var bannerImage = bannerNode.Value<Umbraco.Cms.Core.Models.PublishedContent.IPublishedContent>("bannerimage");
-                if (bannerImage != null)
-                {
-                    bannerImageUrl = bannerImage.Url();
-                }
-
-                // Get other banner properties if they exist
+                // Get text properties from Umbraco, but image from static folder
                 bannerTitle = bannerNode.Value<string>("bannerTitle") ?? bannerTitle;
                 bannerTitleHighlight = bannerNode.Value<string>("bannerTitleHighlight") ?? bannerTitleHighlight;
                 bannerDescription = bannerNode.Value<string>("bannerDescription") ?? bannerDescription;
@@ -37,47 +33,53 @@
 }
 
 <!-- Banner Section -->
+<!-- DEBUG: Banner Image URL = @bannerImageUrl -->
 <section class="relative h-[800px] md:h-[600px] flex items-center justify-start overflow-hidden">
     <!-- Background Image -->
-    <div class="absolute inset-0 z-0">
-        <img src="@bannerImageUrl" alt="Banner" class="w-full h-full object-cover" />
-        <div class="absolute inset-0 bg-black opacity-40"></div>
-    </div>
+    <div class="absolute inset-0 z-0"
+        style="background-image: url('@bannerImageUrl'); background-size: cover; background-position: center;">
 
-    <!-- Content -->
-    <div class="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 mt-12 md:mt-0">
-        <div class="max-w-4xl">
-            <!-- Title -->
-            <h1 class="text-5xl md:text-5xl font-semibold text-white mb-4 leading-tight ">
-                @bannerTitle
-                @if (!string.IsNullOrEmpty(bannerTitleHighlight))
+        <div class="absolute inset-0 z-0">
+            <img src="@bannerImageUrl" alt="Banner" class="w-full h-full object-cover" />
+
+            <div class="absolute inset-0 bg-black opacity-40"></div>
+        </div>
+
+        <!-- Content -->
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 mt-12 md:mt-0">
+            <div class="max-w-4xl">
+                <!-- Title -->
+                <h1 class="text-5xl md:text-5xl font-semibold text-white mb-4 leading-tight ">
+                    @bannerTitle
+                    @if (!string.IsNullOrEmpty(bannerTitleHighlight))
+                    {
+                        <span class="italic">@bannerTitleHighlight</span>
+                    }
+                </h1>
+
+                <!-- Description -->
+                @if (!string.IsNullOrEmpty(bannerDescription))
                 {
-                    <span class="italic">@bannerTitleHighlight</span>
+                    <p class="text-lg md:text-xl font-normal text-white mb-8 leading-relaxed max-w-3xl">
+                        @bannerDescription
+                    </p>
                 }
-            </h1>
 
-            <!-- Description -->
-            @if (!string.IsNullOrEmpty(bannerDescription))
-            {
-                <p class="text-lg md:text-xl font-normal text-white mb-8 leading-relaxed max-w-3xl">
-                    @bannerDescription
-                </p>
-            }
+                <!-- CTA Button -->
+                @if (!string.IsNullOrEmpty(bannerButtonText))
+                {
+                    <a href="@bannerButtonUrl"
+                        class="mb-4 inline-flex items-center gap-2 px-8 py-3 bg-transparent border-2 border-white text-white font-semibold hover:bg-white hover:text-gray-900 transition-all duration-300 text-lg">
+                        @bannerButtonText
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                }
 
-            <!-- CTA Button -->
-            @if (!string.IsNullOrEmpty(bannerButtonText))
-            {
-                <a href="@bannerButtonUrl" class="mb-4 inline-flex items-center gap-2 px-8 py-3 bg-transparent border-2 border-white text-white font-semibold hover:bg-white hover:text-gray-900 transition-all duration-300 text-lg">
-                    @bannerButtonText
-                    <i class="fas fa-arrow-right"></i>
-                </a>
-            }
-
-            <!-- Scroll Down Indicator -->
-            <div class="flex items-center gap-2 text-white text-sm mb-4">
-                <i class="fas fa-mouse"></i>
-                <span>Scroll down for more</span>
+                <!-- Scroll Down Indicator -->
+                <div class="flex items-center gap-2 text-white text-sm mb-4">
+                    <i class="fas fa-mouse"></i>
+                    <span>Scroll down for more</span>
+                </div>
             </div>
         </div>
-    </div>
 </section>

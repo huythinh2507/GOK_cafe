@@ -9,6 +9,14 @@ namespace GOKCafe.Web.Services.Interfaces
         IEnumerable<ProductDto> GetProductsByCategory(Guid categoryId);
         ProductDto? GetProductById(Guid id);
         ProductDto? GetProductBySlug(string slug);
-        PaginatedResponse<ProductDto> GetProducts(int pageNumber = 1, int pageSize = 12, string? categoryId = null, string? searchTerm = null);
+        PaginatedResponse<ProductDto> GetProducts(
+            int pageNumber = 1,
+            int pageSize = 12,
+            string? categoryId = null,
+            string? searchTerm = null,
+            List<string>? flavourProfileIds = null,
+            List<string>? equipmentIds = null,
+            bool? inStock = null);
+        ProductFiltersDto? GetProductFilters();
     }
 }

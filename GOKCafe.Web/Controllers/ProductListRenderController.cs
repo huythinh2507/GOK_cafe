@@ -1,4 +1,5 @@
 using GOKCafe.Web.Models.ViewModels;
+using GOKCafe.Web.Models.DTOs;
 using GOKCafe.Web.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewEngines;
@@ -11,6 +12,7 @@ namespace GOKCafe.Web.Controllers
     {
         private readonly IProductService _productService;
         private readonly ICategoryService _categoryService;
+        private readonly ILogger<ProductListController> _logger;
 
         public ProductListController(
             ILogger<ProductListController> logger,
@@ -22,6 +24,7 @@ namespace GOKCafe.Web.Controllers
         {
             _productService = productService;
             _categoryService = categoryService;
+            _logger = logger;
         }
 
         public override IActionResult Index()
@@ -30,28 +33,66 @@ namespace GOKCafe.Web.Controllers
             if (currentPage == null)
                 return NotFound();
 
-            // Get query parameters
-            var pageNumber = int.TryParse(Request.Query["page"], out var page) ? page : 1;
-            var categoryId = Request.Query["category"].ToString();
-            var searchTerm = Request.Query["search"].ToString();
+            try
+            {
+                // Get query parameters
+                var pageNumber = int.TryParse(Request.Query["page"], out var page) ? page : 1;
+                var categoryId = Request.Query["category"].ToString();
+                var searchTerm = Request.Query["search"].ToString();
 
-            var pageSize = currentPage.Value<int>("productsPerPage");
-            if (pageSize == 0) pageSize = 12;
+                // Get filter parameters
+                var flavourProfileIds = Request.Query["flavour"].Where(x => x != null).Select(x => x!).ToList();
+                var equipmentIds = Request.Query["equipment"].Where(x => x != null).Select(x => x!).ToList();
+                bool? inStock = Request.Query["inStock"].ToString() switch
+                {
+                    "true" => true,
+                    "false" => false,
+                    _ => null
+                };
 
-            // Get products with pagination
-            var products = _productService.GetProducts(pageNumber, pageSize, categoryId, searchTerm);
-            var categories = _categoryService.GetAllCategories().ToList();
+                var pageSize = 12; // Default page size
 
-            // Pass data to view via ViewData (Umbraco Native Pattern)
-            ViewData["Products"] = products;
-            ViewData["Categories"] = categories;
-            ViewData["SelectedCategoryId"] = !string.IsNullOrEmpty(categoryId) && Guid.TryParse(categoryId, out var catId)
-                ? catId
-                : (Guid?)null;
-            ViewData["SearchTerm"] = searchTerm;
+                _logger.LogInformation($"ProductListController: Fetching products - Page: {pageNumber}, PageSize: {pageSize}, Category: {categoryId}, Search: {searchTerm}, Flavours: {flavourProfileIds.Count}, Equipment: {equipmentIds.Count}, InStock: {inStock}");
 
-            // Return CurrentTemplate with CurrentPage for Umbraco routing
-            return CurrentTemplate(CurrentPage);
+                // Get products with pagination and filters
+                var products = _productService.GetProducts(pageNumber, pageSize, categoryId, searchTerm, flavourProfileIds, equipmentIds, inStock);
+                var categories = _categoryService.GetAllCategories().ToList();
+                var filters = _productService.GetProductFilters();
+
+                _logger.LogInformation($"ProductListController: Got {products.Items.Count()} products, {categories.Count} categories");
+
+                // Pass data to view via ViewData
+                ViewData["Products"] = products;
+                ViewData["Categories"] = categories;
+                ViewData["Filters"] = filters;
+                ViewData["SelectedCategoryId"] = !string.IsNullOrEmpty(categoryId) && Guid.TryParse(categoryId, out var catId)
+                    ? catId
+                    : (Guid?)null;
+                ViewData["SearchTerm"] = searchTerm;
+                ViewData["SelectedFlavourIds"] = flavourProfileIds;
+                ViewData["SelectedEquipmentIds"] = equipmentIds;
+                ViewData["SelectedInStock"] = inStock;
+
+                // Return CurrentTemplate with CurrentPage
+                return CurrentTemplate(CurrentPage);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in ProductListController.Index");
+
+                // Return empty data so page doesn't crash
+                ViewData["Products"] = new PaginatedResponse<ProductDto>
+                {
+                    Items = new List<ProductDto>(),
+                    PageNumber = 1,
+                    PageSize = 12,
+                    TotalItems = 0,
+                    TotalPages = 0
+                };
+                ViewData["Categories"] = new List<CategoryDto>();
+
+                return CurrentTemplate(CurrentPage);
+            }
         }
     }
 }

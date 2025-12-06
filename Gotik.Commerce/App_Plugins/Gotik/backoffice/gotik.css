@@ -1,0 +1,44 @@
+.gotik-dashboard {
+    padding: 20px;
+}
+
+.gotik-welcome h2 {
+    color: #1b264f;
+    margin-bottom: 20px;
+}
+
+.gotik-features,
+.gotik-quick-links,
+.gotik-documentation {
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+}
+
+.gotik-features h3,
+.gotik-quick-links h3,
+.gotik-documentation h3 {
+    color: #1b264f;
+    margin-bottom: 15px;
+}
+
+.gotik-features ul,
+.gotik-quick-links ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.gotik-features li,
+.gotik-quick-links li {
+    padding: 8px 0;
+    font-size: 14px;
+}
+
+.gotik-quick-links code {
+    background-color: #e9ecef;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+    color: #d63384;
+}

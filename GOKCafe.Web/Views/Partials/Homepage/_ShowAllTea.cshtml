@@ -1,9 +1,13 @@
-﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+﻿@using GOKCafe.Application.DTOs.Product
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
 @{
     var sectionTitle = "BEST SELLERS";
     var sectionHeading = "OUR TEA COLLECTION";
     var buttonText = "Shop All Tea";
     var buttonUrl = "/tea-products";
+
+    // Get featured products from ViewData (already fetched by controller)
+    var featuredProducts = ViewData["FeaturedProducts"] as List<ProductDto> ?? new List<ProductDto>();
     var products = new List<dynamic>();
 
     // Get Show All Tea Item section from Home children
@@ -49,6 +53,33 @@
         }
     }
 
+    // Use featured products from database if no Umbraco content
+    if (!products.Any() && featuredProducts.Any())
+    {
+        foreach (var product in featuredProducts.Take(4))
+        {
+            // Get primary image or first image
+            var imageUrl = product.ImageUrl;
+            if (string.IsNullOrEmpty(imageUrl) && product.Images.Any())
+            {
+                var primaryImage = product.Images.FirstOrDefault(x => x.IsPrimary);
+                imageUrl = primaryImage?.ImageUrl ?? product.Images.First().ImageUrl;
+            }
+
+            var formattedPrice = product.DiscountPrice.HasValue
+                ? $"{product.DiscountPrice.Value:N0} VNĐ"
+                : $"{product.Price:N0} VNĐ";
+
+            products.Add(new
+            {
+                Name = product.Name,
+                Image = imageUrl ?? "",
+                Price = $"From {formattedPrice}",
+                Url = $"/productdetails?id={product.Id}"
+            });
+        }
+    }
+
     // Fallback data if no Umbraco content
     if (!products.Any())
     {
@@ -78,22 +109,49 @@
                 var hasValidUrl = !string.IsNullOrEmpty(product.Url) && product.Url != "#";
                 <div class="group">
                     <!-- Product Image -->
-                    <div class="overflow-hidden mb-4 flex items-center justify-center bg-[#E8DCC4] w-full h-[480px] ">
-                        @if (!string.IsNullOrEmpty(product.Image))
-                        {
-                            <img src="@product.Image" alt="@product.Name" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                        }
-                        else
-                        {
-                            <div class="w-full h-full bg-[#E8DCC4] flex items-center justify-center">
-                                <i class="fas fa-mug-hot text-6xl text-gray-400"></i>
-                            </div>
-                        }
-                    </div>
+                    @if (hasValidUrl)
+                    {
+                        <a href="@product.Url" class="block overflow-hidden mb-4 flex items-center justify-center bg-[#E8DCC4] w-full h-[480px]">
+                            @if (!string.IsNullOrEmpty(product.Image))
+                            {
+                                <img src="@product.Image" alt="@product.Name" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                            }
+                            else
+                            {
+                                <div class="w-full h-full bg-[#E8DCC4] flex items-center justify-center">
+                                    <i class="fas fa-mug-hot text-6xl text-gray-400"></i>
+                                </div>
+                            }
+                        </a>
+                    }
+                    else
+                    {
+                        <div class="overflow-hidden mb-4 flex items-center justify-center bg-[#E8DCC4] w-full h-[480px]">
+                            @if (!string.IsNullOrEmpty(product.Image))
+                            {
+                                <img src="@product.Image" alt="@product.Name" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                            }
+                            else
+                            {
+                                <div class="w-full h-full bg-[#E8DCC4] flex items-center justify-center">
+                                    <i class="fas fa-mug-hot text-6xl text-gray-400"></i>
+                                </div>
+                            }
+                        </div>
+                    }
 
                     <!-- Product Info -->
                     <div class="text-center">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-2">@product.Name</h3>
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">
+                            @if (hasValidUrl)
+                            {
+                                <a href="@product.Url" class="hover:text-primary transition-colors">@product.Name</a>
+                            }
+                            else
+                            {
+                                @product.Name
+                            }
+                        </h3>
                         <p class="text-gray-600">From <span class="font-semibold">@product.Price</span></p>
                     </div>
                 </div>
@@ -108,3 +166,4 @@
         </div>
     </div>
 </section>
+}

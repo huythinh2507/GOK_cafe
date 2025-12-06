@@ -132,7 +132,10 @@ namespace GOKCafe.Web.Services.Implementations
             int pageNumber = 1,
             int pageSize = 12,
             string? categoryId = null,
-            string? searchTerm = null)
+            string? searchTerm = null,
+            List<string>? flavourProfileIds = null,
+            List<string>? equipmentIds = null,
+            bool? inStock = null)
         {
             try
             {
@@ -142,11 +145,32 @@ namespace GOKCafe.Web.Services.Implementations
                     categoryIds = new List<Guid> { catId };
                 }
 
+                List<Guid>? flavourGuids = null;
+                if (flavourProfileIds != null && flavourProfileIds.Any())
+                {
+                    flavourGuids = flavourProfileIds
+                        .Where(id => Guid.TryParse(id, out _))
+                        .Select(id => Guid.Parse(id))
+                        .ToList();
+                }
+
+                List<Guid>? equipmentGuids = null;
+                if (equipmentIds != null && equipmentIds.Any())
+                {
+                    equipmentGuids = equipmentIds
+                        .Where(id => Guid.TryParse(id, out _))
+                        .Select(id => Guid.Parse(id))
+                        .ToList();
+                }
+
                 var response = _apiClient.GetProductsAsync(
                     pageNumber: pageNumber,
                     pageSize: pageSize,
                     categoryIds: categoryIds,
-                    search: searchTerm
+                    search: searchTerm,
+                    flavourProfileIds: flavourGuids,
+                    equipmentIds: equipmentGuids,
+                    inStock: inStock
                 ).GetAwaiter().GetResult();
 
                 if (response.Success && response.Data != null)
@@ -182,6 +206,27 @@ namespace GOKCafe.Web.Services.Implementations
                     TotalItems = 0,
                     TotalPages = 0
                 };
+            }
+        }
+
+        public ProductFiltersDto? GetProductFilters()
+        {
+            try
+            {
+                var response = _apiClient.GetProductFiltersAsync().GetAwaiter().GetResult();
+
+                if (response.Success && response.Data != null)
+                {
+                    return response.Data;
+                }
+
+                _logger.LogWarning("Failed to get product filters from API: {Message}", response.Message);
+                return null;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting product filters");
+                return null;
             }
         }
     }

@@ -43,8 +43,32 @@ namespace GOKCafe.Web.Composers
             builder.Services.AddScoped<IHomeService, HomeService>();
             // Skip IOdooService registration - not needed for Umbraco Web
 
+            // Register HttpClient with base URL for API
+            var apiBaseUrl = builder.Config.GetSection("ApiSettings:BaseUrl").Value ?? "https://localhost:7045";
+            builder.Services.AddHttpClient<GOKCafe.Web.Services.Interfaces.IApiHttpClient, GOKCafe.Web.Services.Implementations.ApiHttpClient>(client =>
+            {
+                client.BaseAddress = new Uri(apiBaseUrl);
+                client.Timeout = TimeSpan.FromSeconds(30);
+            })
+            .ConfigurePrimaryHttpMessageHandler(() =>
+            {
+#if NET8_0_OR_GREATER
+                return new SocketsHttpHandler
+                {
+                    SslOptions = new System.Net.Security.SslClientAuthenticationOptions
+                    {
+                        RemoteCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true
+                    }
+                };
+#else
+                return new HttpClientHandler
+                {
+                    ServerCertificateCustomValidation = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+                };
+#endif
+            });
+
             // Register Web layer services (Umbraco-specific)
-            builder.Services.AddScoped<GOKCafe.Web.Services.Interfaces.IApiHttpClient, GOKCafe.Web.Services.Implementations.ApiHttpClient>();
             builder.Services.AddScoped<WebProductService, GOKCafe.Web.Services.Implementations.ProductService>();
             builder.Services.AddScoped<WebCategoryService, GOKCafe.Web.Services.Implementations.CategoryService>();
 

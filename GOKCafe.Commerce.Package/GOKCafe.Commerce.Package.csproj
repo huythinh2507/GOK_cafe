@@ -1,0 +1,52 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+
+    <!-- NuGet Package Metadata -->
+    <PackageId>GOKCafe.Commerce</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>GOK Cafe Team</Authors>
+    <Company>GOK Cafe</Company>
+    <Product>GOK Cafe Commerce Backend</Product>
+    <Description>Backend commerce services for GOK Cafe including Cart, Order, and Product management with Odoo integration. Designed for use with .NET 8 APIs and compatible with Umbraco CMS.</Description>
+    <PackageTags>ecommerce;cart;orders;odoo;cafe;commerce;backend</PackageTags>
+    <PackageProjectUrl>https://github.com/huythinh2507/GOK_cafe</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/huythinh2507/GOK_cafe</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <!-- Include README in package -->
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <!-- Project References - These will become NuGet dependencies -->
+  <ItemGroup>
+    <ProjectReference Include="..\GOKCafe.Domain\GOKCafe.Domain.csproj" />
+    <ProjectReference Include="..\GOKCafe.Infrastructure\GOKCafe.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <!-- Framework References -->
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <!-- NuGet Package Dependencies -->
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.*" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="10.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="8.*" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.*" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.15.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.*" />
+  </ItemGroup>
+
+</Project>

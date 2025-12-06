@@ -1,0 +1,106 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
+
+    <!-- NuGet Package Metadata -->
+    <PackageId>Gotik.Commerce</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>GOK Cafe Team</Authors>
+    <Company>GOK Cafe</Company>
+    <Product>Gotik Commerce - Complete E-Commerce Solution for Umbraco</Product>
+    <Description>
+      Complete e-commerce solution for Umbraco CMS including backend services, API controllers,
+      product catalog with dynamic filtering, shopping cart, order management, and Odoo ERP integration.
+      Built with clean architecture principles and enterprise-grade features.
+    </Description>
+    <PackageTags>umbraco;ecommerce;product-catalog;cart;orders;odoo;commerce;fullstack;umbraco-marketplace</PackageTags>
+    <PackageProjectUrl>https://github.com/huythinh2507/GOK_cafe</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/huythinh2507/GOK_cafe</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+
+    <!-- Include content files -->
+    <ContentTargetFolders>content;contentFiles</ContentTargetFolders>
+    <EnableDefaultContentItems>false</EnableDefaultContentItems>
+  </PropertyGroup>
+
+  <!-- README and Icon -->
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+    <None Include="INSTALLATION.md" Pack="true" PackagePath="\" />
+    <None Include="CHANGELOG.md" Pack="true" PackagePath="\" />
+    <None Include="icon.png" Pack="true" PackagePath="\" Condition="Exists('icon.png')" />
+  </ItemGroup>
+
+  <!-- Umbraco Dependencies -->
+  <ItemGroup>
+    <PackageReference Include="Umbraco.Cms" Version="16.3.4" />
+    <PackageReference Include="Umbraco.Commerce" Version="16.0.0" />
+  </ItemGroup>
+
+  <!-- Other Dependencies -->
+  <ItemGroup>
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.4" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.4" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.15.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.0" />
+  </ItemGroup>
+
+  <!-- Reference your existing projects -->
+  <ItemGroup>
+    <ProjectReference Include="..\GOKCafe.Domain\GOKCafe.Domain.csproj" />
+    <ProjectReference Include="..\GOKCafe.Application\GOKCafe.Application.csproj" />
+    <ProjectReference Include="..\GOKCafe.Infrastructure\GOKCafe.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <!-- Include Views -->
+  <ItemGroup>
+    <Content Include="Views/**/*.cshtml">
+      <Pack>true</Pack>
+      <PackagePath>contentFiles/any/net9.0/Views;content/Views</PackagePath>
+      <BuildAction>Content</BuildAction>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <!-- Include Static Assets -->
+  <ItemGroup>
+    <Content Include="wwwroot/**/*.*">
+      <Pack>true</Pack>
+      <PackagePath>contentFiles/any/net9.0/wwwroot;content/wwwroot</PackagePath>
+      <BuildAction>Content</BuildAction>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <!-- Include App_Plugins -->
+  <ItemGroup>
+    <Content Include="App_Plugins/**/*.*">
+      <Pack>true</Pack>
+      <PackagePath>contentFiles/any/net9.0/App_Plugins;content/App_Plugins</PackagePath>
+      <BuildAction>Content</BuildAction>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <!-- Include uSync Document Types -->
+  <ItemGroup>
+    <Content Include="uSync/**/*.*">
+      <Pack>true</Pack>
+      <PackagePath>contentFiles/any/net9.0/uSync;content/uSync</PackagePath>
+      <BuildAction>Content</BuildAction>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+</Project>
