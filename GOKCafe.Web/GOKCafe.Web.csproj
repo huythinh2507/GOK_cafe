@@ -24,6 +24,7 @@
     <ProjectReference Include="..\GOKCafe.Application\GOKCafe.Application.csproj" />
     <ProjectReference Include="..\GOKCafe.Infrastructure\GOKCafe.Infrastructure.csproj" />
     <ProjectReference Include="..\GOKCafe.Domain\GOKCafe.Domain.csproj" />
+    <ProjectReference Include="..\Gotik.Commerce\Gotik.Commerce.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
