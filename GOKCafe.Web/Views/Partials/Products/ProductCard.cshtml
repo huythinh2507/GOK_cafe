@@ -3,15 +3,17 @@
 @{
     // Handle anonymous mock objects
     dynamic item = Model;
-    
+
+    string productId = item.Id?.ToString() ?? Guid.NewGuid().ToString();
     string imageUrl = item.Image ?? "";
     string title = item.Name ?? "Product";
     string price = item.Price ?? "0 VNĐ";
     string category = item.Category ?? "Coffee";
+    string priceNumber = price.Replace(" VNĐ", "").Replace(".", "").Trim();
 }
 
 <!-- Product Card -->
-<div class="group">
+<div class="group" data-product-id="@productId">
     <!-- Product Image -->
     <div class="overflow-hidden mb-4 flex items-center justify-center bg-[#E8DCC4] w-full h-[420px] relative cursor-pointer">
         @if (!string.IsNullOrEmpty(imageUrl))
@@ -30,17 +32,32 @@
     <div class="text-center w-full mb-4">
         <!-- Category -->
         <p class="text-sm font-medium text-gray-500 uppercase mb-1">@category</p>
-        
+
         <!-- Title -->
         <h3 class="text-lg font-bold text-gray-900 mb-2 uppercase">@title</h3>
-        
+
         <!-- Price -->
         <p class="text-gray-600 mb-4">From <span class="font-semibold">@price</span></p>
     </div>
 
     <!-- Buy Now Button -->
-    <button type="button" class="w-full px-4 py-3 border-2 border-primary text-primary font-semibold hover:bg-primary hover:text-white transition-all duration-300 cursor-pointer flex items-center justify-center gap-2">
+    <button type="button"
+            class="w-full px-4 py-3 border-2 border-primary text-primary font-semibold hover:bg-primary hover:text-white transition-all duration-300 cursor-pointer flex items-center justify-center gap-2"
+            onclick="openProductModalFromCard(this)">
         <i class="fas fa-shopping-cart"></i>
         <span>Buy Now</span>
     </button>
+
+    <!-- Hidden data attributes for JavaScript -->
+    <script type="application/json" class="product-data">
+        {
+            "id": "@productId",
+            "name": "@Html.Raw(System.Text.Json.JsonSerializer.Serialize(title))",
+            "price": "@priceNumber",
+            "imageUrl": "@imageUrl",
+            "category": "@category",
+            "sizes": ["250g", "500g", "1kg"],
+            "grinds": ["Whole Bean", "French Press", "Filter", "Espresso"]
+        }
+    </script>
 </div>

@@ -46,15 +46,25 @@
             </a>
 
             <!-- Right Navigation -->
-            <div class="flex items-center md:gap-3 lg:gap-12">
-                <div class="hidden md:flex items-center md:gap-3 lg:gap-12">
-                    <a href="/partners" class="text-gray-700 hover:text-primary font-medium transition-colors uppercase  text-base">Partners</a>
-                    <a href="/contact" class="text-gray-700 hover:text-primary font-medium transition-colors uppercase  text-base">Contact</a>
-                    <a href="/blog" class="text-gray-700 hover:text-primary font-medium transition-colors uppercase  text-base">Blog</a>
-                </div>
+            <div class="md:flex items-center md:gap-3 lg:gap-12">
+            <div class="hidden md:flex items-center md:gap-3 lg:gap-12">
+                <a href="/partners" class="text-gray-700 hover:text-primary font-medium transition-colors uppercase  text-base">Partners</a>
+                <a href="/contact" class="text-gray-700 hover:text-primary font-medium transition-colors uppercase  text-base">Contact</a>
+                <a href="/blog" class="text-gray-700 hover:text-primary font-medium transition-colors uppercase  text-base">Blog</a>
+            </div>
+            <div class="flex items-center gap-4">
+                <!-- Search Icon -->
                 <button type="button" class="text-gray-700 hover:text-primary transition-colors">
                     <i class="fas fa-search text-lg"></i>
                 </button>
+
+                <!-- Cart Icon with Badge -->
+                <button type="button" class="relative text-gray-700 hover:text-primary transition-colors" onclick="toggleCartSidebar()">
+                    <i class="fas fa-shopping-cart text-lg"></i>
+                    <!-- Cart Count Badge -->
+                    <span class="cart-count absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center" style="display: none;">0</span>
+                </button>
+            </div>
             </div>
         </div>
 

@@ -19,6 +19,9 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+    /* Hide scrollbar for IE, Edge and Firefox */
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
 }
 
 body {
@@ -281,21 +284,10 @@ img {
 }
 
 /* ========================================
-   Scrollbar Styling
+   Scrollbar Styling - Hidden but functional
 ======================================== */
+/* Hide scrollbar for Chrome, Safari and Opera */
 ::-webkit-scrollbar {
-    width: 10px;
-}
-
-::-webkit-scrollbar-track {
-    background: #f1f1f1;
-}
-
-::-webkit-scrollbar-thumb {
-    background: var(--primary-color);
-    border-radius: 5px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: #5a32a3;
+    width: 0px;
+    height: 0px;
 }
