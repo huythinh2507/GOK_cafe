@@ -44,7 +44,7 @@ namespace GOKCafe.Web.Controllers
                 return NotFound();
 
             // Get products for this category
-            var productsTask = _productService.GetProductsAsync(pageNumber, pageSize, category.Id.ToString());
+            var productsTask = _productService.GetProductsAsync(pageNumber, pageSize, new List<string> { category.Id.ToString() });
             Task.WaitAll(productsTask);
             var products = productsTask.Result;
 
