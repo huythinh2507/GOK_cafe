@@ -12,7 +12,7 @@ namespace GOKCafe.Web.Services.Interfaces
         Task<PaginatedResponse<ProductDto>> GetProductsAsync(
             int pageNumber = 1,
             int pageSize = 12,
-            string? categoryId = null,
+            List<string>? categoryIds = null,
             string? searchTerm = null,
             List<string>? flavourProfileIds = null,
             List<string>? equipmentIds = null,

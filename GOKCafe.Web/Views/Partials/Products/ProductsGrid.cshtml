@@ -10,7 +10,7 @@
     // Get categories and filters from ViewData
     var categories = ViewData["Categories"] as List<CategoryDto> ?? new List<CategoryDto>();
     var filters = ViewData["Filters"] as ProductFiltersDto;
-    var selectedCategoryId = ViewData["SelectedCategoryId"] as Guid?;
+    var selectedCategoryIds = ViewData["SelectedCategoryIds"] as List<string> ?? new List<string>();
     var searchTerm = ViewData["SearchTerm"] as string ?? string.Empty;
     var selectedFlavourIds = ViewData["SelectedFlavourIds"] as List<string> ?? new List<string>();
     var selectedEquipmentIds = ViewData["SelectedEquipmentIds"] as List<string> ?? new List<string>();
@@ -19,12 +19,12 @@
     // Build category filter options from backend data
     var categoryOptions = new List<(string Name, Guid? Id, bool IsChecked)>
     {
-        ("All categories", null, selectedCategoryId == null)
+        ("All categories", null, !selectedCategoryIds.Any())
     };
 
     foreach (var category in categories)
     {
-        categoryOptions.Add((category.Name, category.Id, selectedCategoryId == category.Id));
+        categoryOptions.Add((category.Name, category.Id, selectedCategoryIds.Contains(category.Id.ToString())));
     }
 
     // Build flavour profile options from API
@@ -46,6 +46,24 @@
     // Build availability options from API
     var inStockCount = filters?.Availability?.InStockCount ?? 0;
     var outOfStockCount = filters?.Availability?.OutOfStockCount ?? 0;
+
+    // Helper function to build pagination URL with all filters
+    string BuildPaginationUrl(int page)
+    {
+        var queryParams = new List<string> { $"page={page}" };
+
+        foreach (var catId in selectedCategoryIds)
+        {
+            queryParams.Add($"category={catId}");
+        }
+
+        if (!string.IsNullOrEmpty(searchTerm))
+        {
+            queryParams.Add($"search={System.Web.HttpUtility.UrlEncode(searchTerm)}");
+        }
+
+        return "?" + string.Join("&", queryParams);
+    }
 }
 
 <!-- Products Grid Section -->
@@ -255,7 +273,7 @@
                         <!-- Previous Button -->
                         @if (currentPage > 1)
                         {
-                            <a href="?page=@(currentPage - 1)@(selectedCategoryId.HasValue ? $"&category={selectedCategoryId.Value}" : "")@(!string.IsNullOrEmpty(searchTerm) ? $"&search={searchTerm}" : "")"
+                            <a href="@BuildPaginationUrl(currentPage - 1)"
                                 class="w-12 h-12 flex items-center justify-center border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors rounded cursor-pointer">
                                 <i class="fas fa-chevron-left"></i>
                             </a>
@@ -280,7 +298,7 @@
                             }
                             else
                             {
-                                <a href="?page=@i@(selectedCategoryId.HasValue ? $"&category={selectedCategoryId.Value}" : "")@(!string.IsNullOrEmpty(searchTerm) ? $"&search={searchTerm}" : "")"
+                                <a href="@BuildPaginationUrl(i)"
                                     class="w-12 h-12 flex items-center justify-center border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors rounded cursor-pointer">
                                     @i
                                 </a>
@@ -302,7 +320,7 @@
                             }
                             else
                             {
-                                <a href="?page=@totalPages@(selectedCategoryId.HasValue ? $"&category={selectedCategoryId.Value}" : "")@(!string.IsNullOrEmpty(searchTerm) ? $"&search={searchTerm}" : "")"
+                                <a href="@BuildPaginationUrl(totalPages)"
                                     class="w-12 h-12 flex items-center justify-center border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors rounded cursor-pointer">
                                     @totalPages
                                 </a>
@@ -312,7 +330,7 @@
                         <!-- Next Button -->
                         @if (currentPage < totalPages)
                         {
-                            <a href="?page=@(currentPage + 1)@(selectedCategoryId.HasValue ? $"&category={selectedCategoryId.Value}" : "")@(!string.IsNullOrEmpty(searchTerm) ? $"&search={searchTerm}" : "")"
+                            <a href="@BuildPaginationUrl(currentPage + 1)"
                                 class="w-12 h-12 flex items-center justify-center border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors rounded cursor-pointer">
                                 <i class="fas fa-chevron-right"></i>
                             </a>
@@ -348,21 +366,21 @@
     }
 
     function filterByCategory(categoryId) {
-        // Uncheck all other category checkboxes
-        const checkboxes = document.querySelectorAll('.category-checkbox');
-        checkboxes.forEach(cb => {
-            if (cb.getAttribute('data-category-id') !== categoryId) {
-                cb.checked = false;
-            }
+        const url = new URL(window.location.href);
+
+        // Get all checked category checkboxes
+        const checkedCategories = Array.from(document.querySelectorAll('.category-checkbox:checked'))
+            .map(cb => cb.getAttribute('data-category-id'))
+            .filter(id => id && id !== 'null' && id !== '');
+
+        // Remove existing category parameters
+        url.searchParams.delete('category');
+
+        // Add new category parameters (multiple categories support)
+        checkedCategories.forEach(id => {
+            url.searchParams.append('category', id);
         });
 
-        // Build URL with category filter
-        const url = new URL(window.location.href);
-        if (categoryId && categoryId !== 'null' && categoryId !== '') {
-            url.searchParams.set('category', categoryId);
-        } else {
-            url.searchParams.delete('category');
-        }
         url.searchParams.set('page', '1'); // Reset to first page when filtering
 
         // Navigate to filtered URL

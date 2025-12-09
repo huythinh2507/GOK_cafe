@@ -131,7 +131,7 @@ namespace GOKCafe.Web.Services.Implementations
         public async Task<PaginatedResponse<ProductDto>> GetProductsAsync(
             int pageNumber = 1,
             int pageSize = 12,
-            string? categoryId = null,
+            List<string>? categoryIds = null,
             string? searchTerm = null,
             List<string>? flavourProfileIds = null,
             List<string>? equipmentIds = null,
@@ -139,10 +139,13 @@ namespace GOKCafe.Web.Services.Implementations
         {
             try
             {
-                List<Guid>? categoryIds = null;
-                if (!string.IsNullOrEmpty(categoryId) && Guid.TryParse(categoryId, out var catId))
+                List<Guid>? categoryGuids = null;
+                if (categoryIds != null && categoryIds.Any())
                 {
-                    categoryIds = new List<Guid> { catId };
+                    categoryGuids = categoryIds
+                        .Where(id => Guid.TryParse(id, out _))
+                        .Select(id => Guid.Parse(id))
+                        .ToList();
                 }
 
                 List<Guid>? flavourGuids = null;
@@ -166,7 +169,7 @@ namespace GOKCafe.Web.Services.Implementations
                 var response = await _apiClient.GetProductsAsync(
                     pageNumber: pageNumber,
                     pageSize: pageSize,
-                    categoryIds: categoryIds,
+                    categoryIds: categoryGuids,
                     search: searchTerm,
                     flavourProfileIds: flavourGuids,
                     equipmentIds: equipmentGuids,

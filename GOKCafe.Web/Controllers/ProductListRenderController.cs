@@ -37,7 +37,7 @@ namespace GOKCafe.Web.Controllers
             {
                 // Get query parameters
                 var pageNumber = int.TryParse(Request.Query["page"], out var page) ? page : 1;
-                var categoryId = Request.Query["category"].ToString();
+                var categoryIds = Request.Query["category"].Where(x => x != null).Select(x => x!).ToList();
                 var searchTerm = Request.Query["search"].ToString();
 
                 // Get filter parameters
@@ -52,10 +52,10 @@ namespace GOKCafe.Web.Controllers
 
                 var pageSize = 12; // Default page size
 
-                _logger.LogInformation($"ProductListController: Fetching products - Page: {pageNumber}, PageSize: {pageSize}, Category: {categoryId}, Search: {searchTerm}, Flavours: {flavourProfileIds.Count}, Equipment: {equipmentIds.Count}, InStock: {inStock}");
+                _logger.LogInformation($"ProductListController: Fetching products - Page: {pageNumber}, PageSize: {pageSize}, Categories: {categoryIds.Count}, Search: {searchTerm}, Flavours: {flavourProfileIds.Count}, Equipment: {equipmentIds.Count}, InStock: {inStock}");
 
                 // Get products with pagination and filters - run in parallel
-                var productsTask = _productService.GetProductsAsync(pageNumber, pageSize, categoryId, searchTerm, flavourProfileIds, equipmentIds, inStock);
+                var productsTask = _productService.GetProductsAsync(pageNumber, pageSize, categoryIds, searchTerm, flavourProfileIds, equipmentIds, inStock);
                 var categoriesTask = _categoryService.GetAllCategoriesAsync();
                 var filtersTask = _productService.GetProductFiltersAsync();
 
@@ -72,9 +72,7 @@ namespace GOKCafe.Web.Controllers
                 ViewData["Products"] = products;
                 ViewData["Categories"] = categories;
                 ViewData["Filters"] = filters;
-                ViewData["SelectedCategoryId"] = !string.IsNullOrEmpty(categoryId) && Guid.TryParse(categoryId, out var catId)
-                    ? catId
-                    : (Guid?)null;
+                ViewData["SelectedCategoryIds"] = categoryIds;
                 ViewData["SearchTerm"] = searchTerm;
                 ViewData["SelectedFlavourIds"] = flavourProfileIds;
                 ViewData["SelectedEquipmentIds"] = equipmentIds;
