@@ -5,6 +5,50 @@ All notable changes to Gotik Commerce will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2024-12-06
+
+### ✨ Added - Document Types & Content Structure
+
+This release adds complete Umbraco content structure to the package.
+
+#### Document Types (via uSync)
+- ✅ **Product Page** - Document type for individual product pages
+- ✅ **Product List** - Document type for product listing pages
+- ✅ **Category Pages** - Document type for category pages
+- ✅ **Homepage** - Document type for homepage with e-commerce features
+- ✅ **All Data Types** - Associated data types for content properties
+- ✅ **Templates** - Razor templates for rendering content
+- ✅ **Content Types** - Complete content structure definitions
+
+#### Package Improvements
+- ✅ **uSync Integration** - Automatic import of document types on package installation
+- ✅ **Content Structure** - Ready-to-use content architecture
+- ✅ **Backoffice Ready** - Create product pages directly from Umbraco backoffice
+- ✅ **Complete Solution** - Now includes both API and CMS content structure
+
+### 📦 What's New
+
+Users can now:
+1. Install the package
+2. Run uSync import (automatic on first load)
+3. Create product pages directly in Umbraco backoffice
+4. Use pre-defined document types for e-commerce content
+5. Get a complete working e-commerce system
+
+### 🔧 Technical Changes
+
+- Added uSync v16 configuration files
+- Included ContentTypes, DataTypes, and Templates
+- Package now includes complete content structure
+- Compatible with Umbraco 16.3.4+ and uSync 16.0.0+
+
+### 📊 Package Size
+
+- Previous: 3.7 MB (API only)
+- Current: ~4.5 MB (API + Content Structure)
+
+---
+
 ## [1.0.0] - 2024-12-06
 
 ### 🎉 Initial Release
