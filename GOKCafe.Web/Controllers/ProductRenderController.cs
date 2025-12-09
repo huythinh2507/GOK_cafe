@@ -36,23 +36,32 @@ namespace GOKCafe.Web.Controllers
             var productInfoNode = currentPage.Children?
                 .FirstOrDefault(x => x.ContentType.Alias == "productInformation");
 
+            Guid productId;
             if (productInfoNode != null)
             {
-                // Get product from child node
-                product = _productService.GetProductById(productInfoNode.Key);
+                productId = productInfoNode.Key;
             }
             else
             {
-                // Try to get product from current page (in case we're on the productInformation node)
-                product = _productService.GetProductById(currentPage.Key);
+                productId = currentPage.Key;
             }
+
+            // Get product async
+            var productTask = _productService.GetProductByIdAsync(productId);
+            Task.WaitAll(productTask);
+            product = productTask.Result;
 
             if (product == null)
                 return NotFound();
 
-            var category = product.CategoryId != Guid.Empty
-                ? _categoryService.GetCategoryById(product.CategoryId)
-                : null;
+            // Get category async if product has one
+            Models.DTOs.CategoryDto? category = null;
+            if (product.CategoryId != Guid.Empty)
+            {
+                var categoryTask = _categoryService.GetCategoryByIdAsync(product.CategoryId);
+                Task.WaitAll(categoryTask);
+                category = categoryTask.Result;
+            }
 
             // Get recommended products from Umbraco content tree
             var relatedProducts = new List<Models.DTOs.ProductDto>();

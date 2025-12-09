@@ -34,7 +34,7 @@ namespace GOKCafe.Web.Controllers.Api
         [HttpGet]
         [ProducesResponseType<ApiResponse<PaginatedResponse<ProductDto>>>(StatusCodes.Status200OK)]
         [ProducesResponseType<ApiResponse<object>>(StatusCodes.Status500InternalServerError)]
-        public IActionResult GetProducts(
+        public async Task<IActionResult> GetProducts(
             [FromQuery] int pageNumber = 1,
             [FromQuery] int pageSize = 12,
             [FromQuery] string? categoryId = null,
@@ -42,7 +42,7 @@ namespace GOKCafe.Web.Controllers.Api
         {
             try
             {
-                var result = _productService.GetProducts(pageNumber, pageSize, categoryId, searchTerm);
+                var result = await _productService.GetProductsAsync(pageNumber, pageSize, categoryId, searchTerm);
                 return Ok(ApiResponse<PaginatedResponse<ProductDto>>.SuccessResult(result));
             }
             catch (Exception ex)
@@ -63,11 +63,11 @@ namespace GOKCafe.Web.Controllers.Api
         [HttpGet("featured")]
         [ProducesResponseType<ApiResponse<IEnumerable<ProductDto>>>(StatusCodes.Status200OK)]
         [ProducesResponseType<ApiResponse<object>>(StatusCodes.Status500InternalServerError)]
-        public IActionResult GetFeaturedProducts([FromQuery] int count = 8)
+        public async Task<IActionResult> GetFeaturedProducts([FromQuery] int count = 8)
         {
             try
             {
-                var products = _productService.GetFeaturedProducts(count);
+                var products = await _productService.GetFeaturedProductsAsync(count);
                 return Ok(ApiResponse<IEnumerable<ProductDto>>.SuccessResult(products));
             }
             catch (Exception ex)
@@ -89,11 +89,11 @@ namespace GOKCafe.Web.Controllers.Api
         [ProducesResponseType<ApiResponse<ProductDto>>(StatusCodes.Status200OK)]
         [ProducesResponseType<ApiResponse<object>>(StatusCodes.Status404NotFound)]
         [ProducesResponseType<ApiResponse<object>>(StatusCodes.Status500InternalServerError)]
-        public IActionResult GetProductById(Guid id)
+        public async Task<IActionResult> GetProductById(Guid id)
         {
             try
             {
-                var product = _productService.GetProductById(id);
+                var product = await _productService.GetProductByIdAsync(id);
                 if (product == null)
                     return NotFound(ApiResponse<object>.FailureResult("Product not found"));
 
@@ -118,11 +118,11 @@ namespace GOKCafe.Web.Controllers.Api
         [ProducesResponseType<ApiResponse<ProductDto>>(StatusCodes.Status200OK)]
         [ProducesResponseType<ApiResponse<object>>(StatusCodes.Status404NotFound)]
         [ProducesResponseType<ApiResponse<object>>(StatusCodes.Status500InternalServerError)]
-        public IActionResult GetProductBySlug(string slug)
+        public async Task<IActionResult> GetProductBySlug(string slug)
         {
             try
             {
-                var product = _productService.GetProductBySlug(slug);
+                var product = await _productService.GetProductBySlugAsync(slug);
                 if (product == null)
                     return NotFound(ApiResponse<object>.FailureResult("Product not found"));
 
@@ -146,11 +146,11 @@ namespace GOKCafe.Web.Controllers.Api
         [HttpGet("category/{categoryId:guid}")]
         [ProducesResponseType<ApiResponse<IEnumerable<ProductDto>>>(StatusCodes.Status200OK)]
         [ProducesResponseType<ApiResponse<object>>(StatusCodes.Status500InternalServerError)]
-        public IActionResult GetProductsByCategory(Guid categoryId)
+        public async Task<IActionResult> GetProductsByCategory(Guid categoryId)
         {
             try
             {
-                var products = _productService.GetProductsByCategory(categoryId);
+                var products = await _productService.GetProductsByCategoryAsync(categoryId);
                 return Ok(ApiResponse<IEnumerable<ProductDto>>.SuccessResult(products));
             }
             catch (Exception ex)

@@ -48,17 +48,22 @@ namespace GOKCafe.Web.Controllers
             {
                 _logger.LogInformation($"[Homepage] Fetching {featuredCount} featured products");
 
-                // Call directly to Application layer service (no HTTP API)
-                var productsResponse = _productService.GetProductsAsync(
+                // Call both services in parallel for better performance
+                var productsTask = _productService.GetProductsAsync(
                     pageNumber: 1,
                     pageSize: featuredCount,
                     isFeatured: null // Changed from true to null to get all products
-                ).GetAwaiter().GetResult();
+                );
+
+                var categoriesTask = _categoryService.GetAllCategoriesAsync();
+
+                // Wait for both to complete in parallel - using Task.WaitAll for sync context
+                Task.WaitAll(productsTask, categoriesTask);
+
+                var productsResponse = productsTask.Result;
+                var categoriesResponse = categoriesTask.Result;
 
                 _logger.LogInformation($"[Homepage] Products Response - Success: {productsResponse.Success}, Count: {productsResponse.Data?.Items.Count ?? 0}");
-
-                var categoriesResponse = _categoryService.GetAllCategoriesAsync()
-                    .GetAwaiter().GetResult();
 
                 // Extract data from API responses
                 var featuredProducts = productsResponse.Success && productsResponse.Data != null

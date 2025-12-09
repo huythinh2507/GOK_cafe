@@ -16,11 +16,11 @@ namespace GOKCafe.Web.Services.Implementations
             _logger = logger;
         }
 
-        public IEnumerable<CategoryDto> GetAllCategories()
+        public async Task<IEnumerable<CategoryDto>> GetAllCategoriesAsync()
         {
             try
             {
-                var response = _apiClient.GetCategoriesAsync().GetAwaiter().GetResult();
+                var response = await _apiClient.GetCategoriesAsync();
 
                 if (response.Success && response.Data != null)
                 {
@@ -37,11 +37,11 @@ namespace GOKCafe.Web.Services.Implementations
             }
         }
 
-        public CategoryDto? GetCategoryById(Guid id)
+        public async Task<CategoryDto?> GetCategoryByIdAsync(Guid id)
         {
             try
             {
-                var response = _apiClient.GetCategoryByIdAsync(id).GetAwaiter().GetResult();
+                var response = await _apiClient.GetCategoryByIdAsync(id);
 
                 if (response.Success && response.Data != null)
                 {
@@ -58,12 +58,12 @@ namespace GOKCafe.Web.Services.Implementations
             }
         }
 
-        public CategoryDto? GetCategoryBySlug(string slug)
+        public async Task<CategoryDto?> GetCategoryBySlugAsync(string slug)
         {
             try
             {
                 // API doesn't have slug endpoint, so get all and filter
-                var allCategories = GetAllCategories();
+                var allCategories = await GetAllCategoriesAsync();
                 return allCategories.FirstOrDefault(c =>
                     c.Slug.Equals(slug, StringComparison.OrdinalIgnoreCase) ||
                     c.Name.Replace(" ", "-").Equals(slug, StringComparison.OrdinalIgnoreCase));

@@ -16,15 +16,15 @@ namespace GOKCafe.Web.Services.Implementations
             this._logger = _logger;
         }
 
-        public IEnumerable<ProductDto> GetFeaturedProducts(int count = 8)
+        public async Task<IEnumerable<ProductDto>> GetFeaturedProductsAsync(int count = 8)
         {
             try
             {
-                var response = _apiClient.GetProductsAsync(
+                var response = await _apiClient.GetProductsAsync(
                     pageNumber: 1,
                     pageSize: count,
                     isFeatured: true
-                ).GetAwaiter().GetResult();
+                );
 
                 if (response.Success && response.Data != null)
                 {
@@ -41,14 +41,14 @@ namespace GOKCafe.Web.Services.Implementations
             }
         }
 
-        public IEnumerable<ProductDto> GetAllProducts()
+        public async Task<IEnumerable<ProductDto>> GetAllProductsAsync()
         {
             try
             {
-                var response = _apiClient.GetProductsAsync(
+                var response = await _apiClient.GetProductsAsync(
                     pageNumber: 1,
                     pageSize: 1000 // Get all products
-                ).GetAwaiter().GetResult();
+                );
 
                 if (response.Success && response.Data != null)
                 {
@@ -65,15 +65,15 @@ namespace GOKCafe.Web.Services.Implementations
             }
         }
 
-        public IEnumerable<ProductDto> GetProductsByCategory(Guid categoryId)
+        public async Task<IEnumerable<ProductDto>> GetProductsByCategoryAsync(Guid categoryId)
         {
             try
             {
-                var response = _apiClient.GetProductsAsync(
+                var response = await _apiClient.GetProductsAsync(
                     pageNumber: 1,
                     pageSize: 1000,
                     categoryIds: new List<Guid> { categoryId }
-                ).GetAwaiter().GetResult();
+                );
 
                 if (response.Success && response.Data != null)
                 {
@@ -90,11 +90,11 @@ namespace GOKCafe.Web.Services.Implementations
             }
         }
 
-        public ProductDto? GetProductById(Guid id)
+        public async Task<ProductDto?> GetProductByIdAsync(Guid id)
         {
             try
             {
-                var response = _apiClient.GetProductByIdAsync(id).GetAwaiter().GetResult();
+                var response = await _apiClient.GetProductByIdAsync(id);
 
                 if (response.Success && response.Data != null)
                 {
@@ -111,12 +111,12 @@ namespace GOKCafe.Web.Services.Implementations
             }
         }
 
-        public ProductDto? GetProductBySlug(string slug)
+        public async Task<ProductDto?> GetProductBySlugAsync(string slug)
         {
             try
             {
                 // API doesn't have slug endpoint, so get all and filter
-                var allProducts = GetAllProducts();
+                var allProducts = await GetAllProductsAsync();
                 return allProducts.FirstOrDefault(p =>
                     p.Slug.Equals(slug, StringComparison.OrdinalIgnoreCase) ||
                     p.Name.Replace(" ", "-").Equals(slug, StringComparison.OrdinalIgnoreCase));
@@ -128,7 +128,7 @@ namespace GOKCafe.Web.Services.Implementations
             }
         }
 
-        public PaginatedResponse<ProductDto> GetProducts(
+        public async Task<PaginatedResponse<ProductDto>> GetProductsAsync(
             int pageNumber = 1,
             int pageSize = 12,
             string? categoryId = null,
@@ -163,7 +163,7 @@ namespace GOKCafe.Web.Services.Implementations
                         .ToList();
                 }
 
-                var response = _apiClient.GetProductsAsync(
+                var response = await _apiClient.GetProductsAsync(
                     pageNumber: pageNumber,
                     pageSize: pageSize,
                     categoryIds: categoryIds,
@@ -171,7 +171,7 @@ namespace GOKCafe.Web.Services.Implementations
                     flavourProfileIds: flavourGuids,
                     equipmentIds: equipmentGuids,
                     inStock: inStock
-                ).GetAwaiter().GetResult();
+                );
 
                 if (response.Success && response.Data != null)
                 {
@@ -209,11 +209,11 @@ namespace GOKCafe.Web.Services.Implementations
             }
         }
 
-        public ProductFiltersDto? GetProductFilters()
+        public async Task<ProductFiltersDto?> GetProductFiltersAsync()
         {
             try
             {
-                var response = _apiClient.GetProductFiltersAsync().GetAwaiter().GetResult();
+                var response = await _apiClient.GetProductFiltersAsync();
 
                 if (response.Success && response.Data != null)
                 {

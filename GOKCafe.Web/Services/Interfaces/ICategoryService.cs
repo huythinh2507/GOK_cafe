@@ -4,8 +4,8 @@ namespace GOKCafe.Web.Services.Interfaces
 {
     public interface ICategoryService
     {
-        IEnumerable<CategoryDto> GetAllCategories();
-        CategoryDto? GetCategoryById(Guid id);
-        CategoryDto? GetCategoryBySlug(string slug);
+        Task<IEnumerable<CategoryDto>> GetAllCategoriesAsync();
+        Task<CategoryDto?> GetCategoryByIdAsync(Guid id);
+        Task<CategoryDto?> GetCategoryBySlugAsync(string slug);
     }
 }
