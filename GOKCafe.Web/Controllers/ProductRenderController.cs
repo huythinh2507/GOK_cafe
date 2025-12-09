@@ -32,18 +32,29 @@ namespace GOKCafe.Web.Controllers
 
             Models.DTOs.ProductDto? product = null;
 
-            // Check if current page has productInformation as child
-            var productInfoNode = currentPage.Children?
-                .FirstOrDefault(x => x.ContentType.Alias == "productInformation");
-
+            // Try to get product ID from query string first
+            var productIdParam = Request.Query["id"].ToString();
             Guid productId;
-            if (productInfoNode != null)
+
+            if (!string.IsNullOrEmpty(productIdParam) && Guid.TryParse(productIdParam, out var parsedId))
             {
-                productId = productInfoNode.Key;
+                // Use product ID from query string
+                productId = parsedId;
             }
             else
             {
-                productId = currentPage.Key;
+                // Check if current page has productInformation as child
+                var productInfoNode = currentPage.Children()?
+                    .FirstOrDefault(x => x.ContentType.Alias == "productInformation");
+
+                if (productInfoNode != null)
+                {
+                    productId = productInfoNode.Key;
+                }
+                else
+                {
+                    productId = currentPage.Key;
+                }
             }
 
             // Get product async
@@ -63,9 +74,9 @@ namespace GOKCafe.Web.Controllers
                 category = categoryTask.Result;
             }
 
-            // Get recommended products from Umbraco content tree
+            // Get recommended products from Umbraco content tree or from API
             var relatedProducts = new List<Models.DTOs.ProductDto>();
-            var recommendProductNodes = currentPage.Children?.Where(x => x.ContentType.Alias == "recommendProduct");
+            var recommendProductNodes = currentPage.Children()?.Where(x => x.ContentType.Alias == "recommendProduct");
 
             if (recommendProductNodes != null && recommendProductNodes.Any())
             {
@@ -88,6 +99,28 @@ namespace GOKCafe.Web.Controllers
                     };
 
                     relatedProducts.Add(recommendedProduct);
+                }
+            }
+            else
+            {
+                // Get related products from API (same category)
+                if (product.CategoryId != Guid.Empty)
+                {
+                    var relatedProductsTask = _productService.GetProductsAsync(
+                        pageNumber: 1,
+                        pageSize: 4,
+                        categoryId: product.CategoryId.ToString()
+                    );
+                    Task.WaitAll(relatedProductsTask);
+                    var relatedProductsResponse = relatedProductsTask.Result;
+
+                    if (relatedProductsResponse?.Items != null)
+                    {
+                        relatedProducts = relatedProductsResponse.Items
+                            .Where(p => p.Id != product.Id) // Exclude current product
+                            .Take(4)
+                            .ToList();
+                    }
                 }
             }
 

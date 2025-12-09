@@ -114,7 +114,7 @@
 
     <!-- Cart Footer -->
     <div class="px-5 py-4 bg-white">
-        <!-- Order for Someone Else (Moved to top) -->
+        @* <!-- Order for Someone Else (Moved to top) -->
         <div class="mb-3 pb-3 border-b border-gray-200">
             <button type="button" class="text-xs text-gray-700 hover:text-primary transition-colors flex items-center gap-2" onclick="toggleOrderForSomeoneElse()">
                 <i class="fas fa-user-friends text-sm"></i>
@@ -138,26 +138,135 @@
                               placeholder=""></textarea>
                 </div>
             </div>
+        </div> *@
+
+        <!-- Price Breakdown -->
+        <div class="space-y-3 mb-4">
+            <!-- Subtotal -->
+            <div class="flex justify-between items-center">
+                <span class="text-sm text-gray-700">Subtotal</span>
+                <span class="text-sm font-semibold text-gray-900" id="cartSubtotal">0đ</span>
+            </div>
+
+            <!-- Shipping Fee -->
+            <div class="flex justify-between items-center">
+                <span class="text-sm text-gray-700">Shipping fee</span>
+                <span class="text-sm text-gray-900" id="shippingFee">0đ</span>
+            </div>
+
+            <!-- Coupon Input -->
+            <div class="space-y-2">
+                <label for="couponCode" class="block text-xs font-medium text-gray-700 uppercase">Enter coupon code</label>
+                <div class="flex gap-2">
+                    <input type="text"
+                           id="couponCode"
+                           placeholder="Enter coupon code"
+                           class="flex-1 border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary" />
+                    <button type="button"
+                            onclick="applyCoupon()"
+                            class="bg-primary text-white px-4 py-2 rounded text-sm font-medium hover:bg-primary/90 transition-colors">
+                        Apply
+                    </button>
+                </div>
+                <p id="couponError" class="text-xs text-red-600 hidden"></p>
+                <p id="couponSuccess" class="text-xs text-green-600 hidden"></p>
+            </div>
+
+            <!-- Voucher Selection -->
+            <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                    <label class="block text-xs font-medium text-gray-700 uppercase">Enter Voucher</label>
+                    <button type="button" class="text-xs text-primary hover:underline" onclick="showAllVouchers()">
+                        View all
+                    </button>
+                </div>
+
+                <!-- Voucher Cards Container (Horizontal Scroll) -->
+                <div class="relative">
+                    <div id="voucherContainer" class="flex gap-3 overflow-x-auto pb-2 scroll-smooth" style="scrollbar-width: thin;">
+                        <!-- Vouchers will be loaded dynamically -->
+                        <div class="text-center text-gray-400 text-sm py-4 w-full">
+                            Loading vouchers...
+                        </div>
+                    </div>
+
+                    <!-- Scroll Navigation Buttons (Optional) -->
+                    <button type="button"
+                            id="scrollLeftBtn"
+                            onclick="scrollVouchers('left')"
+                            class="hidden absolute left-0 top-1/2 -translate-y-1/2 bg-white/90 rounded-full w-6 h-6 shadow-md items-center justify-center hover:bg-white z-10">
+                        <i class="fas fa-chevron-left text-xs text-gray-600"></i>
+                    </button>
+                    <button type="button"
+                            id="scrollRightBtn"
+                            onclick="scrollVouchers('right')"
+                            class="hidden absolute right-0 top-1/2 -translate-y-1/2 bg-white/90 rounded-full w-6 h-6 shadow-md items-center justify-center hover:bg-white z-10">
+                        <i class="fas fa-chevron-right text-xs text-gray-600"></i>
+                    </button>
+                </div>
+
+                <!-- Voucher Card Template -->
+                <template id="voucherCardTemplate">
+                    <div class="voucher-card flex-shrink-0 w-48 border rounded-lg p-3 cursor-pointer transition-all hover:shadow-md"
+                         data-voucher-id=""
+                         onclick="selectVoucher(this)">
+                        <!-- Voucher Header -->
+                        <div class="flex items-start justify-between mb-2">
+                            <div class="flex-1">
+                                <h4 class="voucher-code text-sm font-bold text-gray-900 uppercase"></h4>
+                                <p class="voucher-discount text-xs text-gray-600 mt-1"></p>
+                            </div>
+                            <input type="radio" name="selectedVoucher" class="voucher-radio mt-1" />
+                        </div>
+
+                        <!-- Voucher Details -->
+                        <div class="voucher-description text-xs text-gray-500 mb-2"></div>
+
+                        <!-- Expiry Date -->
+                        <div class="flex items-center justify-between">
+                            <span class="voucher-expiry text-xs text-gray-400"></span>
+                            <button type="button" class="text-xs text-primary hover:underline">
+                                Terms
+                            </button>
+                        </div>
+
+                        <!-- Progress Bar (if applicable) -->
+                        <div class="voucher-progress mt-2 hidden">
+                            <div class="w-full bg-gray-200 rounded-full h-1.5">
+                                <div class="voucher-progress-bar bg-orange-400 h-1.5 rounded-full" style="width: 0%"></div>
+                            </div>
+                            <p class="voucher-progress-text text-xs text-orange-600 mt-1"></p>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Voucher Discount -->
+            <div id="voucherDiscountContainer" class="hidden">
+                <div class="flex justify-between items-center">
+                    <span class="text-sm text-gray-700">Voucher discount</span>
+                    <span class="text-sm font-semibold text-green-600" id="voucherDiscount">-0đ</span>
+                </div>
+            </div>
         </div>
 
-        <!-- Subtotal -->
-        <div class="flex justify-between items-center mb-3">
-            <span class="text-xs font-semibold text-gray-700 uppercase">Subtotal</span>
-            <span class="text-base font-bold text-gray-900" id="cartSubtotal">0 VND</span>
+        <!-- Divider -->
+        <div class="border-t border-gray-300 pt-3 mb-4">
+            <!-- Total -->
+            <div class="flex justify-between items-center">
+                <span class="text-base font-bold text-gray-900 uppercase">Total</span>
+                <span class="text-xl font-bold text-primary" id="cartTotal">0đ</span>
+            </div>
         </div>
 
-        <p class="text-xs text-gray-500 mb-4">
-            Shipping, taxes, and discount codes calculated at checkout.
-        </p>
-
-        <!-- Pay via Gift Cards -->
+        @* <!-- Pay via Gift Cards -->
         <div class="mb-4">
             <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer border border-gray-300 rounded px-3 py-2">
                 <input type="checkbox" id="payViaGiftCards" class="rounded border-gray-300 text-primary focus:ring-primary w-4 h-4" />
                 <i class="fas fa-gift"></i>
-                <span class="font-medium">PAY VIA GIFT CARDS</span>
+                <span class="font-medium">THANH TOÁN BẰNG THẺ QUÀ TẶNG</span>
             </label>
-        </div>
+        </div> *@
 
         <!-- Checkout Buttons -->
         <div class="space-y-2">
@@ -218,5 +327,38 @@
 
 .cart-item-quantity {
     -moz-appearance: textfield;
+}
+
+/* Voucher Container Scrollbar */
+#voucherContainer::-webkit-scrollbar {
+    height: 6px;
+}
+
+#voucherContainer::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+#voucherContainer::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+}
+
+#voucherContainer::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Voucher Card Styles */
+.voucher-card {
+    border-color: #e5e7eb;
+}
+
+.voucher-card:hover {
+    border-color: #d1d5db;
+}
+
+.voucher-card.border-primary {
+    border-color: #3B82F6;
+    border-width: 2px;
 }
 </style>
