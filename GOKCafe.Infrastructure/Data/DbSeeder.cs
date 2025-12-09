@@ -79,6 +79,10 @@ public static class DbSeeder
                 Id = Guid.NewGuid(),
                 Name = "Natural Cold Brew Coffee",
                 Description = "Smooth and refreshing cold brew coffee, steeped for 24 hours for maximum flavor. Perfect for hot days!",
+                ShortDescription = "24-hour steeped cold brew coffee",
+                TastingNote = "Smooth, chocolatey, low acidity",
+                Region = "Colombia",
+                Process = "Cold Brew",
                 Slug = "natural-cold-brew-coffee",
                 Price = 4.99m,
                 DiscountPrice = 3.99m,
@@ -88,6 +92,8 @@ public static class DbSeeder
                 IsFeatured = true,
                 CategoryId = coffeeCategory.Id,
                 DisplayOrder = 1,
+                AvailableSizes = System.Text.Json.JsonSerializer.Serialize(new[] { "250g", "500g", "1kg" }),
+                AvailableGrinds = System.Text.Json.JsonSerializer.Serialize(new[] { "Whole Bean", "French Press", "Filter", "Espresso" }),
                 CreatedAt = DateTime.UtcNow
             },
             new Product
@@ -95,6 +101,10 @@ public static class DbSeeder
                 Id = Guid.NewGuid(),
                 Name = "Espresso",
                 Description = "Rich and bold espresso made from premium arabica beans. The perfect wake-up call!",
+                ShortDescription = "Premium arabica espresso beans",
+                TastingNote = "Bold, intense, caramel notes",
+                Region = "Ethiopia",
+                Process = "Washed",
                 Slug = "espresso",
                 Price = 3.50m,
                 ImageUrl = "https://images.unsplash.com/photo-1510591509098-f4fdc6d0ff04?w=800",
@@ -103,6 +113,8 @@ public static class DbSeeder
                 IsFeatured = true,
                 CategoryId = coffeeCategory.Id,
                 DisplayOrder = 2,
+                AvailableSizes = System.Text.Json.JsonSerializer.Serialize(new[] { "250g", "500g", "1kg" }),
+                AvailableGrinds = System.Text.Json.JsonSerializer.Serialize(new[] { "Whole Bean", "Espresso" }),
                 CreatedAt = DateTime.UtcNow
             },
             new Product
@@ -110,6 +122,10 @@ public static class DbSeeder
                 Id = Guid.NewGuid(),
                 Name = "Cappuccino",
                 Description = "Classic Italian cappuccino with perfectly steamed milk and a touch of foam",
+                ShortDescription = "Classic Italian cappuccino blend",
+                TastingNote = "Creamy, balanced, hazelnut finish",
+                Region = "Brazil",
+                Process = "Natural",
                 Slug = "cappuccino",
                 Price = 4.50m,
                 ImageUrl = "https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=800",
@@ -118,6 +134,8 @@ public static class DbSeeder
                 IsFeatured = true,
                 CategoryId = coffeeCategory.Id,
                 DisplayOrder = 3,
+                AvailableSizes = System.Text.Json.JsonSerializer.Serialize(new[] { "250g", "500g" }),
+                AvailableGrinds = System.Text.Json.JsonSerializer.Serialize(new[] { "Whole Bean", "French Press", "Filter" }),
                 CreatedAt = DateTime.UtcNow
             },
             new Product

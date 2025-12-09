@@ -14,6 +14,17 @@ public class Product : BaseEntity
     public bool IsFeatured { get; set; }
     public Guid CategoryId { get; set; }
     public int DisplayOrder { get; set; }
+    public string? ShortDescription { get; set; }
+    public string? TastingNote { get; set; }
+    public string? Region { get; set; }
+    public string? Process { get; set; }
+
+    // Product options stored as JSON arrays
+    // Example: ["250g", "500g", "1kg"]
+    public string? AvailableSizes { get; set; }
+
+    // Example: ["Whole Bean", "French Press", "Filter", "Espresso"]
+    public string? AvailableGrinds { get; set; }
 
     // Navigation properties
     public virtual Category Category { get; set; } = null!;

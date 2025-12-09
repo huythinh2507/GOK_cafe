@@ -624,7 +624,9 @@ window.openProductModal = async function(productId) {
             region: productData.region,
             process: productData.process,
             stockQuantity: productData.stockQuantity,
-            isActive: productData.isActive
+            isActive: productData.isActive,
+            availableSizes: productData.availableSizes || [],
+            availableGrinds: productData.availableGrinds || []
         };
 
         // Populate modal with product data
@@ -708,11 +710,17 @@ window.openProductModal = async function(productId) {
         document.getElementById('modalMainImage').src = currentProduct.imageUrl || '/images/placeholder-product.jpg';
         document.getElementById('modalMainImage').alt = currentProduct.name || '';
 
-        // Render size options (default options, can be customized later)
-        renderSizeOptions(['250g', '500g', '1kg']);
+        // Render size options from backend data (or use defaults if not available)
+        const sizeOptions = currentProduct.availableSizes && currentProduct.availableSizes.length > 0
+            ? currentProduct.availableSizes
+            : ['250g', '500g', '1kg'];
+        renderSizeOptions(sizeOptions);
 
-        // Render grind options (default options, can be customized later)
-        renderGrindOptions(['Whole Bean', 'French Press', 'Filter', 'Espresso']);
+        // Render grind options from backend data (or use defaults if not available)
+        const grindOptions = currentProduct.availableGrinds && currentProduct.availableGrinds.length > 0
+            ? currentProduct.availableGrinds
+            : ['Whole Bean', 'French Press', 'Filter', 'Espresso'];
+        renderGrindOptions(grindOptions);
 
         // Reset quantity
         document.getElementById('modalQuantity').value = 1;

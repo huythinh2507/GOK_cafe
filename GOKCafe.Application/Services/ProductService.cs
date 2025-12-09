@@ -110,11 +110,18 @@ public class ProductService : IProductService
                 .ThenBy(p => p.Name)
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
-                .Select(p => new ProductDto
+                .ToListAsync();
+
+            // Map to DTOs with JSON deserialization done in-memory
+            var productDtos = items.Select(p => new ProductDto
                 {
                     Id = p.Id,
                     Name = p.Name,
                     Description = p.Description,
+                    ShortDescription = p.ShortDescription,
+                    TastingNote = p.TastingNote,
+                    Region = p.Region,
+                    Process = p.Process,
                     Slug = p.Slug,
                     Price = p.Price,
                     DiscountPrice = p.DiscountPrice,
@@ -124,6 +131,12 @@ public class ProductService : IProductService
                     IsFeatured = p.IsFeatured,
                     CategoryId = p.CategoryId,
                     CategoryName = p.Category.Name,
+                    AvailableSizes = !string.IsNullOrEmpty(p.AvailableSizes)
+                        ? System.Text.Json.JsonSerializer.Deserialize<List<string>>(p.AvailableSizes)
+                        : null,
+                    AvailableGrinds = !string.IsNullOrEmpty(p.AvailableGrinds)
+                        ? System.Text.Json.JsonSerializer.Deserialize<List<string>>(p.AvailableGrinds)
+                        : null,
                     Images = p.ProductImages.Select(pi => new ProductImageDto
                     {
                         Id = pi.Id,
@@ -148,11 +161,11 @@ public class ProductService : IProductService
                         DisplayOrder = pe.Equipment.DisplayOrder,
                         IsActive = pe.Equipment.IsActive
                     }).ToList()
-                }).ToListAsync();
+                }).ToList();
 
             var response = new PaginatedResponse<ProductDto>
             {
-                Items = items,
+                Items = productDtos,
                 TotalItems = totalCount,
                 PageNumber = pageNumber,
                 PageSize = pageSize
@@ -471,6 +484,10 @@ public class ProductService : IProductService
             Id = product.Id,
             Name = product.Name,
             Description = product.Description,
+            ShortDescription = product.ShortDescription,
+            TastingNote = product.TastingNote,
+            Region = product.Region,
+            Process = product.Process,
             Slug = product.Slug,
             Price = product.Price,
             DiscountPrice = product.DiscountPrice,
@@ -480,6 +497,12 @@ public class ProductService : IProductService
             IsFeatured = product.IsFeatured,
             CategoryId = product.CategoryId,
             CategoryName = product.Category?.Name ?? string.Empty,
+            AvailableSizes = !string.IsNullOrEmpty(product.AvailableSizes)
+                ? System.Text.Json.JsonSerializer.Deserialize<List<string>>(product.AvailableSizes)
+                : null,
+            AvailableGrinds = !string.IsNullOrEmpty(product.AvailableGrinds)
+                ? System.Text.Json.JsonSerializer.Deserialize<List<string>>(product.AvailableGrinds)
+                : null,
             Images = product.ProductImages?.Select(pi => new ProductImageDto
             {
                 Id = pi.Id,
