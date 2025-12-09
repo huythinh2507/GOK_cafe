@@ -24,6 +24,12 @@ public static class DbSeeder
         {
             await SeedFlavourProfilesAndEquipment(context);
         }
+
+        // Seed Coupons and Bank Transfer Configs if not exist
+        if (!context.Coupons.Any())
+        {
+            await SeedCouponsAndBankConfigs(context);
+        }
     }
 
     private static async Task SeedCategoriesAndProducts(ApplicationDbContext context)
@@ -659,6 +665,270 @@ public static class DbSeeder
         };
 
         await context.Equipments.AddRangeAsync(equipments);
+
+        await context.SaveChangesAsync();
+    }
+
+    private static async Task SeedCouponsAndBankConfigs(ApplicationDbContext context)
+    {
+        // Seed Bank Transfer Configurations
+        var bankConfigs = new List<BankTransferConfig>
+        {
+            new BankTransferConfig
+            {
+                Id = Guid.NewGuid(),
+                BankCode = "970422", // MB Bank
+                BankName = "MB Bank (Military Commercial Joint Stock Bank)",
+                AccountNumber = "0123456789012",
+                AccountName = "CONG TY GOK CAFE",
+                BankBranch = "Ho Chi Minh City Branch",
+                IsActive = true,
+                DisplayOrder = 1,
+                LogoUrl = "https://via.placeholder.com/150x50?text=MBBank",
+                CreatedAt = DateTime.UtcNow
+            },
+            new BankTransferConfig
+            {
+                Id = Guid.NewGuid(),
+                BankCode = "970415", // Vietinbank
+                BankName = "Vietinbank (Vietnam Joint Stock Commercial Bank for Industry and Trade)",
+                AccountNumber = "1234567890123",
+                AccountName = "CONG TY GOK CAFE",
+                BankBranch = "District 1 Branch",
+                IsActive = true,
+                DisplayOrder = 2,
+                LogoUrl = "https://via.placeholder.com/150x50?text=Vietinbank",
+                CreatedAt = DateTime.UtcNow
+            },
+            new BankTransferConfig
+            {
+                Id = Guid.NewGuid(),
+                BankCode = "970436", // Vietcombank
+                BankName = "Vietcombank (Joint Stock Commercial Bank for Foreign Trade of Vietnam)",
+                AccountNumber = "2345678901234",
+                AccountName = "CONG TY GOK CAFE",
+                BankBranch = "Saigon Branch",
+                IsActive = true,
+                DisplayOrder = 3,
+                LogoUrl = "https://via.placeholder.com/150x50?text=Vietcombank",
+                CreatedAt = DateTime.UtcNow
+            }
+        };
+
+        await context.BankTransferConfigs.AddRangeAsync(bankConfigs);
+
+        // Seed System Coupons (Available for all users)
+        var systemCoupons = new List<Coupon>
+        {
+            new Coupon
+            {
+                Id = Guid.NewGuid(),
+                Code = "WELCOME2025",
+                Name = "Welcome Coupon 2025",
+                Description = "Special welcome discount for new customers - 50,000 VNĐ off your first order!",
+                Type = CouponType.OneTime,
+                DiscountType = DiscountType.FixedAmount,
+                DiscountValue = 50000,
+                MaxDiscountAmount = null,
+                MinOrderAmount = 100000,
+                RemainingBalance = null,
+                IsSystemCoupon = true,
+                UserId = null,
+                IsActive = true,
+                StartDate = DateTime.UtcNow,
+                EndDate = DateTime.UtcNow.AddMonths(6),
+                MaxUsageCount = null, // Unlimited usage
+                UsageCount = 0,
+                IsUsed = false,
+                CreatedAt = DateTime.UtcNow
+            },
+            new Coupon
+            {
+                Id = Guid.NewGuid(),
+                Code = "COFFEE20",
+                Name = "Coffee Lover's Discount",
+                Description = "Get 20% off on all coffee products",
+                Type = CouponType.OneTime,
+                DiscountType = DiscountType.Percentage,
+                DiscountValue = 20,
+                MaxDiscountAmount = 100000,
+                MinOrderAmount = 50000,
+                RemainingBalance = null,
+                IsSystemCoupon = true,
+                UserId = null,
+                IsActive = true,
+                StartDate = DateTime.UtcNow,
+                EndDate = DateTime.UtcNow.AddMonths(3),
+                MaxUsageCount = 100, // Limited to 100 uses
+                UsageCount = 0,
+                IsUsed = false,
+                CreatedAt = DateTime.UtcNow
+            },
+            new Coupon
+            {
+                Id = Guid.NewGuid(),
+                Code = "TEATIME15",
+                Name = "Tea Time Special",
+                Description = "15% discount on tea purchases",
+                Type = CouponType.OneTime,
+                DiscountType = DiscountType.Percentage,
+                DiscountValue = 15,
+                MaxDiscountAmount = 75000,
+                MinOrderAmount = 30000,
+                RemainingBalance = null,
+                IsSystemCoupon = true,
+                UserId = null,
+                IsActive = true,
+                StartDate = DateTime.UtcNow,
+                EndDate = DateTime.UtcNow.AddMonths(2),
+                MaxUsageCount = null,
+                UsageCount = 0,
+                IsUsed = false,
+                CreatedAt = DateTime.UtcNow
+            },
+            new Coupon
+            {
+                Id = Guid.NewGuid(),
+                Code = "FREESHIP",
+                Name = "Free Shipping Voucher",
+                Description = "Free shipping for orders above 200,000 VNĐ",
+                Type = CouponType.OneTime,
+                DiscountType = DiscountType.FixedAmount,
+                DiscountValue = 30000,
+                MaxDiscountAmount = null,
+                MinOrderAmount = 200000,
+                RemainingBalance = null,
+                IsSystemCoupon = true,
+                UserId = null,
+                IsActive = true,
+                StartDate = DateTime.UtcNow,
+                EndDate = DateTime.UtcNow.AddMonths(12),
+                MaxUsageCount = null,
+                UsageCount = 0,
+                IsUsed = false,
+                CreatedAt = DateTime.UtcNow
+            },
+            new Coupon
+            {
+                Id = Guid.NewGuid(),
+                Code = "LOYALTY500K",
+                Name = "Loyalty Reward - 500K Balance",
+                Description = "Gradual discount coupon with 500,000 VNĐ balance - can be used multiple times until balance runs out",
+                Type = CouponType.Gradual,
+                DiscountType = DiscountType.FixedAmount,
+                DiscountValue = 500000, // Initial balance
+                MaxDiscountAmount = 100000, // Max 100K per order
+                MinOrderAmount = 50000,
+                RemainingBalance = 500000,
+                IsSystemCoupon = true,
+                UserId = null,
+                IsActive = true,
+                StartDate = DateTime.UtcNow,
+                EndDate = DateTime.UtcNow.AddYears(1),
+                MaxUsageCount = null,
+                UsageCount = 0,
+                IsUsed = false,
+                CreatedAt = DateTime.UtcNow
+            },
+            new Coupon
+            {
+                Id = Guid.NewGuid(),
+                Code = "WEEKEND25",
+                Name = "Weekend Special",
+                Description = "25% off on weekend orders (Friday-Sunday)",
+                Type = CouponType.OneTime,
+                DiscountType = DiscountType.Percentage,
+                DiscountValue = 25,
+                MaxDiscountAmount = 150000,
+                MinOrderAmount = 100000,
+                RemainingBalance = null,
+                IsSystemCoupon = true,
+                UserId = null,
+                IsActive = true,
+                StartDate = DateTime.UtcNow,
+                EndDate = DateTime.UtcNow.AddMonths(1),
+                MaxUsageCount = 50,
+                UsageCount = 0,
+                IsUsed = false,
+                CreatedAt = DateTime.UtcNow
+            },
+            new Coupon
+            {
+                Id = Guid.NewGuid(),
+                Code = "NEWYEAR2025",
+                Name = "New Year Mega Sale",
+                Description = "Special New Year discount - 100,000 VNĐ off!",
+                Type = CouponType.OneTime,
+                DiscountType = DiscountType.FixedAmount,
+                DiscountValue = 100000,
+                MaxDiscountAmount = null,
+                MinOrderAmount = 300000,
+                RemainingBalance = null,
+                IsSystemCoupon = true,
+                UserId = null,
+                IsActive = true,
+                StartDate = DateTime.UtcNow,
+                EndDate = new DateTime(2025, 1, 31, 23, 59, 59, DateTimeKind.Utc),
+                MaxUsageCount = 200,
+                UsageCount = 0,
+                IsUsed = false,
+                CreatedAt = DateTime.UtcNow
+            }
+        };
+
+        await context.Coupons.AddRangeAsync(systemCoupons);
+
+        // Seed Sample Personal Coupons (for demonstration)
+        // Note: In production, these would be created when users register or earn rewards
+        var personalCoupons = new List<Coupon>
+        {
+            new Coupon
+            {
+                Id = Guid.NewGuid(),
+                Code = "PERSONAL100K",
+                Name = "Personal Loyalty Reward",
+                Description = "Your exclusive loyalty reward - 100,000 VNĐ gradual discount",
+                Type = CouponType.Gradual,
+                DiscountType = DiscountType.FixedAmount,
+                DiscountValue = 100000,
+                MaxDiscountAmount = 50000, // Max 50K per order
+                MinOrderAmount = 30000,
+                RemainingBalance = 100000,
+                IsSystemCoupon = false,
+                UserId = null, // Would be set to actual user ID
+                IsActive = true,
+                StartDate = DateTime.UtcNow,
+                EndDate = DateTime.UtcNow.AddMonths(6),
+                MaxUsageCount = null,
+                UsageCount = 0,
+                IsUsed = false,
+                CreatedAt = DateTime.UtcNow
+            },
+            new Coupon
+            {
+                Id = Guid.NewGuid(),
+                Code = "BIRTHDAY50",
+                Name = "Birthday Gift Coupon",
+                Description = "Happy Birthday! Enjoy 50% off your order",
+                Type = CouponType.OneTime,
+                DiscountType = DiscountType.Percentage,
+                DiscountValue = 50,
+                MaxDiscountAmount = 200000,
+                MinOrderAmount = 0,
+                RemainingBalance = null,
+                IsSystemCoupon = false,
+                UserId = null, // Would be set to actual user ID
+                IsActive = true,
+                StartDate = DateTime.UtcNow,
+                EndDate = DateTime.UtcNow.AddDays(30),
+                MaxUsageCount = 1,
+                UsageCount = 0,
+                IsUsed = false,
+                CreatedAt = DateTime.UtcNow
+            }
+        };
+
+        await context.Coupons.AddRangeAsync(personalCoupons);
 
         await context.SaveChangesAsync();
     }
