@@ -1,0 +1,212 @@
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+
+<!-- Product Detail Modal Overlay -->
+<div id="productModalOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden transition-opacity duration-300" onclick="closeProductModal()"></div>
+
+<!-- Product Detail Modal -->
+<div id="productModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-lg max-w-6xl w-full max-h-[90vh] overflow-hidden flex flex-col md:flex-row relative" onclick="event.stopPropagation()">
+
+        <!-- Close Button -->
+        <button type="button"
+                class="absolute top-4 right-4 z-10 text-gray-400 hover:text-gray-700 transition-colors bg-white rounded-full w-8 h-8 flex items-center justify-center shadow"
+                onclick="closeProductModal()">
+            ×
+        </button>
+
+        <!-- Left: Product Images -->
+        <div class="w-full md:w-1/2 bg-white p-8 flex flex-col">
+            <!-- Main Image -->
+            <div class="flex-1 flex items-center justify-center mb-4">
+                <img id="modalMainImage"
+                     src=""
+                     alt=""
+                     class="max-w-full max-h-[500px] object-contain" />
+            </div>
+
+            <!-- Thumbnail Images -->
+            <div class="flex gap-2 justify-center" id="modalThumbnails">
+                <!-- Thumbnails will be rendered here -->
+            </div>
+        </div>
+
+        <!-- Right: Product Information -->
+        <div class="w-full md:w-1/2 bg-gray-50 p-8 overflow-y-auto">
+            <!-- Product Name -->
+            <h2 id="modalProductName" class="text-3xl font-semibold text-gray-900 mb-4">Product Name</h2>
+
+            <!-- Price -->
+            <div class="mb-6">
+                <p class="text-gray-600 text-sm mb-1">₹ <span id="modalProductPrice" class="text-2xl font-bold text-gray-900">700</span></p>
+                <p class="text-xs text-gray-500" id="modalProductPriceNote">MRP (Inclusive of all taxes)</p>
+            </div>
+
+            <!-- SIZE Section -->
+            <div class="mb-6">
+                <h3 class="text-sm font-bold text-gray-900 mb-3 uppercase">Size</h3>
+                <div class="flex flex-wrap gap-2" id="modalSizeOptions">
+                    <!-- Size options will be rendered here -->
+                    <button type="button" class="size-option px-6 py-2 border-2 border-gray-300 text-gray-700 hover:border-primary hover:text-primary transition-colors font-medium"
+                            data-size="250g">250g</button>
+                </div>
+            </div>
+
+            <!-- GRIND Section -->
+            <div class="mb-6">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-sm font-bold text-gray-900 uppercase">Grind</h3>
+                    <a href="#" class="text-xs text-primary hover:underline">GRIND GUIDE</a>
+                </div>
+                <div class="flex flex-wrap gap-2" id="modalGrindOptions">
+                    <!-- Grind options will be rendered here -->
+                    <button type="button" class="grind-option px-6 py-2 border-2 border-gray-300 text-gray-700 hover:border-primary hover:text-primary transition-colors font-medium"
+                            data-grind="Whole Bean">Whole Bean</button>
+                </div>
+            </div>
+
+            <!-- Quantity & Add to Cart -->
+            <div class="flex items-center gap-4 mb-6">
+                <!-- Quantity Controls -->
+                <div class="flex items-center border-2 border-gray-300">
+                    <button type="button"
+                            class="px-4 py-3 hover:bg-gray-100 transition-colors text-gray-700"
+                            onclick="decreaseModalQuantity()">
+                        -
+                    </button>
+                    <input type="number"
+                           id="modalQuantity"
+                           value="1"
+                           min="1"
+                           readonly
+                           class="w-16 text-center border-x-2 border-gray-300 py-3 font-semibold text-gray-900" />
+                    <button type="button"
+                            class="px-4 py-3 hover:bg-gray-100 transition-colors text-gray-700"
+                            onclick="increaseModalQuantity()">
+                        +
+                    </button>
+                </div>
+
+                <!-- Add to Cart Button -->
+                <button type="button"
+                        class="flex-1 bg-white border-2 border-primary text-primary font-semibold py-3 px-6 hover:bg-blue-50 transition-colors uppercase tracking-wide"
+                        onclick="addToCartFromModal()">
+                    Add to Cart
+                </button>
+            </div>
+
+            <!-- Subscribe & Save Button -->
+            <button type="button"
+                    class="w-full bg-blue-100 text-primary font-semibold py-3 px-6 mb-4 hover:bg-blue-200 transition-colors uppercase tracking-wide">
+                Subscribe & Save upto 20%
+            </button>
+
+            <!-- Buy Now Button -->
+            <button type="button"
+                    class="w-full bg-primary text-white font-semibold py-3 px-6 mb-4 hover:bg-primary/90 transition-colors uppercase tracking-wide flex items-center justify-center gap-2"
+                    onclick="buyNowFromModal()">
+                <i class="fas fa-bolt"></i>
+                Buy Now
+            </button>
+
+            <!-- Payment Info -->
+            <p class="text-xs text-center text-gray-600 mb-4">
+                All payment modes and COD available
+            </p>
+
+            <!-- Shipping Check -->
+            <div class="border-t border-gray-300 pt-4">
+                <h4 class="text-sm font-semibold text-gray-900 mb-2">Enter PIN to check shipping option & delivery time</h4>
+                <div class="flex gap-2">
+                    <input type="text"
+                           placeholder="Enter PIN"
+                           class="flex-1 border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary" />
+                    <button type="button"
+                            class="bg-primary text-white px-6 py-2 rounded hover:bg-primary/90 transition-colors uppercase text-sm font-semibold">
+                        Check
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Modal animations */
+#productModal.show {
+    display: flex !important;
+    animation: modalFadeIn 0.3s ease;
+}
+
+#productModalOverlay.show {
+    display: block !important;
+    animation: overlayFadeIn 0.3s ease;
+}
+
+@@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@@keyframes overlayFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Hide / fade-out animations */
+#productModal.hide {
+    animation: modalFadeOut 0.3s ease;
+}
+
+#productModalOverlay.hide {
+    animation: overlayFadeOut 0.3s ease;
+}
+
+@@keyframes modalFadeOut {
+    from {
+        opacity: 1;
+        transform: scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+}
+
+@@keyframes overlayFadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+/* Active state for size/grind options */
+.size-option.active,
+.grind-option.active {
+    border-color: #3B82F6;
+    background-color: #3B82F6;
+    color: white;
+}
+
+/* Disable number input spinner */
+#modalQuantity::-webkit-outer-spin-button,
+#modalQuantity::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+#modalQuantity {
+    -moz-appearance: textfield;
+}
+</style>
