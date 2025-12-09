@@ -199,7 +199,7 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-8 mb-12">
                         @foreach (var product in products)
                         {
-                            var productUrl = $"/productdetails?id={product.Id}";
+                            var productUrl = $"/product-details?id={product.Id}";
 
                             <!-- Product Card -->
                             <div class="group">
@@ -249,11 +249,11 @@
                                 </div>
 
                                 <!-- Buy Now Button -->
-                                <a href="@productUrl"
+                                <button onclick="openProductModal('@product.Id')"
                                     class="block w-full px-4 py-3 border-2 border-primary text-primary font-semibold hover:bg-primary hover:text-white transition-all duration-300 cursor-pointer flex items-center justify-center gap-2">
                                     <i class="fas fa-shopping-cart"></i>
                                     <span>Buy Now</span>
-                                </a>
+                                </button>
                             </div>
                         }
                     </div>

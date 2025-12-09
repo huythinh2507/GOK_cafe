@@ -1,0 +1,70 @@
+﻿@using GOKCafe.Web.Models.DTOs
+@using GOKCafe.Web.Models.ViewModels
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@{
+    Layout = "_Layout.cshtml";
+
+    // Get ViewModel from ViewData (provided by ProductDetailController)
+    var viewModel = ViewData["ProductDetailViewModel"] as ProductDetailViewModel;
+    var product = viewModel?.Product;
+
+    // Fallback to mock data for preview if no product found
+    if (product == null)
+    {
+        product = new ProductDto
+        {
+            Id = Guid.NewGuid(),
+            Name = "Colombia Wilton Benitez Geisha",
+            ImageUrl = "/media/kgymu0pv/honeygreentea.png",
+            Price = 682000,
+            DiscountPrice = 950000,
+            CategoryName = "Coffees",
+            ShortDescription = "Premium Colombian single origin from renowned producer Wilton Benitez",
+            Description = "A groundbreaking 96-point Geisha from Geisha El Paraiso 82 in Hieronzuelo, Caucas, grown at high elevation and processed using innovative thermal shock paired with wine yeast fermentation. This coffee redefines complexity and elegance. Expect a dazzling cup—radiant florals interlacing with lush fruit notes and refined spice, all framed by an impeccable balance and silky texture. A true testament to innovation in microlot coffee craftsmanship.",
+            TastingNote = "Tropical fruits, Pink guava, Milk chocolate, Mild acidity, Rounded, Lingering sweetness",
+            Region = "Biao Loc",
+            Process = "Nature",
+            StockQuantity = 100
+        };
+    }
+
+    ViewData["Title"] = product.Name;
+}
+
+@* <!-- Breadcrumb -->
+<div class="container mx-auto px-4 py-4">
+    <a href="/products" class="text-blue-600 hover:text-blue-800 flex items-center gap-2">
+        <i class="fas fa-chevron-left"></i>
+        <span>Products list</span>
+    </a>
+</div> *@
+
+@* Breadcrumbs *@
+@await Html.PartialAsync("~/Views/Partials/Shared/_Breadcrumbs.cshtml", Model)
+
+<!-- Product Information Partial -->
+@await Html.PartialAsync("~/Views/Partials/ProductDetail/_ProductInformation.cshtml", product)
+
+@* Related products from ViewModel or fallback to mock *@
+@{
+    var relatedProducts = viewModel?.RelatedProducts ?? new List<ProductDto>();
+
+    // Fallback to mock data if no related products from API
+    if (!relatedProducts.Any())
+    {
+        relatedProducts = new List<ProductDto>
+        {
+            new ProductDto { Id = Guid.NewGuid(), Name = "Colombia Wilton Benitez Geisha", Slug = "colombia-wilton-benitez-geisha", ImageUrl = "/media/kgymu0pv/honeygreentea.png", Price = 682000, DiscountPrice = 950000 },
+        };
+    }
+}
+
+@await Html.PartialAsync("~/Views/Partials/ProductDetail/_RecommendProduct.cshtml", relatedProducts)
+
+@* Products Banner Carousel *@
+@await Html.PartialAsync("~/Views/Partials/Products/ProductsBanner.cshtml", Model)
+
+@* OnFooter Section *@
+@await Html.PartialAsync("~/Views/Partials/Homepage/_OnFooter.cshtml", Model)
+
+

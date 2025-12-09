@@ -322,6 +322,11 @@ window.openCartSidebar = function() {
 
     // Render cart items
     renderCartSidebar();
+
+    // Load available vouchers
+    if (typeof loadVouchers === 'function') {
+        loadVouchers();
+    }
 };
 
 window.closeCartSidebar = function() {
@@ -375,7 +380,8 @@ function renderCartSidebar() {
         // Hide all cart items
         const existingItems = container.querySelectorAll('.cart-item');
         existingItems.forEach(item => item.remove());
-        subtotalElement.textContent = '0 VND';
+        subtotalElement.textContent = '0đ';
+        updateCartTotal();
         return;
     }
 
@@ -397,7 +403,10 @@ function renderCartSidebar() {
     });
 
     // Update subtotal
-    subtotalElement.textContent = formatPrice(subtotal);
+    subtotalElement.textContent = formatPriceVND(subtotal);
+
+    // Update total with shipping and discount
+    updateCartTotal();
 
     // Render special price products (mock data for now)
     renderSpecialPriceProducts();
@@ -572,34 +581,154 @@ let currentProduct = null;
 let selectedSize = null;
 let selectedGrind = null;
 
-window.openProductModal = function(productData) {
-    currentProduct = productData;
-    const modal = document.getElementById('productModal');
-    const overlay = document.getElementById('productModalOverlay');
+window.openProductModal = async function(productId) {
+    try {
+        // Show loading state
+        const modal = document.getElementById('productModal');
+        const overlay = document.getElementById('productModalOverlay');
 
-    // Populate modal with product data
-    document.getElementById('modalProductName').textContent = productData.name || 'Product Name';
-    document.getElementById('modalProductPrice').textContent = productData.price || '700';
-    document.getElementById('modalMainImage').src = productData.imageUrl || '';
-    document.getElementById('modalMainImage').alt = productData.name || '';
+        // Show modal with loading state
+        overlay.classList.remove('hidden');
+        overlay.classList.add('show');
+        modal.classList.remove('hidden');
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
 
-    // Render size options
-    renderSizeOptions(productData.sizes || ['250g', '500g', '1kg']);
+        // Show loading indicator
+        document.getElementById('modalProductName').textContent = 'Loading...';
 
-    // Render grind options
-    renderGrindOptions(productData.grinds || ['Whole Bean', 'French Press', 'Filter', 'Espresso']);
+        // Fetch product data from API
+        const response = await fetch(`/umbraco/api/ProductModalApi/${productId}`);
 
-    // Reset quantity
-    document.getElementById('modalQuantity').value = 1;
+        if (!response.ok) {
+            throw new Error('Failed to fetch product data');
+        }
 
-    // Show modal
-    overlay.classList.remove('hidden');
-    overlay.classList.add('show');
-    modal.classList.remove('hidden');
-    modal.classList.add('show');
+        const result = await response.json();
 
-    // Prevent body scroll
-    document.body.style.overflow = 'hidden';
+        if (!result.success || !result.data) {
+            throw new Error(result.message || 'Product not found');
+        }
+
+        const productData = result.data;
+        currentProduct = {
+            id: productData.id,
+            name: productData.name,
+            price: productData.discountPrice || productData.price,
+            originalPrice: productData.discountPrice ? productData.price : null,
+            imageUrl: productData.imageUrl,
+            description: productData.description,
+            shortDescription: productData.shortDescription,
+            categoryName: productData.categoryName,
+            tastingNote: productData.tastingNote,
+            region: productData.region,
+            process: productData.process,
+            stockQuantity: productData.stockQuantity,
+            isActive: productData.isActive
+        };
+
+        // Populate modal with product data
+        document.getElementById('modalProductName').textContent = currentProduct.name || 'Product Name';
+
+        // Set category
+        const categoryElement = document.getElementById('modalProductCategory');
+        if (currentProduct.categoryName) {
+            categoryElement.textContent = currentProduct.categoryName;
+            categoryElement.classList.remove('hidden');
+        } else {
+            categoryElement.classList.add('hidden');
+        }
+
+        // Display price with discount if applicable
+        const priceElement = document.getElementById('modalProductPrice');
+        if (currentProduct.originalPrice) {
+            priceElement.innerHTML = `
+                <span class="text-gray-400 line-through text-xl mr-2">${currentProduct.originalPrice.toLocaleString('en-US')}</span>
+                <span class="text-red-600">${currentProduct.price.toLocaleString('en-US')}</span>
+            `;
+        } else {
+            priceElement.textContent = currentProduct.price.toLocaleString('en-US');
+        }
+
+        // Set short description
+        const shortDescContainer = document.getElementById('modalShortDescriptionContainer');
+        const shortDescElement = document.getElementById('modalShortDescription');
+        if (currentProduct.shortDescription) {
+            shortDescElement.textContent = currentProduct.shortDescription;
+            shortDescContainer.classList.remove('hidden');
+        } else {
+            shortDescContainer.classList.add('hidden');
+        }
+
+        // Set product details (tasting note, region, process)
+        const detailsContainer = document.getElementById('modalProductDetailsContainer');
+        let hasDetails = false;
+
+        // Tasting Note
+        const tastingNoteContainer = document.getElementById('modalTastingNoteContainer');
+        const tastingNoteElement = document.getElementById('modalTastingNote');
+        if (currentProduct.tastingNote) {
+            tastingNoteElement.textContent = currentProduct.tastingNote;
+            tastingNoteContainer.classList.remove('hidden');
+            hasDetails = true;
+        } else {
+            tastingNoteContainer.classList.add('hidden');
+        }
+
+        // Region
+        const regionContainer = document.getElementById('modalRegionContainer');
+        const regionElement = document.getElementById('modalRegion');
+        if (currentProduct.region) {
+            regionElement.textContent = currentProduct.region;
+            regionContainer.classList.remove('hidden');
+            hasDetails = true;
+        } else {
+            regionContainer.classList.add('hidden');
+        }
+
+        // Process
+        const processContainer = document.getElementById('modalProcessContainer');
+        const processElement = document.getElementById('modalProcess');
+        if (currentProduct.process) {
+            processElement.textContent = currentProduct.process;
+            processContainer.classList.remove('hidden');
+            hasDetails = true;
+        } else {
+            processContainer.classList.add('hidden');
+        }
+
+        // Show or hide details container
+        if (hasDetails) {
+            detailsContainer.classList.remove('hidden');
+        } else {
+            detailsContainer.classList.add('hidden');
+        }
+
+        // Set images
+        document.getElementById('modalMainImage').src = currentProduct.imageUrl || '/images/placeholder-product.jpg';
+        document.getElementById('modalMainImage').alt = currentProduct.name || '';
+
+        // Render size options (default options, can be customized later)
+        renderSizeOptions(['250g', '500g', '1kg']);
+
+        // Render grind options (default options, can be customized later)
+        renderGrindOptions(['Whole Bean', 'French Press', 'Filter', 'Espresso']);
+
+        // Reset quantity
+        document.getElementById('modalQuantity').value = 1;
+
+    } catch (error) {
+        console.error('Error loading product:', error);
+
+        // Show error message
+        document.getElementById('modalProductName').textContent = 'Error loading product';
+        cart.showNotification('Failed to load product details. Please try again.', 'error');
+
+        // Close modal after delay
+        setTimeout(() => {
+            closeProductModal();
+        }, 2000);
+    }
 };
 
 window.closeProductModal = function() {
@@ -768,3 +897,336 @@ window.openProductModalFromCard = function(button) {
         console.error('Failed to parse product data:', error);
     }
 };
+
+// ========================================
+// Cart Calculation & Discount Management
+// ========================================
+let currentDiscount = {
+    couponCode: null,
+    couponDiscount: 0,
+    voucherId: null,
+    voucherDiscount: 0,
+    voucherType: null // 'percentage' or 'fixed'
+};
+
+const SHIPPING_FEE = 150000; // Fixed shipping fee 30,000 VND
+
+// Format price in VND
+function formatPriceVND(price) {
+    return price.toLocaleString('vi-VN') + 'đ';
+}
+
+// Get cart subtotal
+function getCartSubtotal() {
+    let subtotal = 0;
+    cart.items.forEach(item => {
+        const priceNum = parseInt(item.price) || 32000;
+        subtotal += priceNum * item.quantity;
+    });
+    return subtotal;
+}
+
+// Update cart total with shipping and discounts
+function updateCartTotal() {
+    const subtotal = getCartSubtotal();
+    const shippingFee = subtotal > 0 ? SHIPPING_FEE : 0;
+
+    // Calculate total discount
+    let totalDiscount = currentDiscount.couponDiscount + currentDiscount.voucherDiscount;
+
+    // Calculate final total
+    let total = subtotal + shippingFee - totalDiscount;
+
+    // Ensure total is not negative
+    if (total < 0) total = 0;
+
+    // Update UI
+    document.getElementById('shippingFee').textContent = formatPriceVND(shippingFee);
+    document.getElementById('cartTotal').textContent = formatPriceVND(total);
+
+    // Show/hide voucher discount
+    const voucherContainer = document.getElementById('voucherDiscountContainer');
+    if (currentDiscount.voucherDiscount > 0) {
+        voucherContainer.classList.remove('hidden');
+        document.getElementById('voucherDiscount').textContent = '-' + formatPriceVND(currentDiscount.voucherDiscount);
+    } else {
+        voucherContainer.classList.add('hidden');
+    }
+}
+
+// Apply coupon code
+window.applyCoupon = async function() {
+    const couponInput = document.getElementById('couponCode');
+    const couponCode = couponInput.value.trim().toUpperCase();
+    const errorElement = document.getElementById('couponError');
+    const successElement = document.getElementById('couponSuccess');
+
+    // Hide previous messages
+    errorElement.classList.add('hidden');
+    successElement.classList.add('hidden');
+
+    if (!couponCode) {
+        errorElement.textContent = 'Please enter discout code';
+        errorElement.classList.remove('hidden');
+        return;
+    }
+
+    try {
+        // TODO: Call API to validate coupon
+        // For now, use mock validation
+        const mockCoupons = {
+            'WELCOME10': { discount: 10000, type: 'fixed' },
+            'SAVE20': { discount: 20000, type: 'fixed' },
+            'DISCOUNT15': { discount: 15, type: 'percentage' }
+        };
+
+        if (mockCoupons[couponCode]) {
+            const coupon = mockCoupons[couponCode];
+            const subtotal = getCartSubtotal();
+
+            if (coupon.type === 'percentage') {
+                currentDiscount.couponDiscount = Math.floor(subtotal * coupon.discount / 100);
+            } else {
+                currentDiscount.couponDiscount = coupon.discount;
+            }
+
+            currentDiscount.couponCode = couponCode;
+
+            successElement.textContent = `Coupon applied successfully! Save ${formatPriceVND(currentDiscount.couponDiscount)}`;
+            successElement.classList.remove('hidden');
+
+            updateCartTotal();
+        } else {
+            errorElement.textContent = 'Invalid discount code';
+            errorElement.classList.remove('hidden');
+        }
+    } catch (error) {
+        console.error('Error applying coupon:', error);
+        errorElement.textContent = 'An error occurred. Please try again';
+        errorElement.classList.remove('hidden');
+    }
+};
+
+// Select voucher from card
+window.selectVoucher = function(cardElement) {
+    const voucherId = cardElement.getAttribute('data-voucher-id');
+
+    // If clicking the same voucher, deselect it
+    if (currentDiscount.voucherId === voucherId) {
+        // Deselect
+        cardElement.classList.remove('border-primary', 'bg-blue-50');
+        cardElement.querySelector('.voucher-radio').checked = false;
+        currentDiscount.voucherId = null;
+        currentDiscount.voucherDiscount = 0;
+        currentDiscount.voucherType = null;
+        updateCartTotal();
+        return;
+    }
+
+    // Remove selection from all cards
+    document.querySelectorAll('.voucher-card').forEach(card => {
+        card.classList.remove('border-primary', 'bg-blue-50');
+        card.querySelector('.voucher-radio').checked = false;
+    });
+
+    // Get voucher details
+    const mockVouchers = {
+        'voucher1': { code: 'GOTIK12', discount: 50000, type: 'fixed', minOrder: 1, description: 'Save 50K for orders from 499K' },
+        'voucher2': { code: 'GOTIK123', discount: 50000, type: 'fixed', minOrder: 1, description: '[New Customer] Enter  first order from 299k' },
+        'voucher3': { code: 'GOTIK1234', discount: 100000, type: 'fixed', minOrder: 1, description: 'Save 100K for orders from 500K' }
+    };
+
+    const voucher = mockVouchers[voucherId];
+    if (voucher) {
+        const subtotal = getCartSubtotal();
+
+        // Check minimum order requirement
+        if (subtotal < voucher.minOrder) {
+            cart.showNotification(`Minimum order ${formatPriceVND(voucher.minOrder)} required to use this voucher`, 'error');
+            return;
+        }
+
+        // Calculate discount
+        if (voucher.type === 'percentage') {
+            currentDiscount.voucherDiscount = Math.floor(subtotal * voucher.discount / 100);
+        } else {
+            currentDiscount.voucherDiscount = voucher.discount;
+        }
+
+        // Update current discount
+        currentDiscount.voucherId = voucherId;
+        currentDiscount.voucherType = voucher.type;
+
+        // Mark card as selected
+        cardElement.classList.add('border-primary', 'bg-blue-50');
+        cardElement.querySelector('.voucher-radio').checked = true;
+
+        // Show success notification
+        cart.showNotification(`Voucher applied successfully! Save ${formatPriceVND(currentDiscount.voucherDiscount)}`, 'success');
+
+        // Update total
+        updateCartTotal();
+    }
+};
+
+// Scroll vouchers horizontally
+window.scrollVouchers = function(direction) {
+    const container = document.getElementById('voucherContainer');
+    const scrollAmount = 200;
+
+    if (direction === 'left') {
+        container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+    } else {
+        container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+};
+
+// Show all vouchers (could open a modal or expand view)
+window.showAllVouchers = function() {
+    // TODO: Implement modal or expanded view for all vouchers
+    cart.showNotification('Showing all vouchers', 'info');
+};
+
+// Load available vouchers
+function loadVouchers() {
+    const voucherContainer = document.getElementById('voucherContainer');
+    if (!voucherContainer) return;
+
+    // TODO: Load vouchers from API
+    // For now, use mock data matching the image
+    const mockVouchers = [
+        {
+            id: 'voucher1',
+            code: 'CMFW25',
+            discount: 50000,
+            type: 'fixed',
+            minOrder: 1,
+            description: 'Save 50K for orders from 499K (applies to equipment)',
+            expiry: 'EXP: 31/12/2025',
+            progress: { current: 0, target: 499000, show: true }
+        },
+        {
+            id: 'voucher2',
+            code: 'COOLNEW',
+            discount: 50000,
+            type: 'fixed',
+            minOrder: 1,
+            description: '[New Customer] Enter COOLNEW Save 50K first order from 299k',
+            expiry: 'EXP: 31/12/2025',
+            progress: null
+        },
+        {
+            id: 'voucher3',
+            code: 'SAVE100',
+            discount: 100000,
+            type: 'fixed',
+            minOrder: 1,
+            description: 'Save 100K for orders from 500K',
+            expiry: 'EXP: 31/12/2025',
+            progress: null
+        }
+    ];
+
+    // Clear container
+    voucherContainer.innerHTML = '';
+
+    const template = document.getElementById('voucherCardTemplate');
+
+    // Render voucher cards
+    mockVouchers.forEach(voucher => {
+        const clone = template.content.cloneNode(true);
+        const card = clone.querySelector('.voucher-card');
+
+        // Set data
+        card.setAttribute('data-voucher-id', voucher.id);
+        card.querySelector('.voucher-code').textContent = voucher.code;
+
+        // Set discount text
+        let discountText = '';
+        if (voucher.type === 'percentage') {
+            discountText = `Save ${voucher.discount}%`;
+        } else {
+            discountText = `Save ${formatPriceVND(voucher.discount)}`;
+        }
+        card.querySelector('.voucher-discount').textContent = discountText;
+
+        // Set description
+        card.querySelector('.voucher-description').textContent = voucher.description;
+
+        // Set expiry
+        card.querySelector('.voucher-expiry').textContent = voucher.expiry;
+
+        // Handle progress bar
+        const progressContainer = card.querySelector('.voucher-progress');
+        if (voucher.progress && voucher.progress.show) {
+            const subtotal = getCartSubtotal();
+            const progressPercent = Math.min((subtotal / voucher.progress.target) * 100, 100);
+
+            progressContainer.classList.remove('hidden');
+            progressContainer.querySelector('.voucher-progress-bar').style.width = `${progressPercent}%`;
+
+            const remaining = Math.max(voucher.progress.target - subtotal, 0);
+            if (remaining > 0) {
+                progressContainer.querySelector('.voucher-progress-text').textContent = '';
+                progressContainer.classList.add('hidden');
+            } else {
+                progressContainer.querySelector('.voucher-progress-text').textContent = '✓ Eligible to use';
+                progressContainer.querySelector('.voucher-progress-text').classList.remove('text-orange-600');
+                progressContainer.querySelector('.voucher-progress-text').classList.add('text-green-600');
+            }
+        }
+
+        // Check if this voucher is currently selected
+        if (currentDiscount.voucherId === voucher.id) {
+            card.classList.add('border-primary', 'bg-blue-50');
+            card.querySelector('.voucher-radio').checked = true;
+        }
+
+        voucherContainer.appendChild(clone);
+    });
+
+    // Update scroll buttons visibility
+    updateScrollButtons();
+}
+
+// Update scroll button visibility
+function updateScrollButtons() {
+    const container = document.getElementById('voucherContainer');
+    const leftBtn = document.getElementById('scrollLeftBtn');
+    const rightBtn = document.getElementById('scrollRightBtn');
+
+    if (!container || !leftBtn || !rightBtn) return;
+
+    // Check if scrollable
+    const isScrollable = container.scrollWidth > container.clientWidth;
+
+    if (isScrollable) {
+        // Show buttons if at scroll positions
+        if (container.scrollLeft > 0) {
+            leftBtn.classList.remove('hidden');
+            leftBtn.classList.add('flex');
+        } else {
+            leftBtn.classList.add('hidden');
+            leftBtn.classList.remove('flex');
+        }
+
+        if (container.scrollLeft < container.scrollWidth - container.clientWidth - 10) {
+            rightBtn.classList.remove('hidden');
+            rightBtn.classList.add('flex');
+        } else {
+            rightBtn.classList.add('hidden');
+            rightBtn.classList.remove('flex');
+        }
+    } else {
+        leftBtn.classList.add('hidden');
+        rightBtn.classList.add('hidden');
+    }
+}
+
+// Listen to scroll events to update buttons
+document.addEventListener('DOMContentLoaded', () => {
+    const container = document.getElementById('voucherContainer');
+    if (container) {
+        container.addEventListener('scroll', updateScrollButtons);
+    }
+});
