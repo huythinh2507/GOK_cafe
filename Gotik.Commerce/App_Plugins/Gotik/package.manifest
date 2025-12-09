@@ -1,0 +1,25 @@
+{
+  "name": "Gotik Commerce",
+  "version": "1.0.0",
+  "allowPackageTelemetry": false,
+  "javascript": [
+    "~/App_Plugins/Gotik/backoffice/gotik.controller.js"
+  ],
+  "css": [
+    "~/App_Plugins/Gotik/backoffice/gotik.css"
+  ],
+  "sections": [],
+  "dashboards": [
+    {
+      "alias": "gotikCommerceDashboard",
+      "view": "~/App_Plugins/Gotik/backoffice/dashboard.html",
+      "sections": ["content"],
+      "weight": 10,
+      "access": [
+        {
+          "grant": "admin"
+        }
+      ]
+    }
+  ]
+}

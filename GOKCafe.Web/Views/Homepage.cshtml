@@ -44,6 +44,21 @@
 @* OnFooter Section *@
 @await Html.PartialAsync("~/Views/Partials/Homepage/_OnFooter.cshtml", Model)
 
+@* Featured Products Section *@
+@if (featuredProducts.Any())
+{
+    @await Html.PartialAsync("~/Views/Partials/Homepage/_FeaturedProducts.cshtml", (Model, featuredProducts))
+}
+
+@* Categories Section *@
+@if (categories.Any())
+{
+    @await Html.PartialAsync("~/Views/Partials/Homepage/_CategoriesSection.cshtml", categories)
+}
+
+@* About Section *@
+@await Html.PartialAsync("~/Views/Partials/Homepage/_AboutSection.cshtml", Model)
+
 @section Scripts {
     <script>
         function addToCart(productId) {

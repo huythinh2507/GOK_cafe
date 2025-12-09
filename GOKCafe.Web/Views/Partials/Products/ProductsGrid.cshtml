@@ -1,85 +1,51 @@
-﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@using GOKCafe.Web.Models.DTOs
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
 @{
-    // Mock products only - no Umbraco
-    var mockProducts = new[]
+    // Get products from backend API (passed from controller via ViewData)
+    var paginatedProducts = ViewData["Products"] as PaginatedResponse<ProductDto>;
+    var products = paginatedProducts?.Items ?? new List<ProductDto>();
+    var totalPages = paginatedProducts?.TotalPages ?? 1;
+    var currentPage = paginatedProducts?.PageNumber ?? 1;
+
+    // Get categories and filters from ViewData
+    var categories = ViewData["Categories"] as List<CategoryDto> ?? new List<CategoryDto>();
+    var filters = ViewData["Filters"] as ProductFiltersDto;
+    var selectedCategoryId = ViewData["SelectedCategoryId"] as Guid?;
+    var searchTerm = ViewData["SearchTerm"] as string ?? string.Empty;
+    var selectedFlavourIds = ViewData["SelectedFlavourIds"] as List<string> ?? new List<string>();
+    var selectedEquipmentIds = ViewData["SelectedEquipmentIds"] as List<string> ?? new List<string>();
+    var selectedInStock = ViewData["SelectedInStock"] as bool?;
+
+    // Build category filter options from backend data
+    var categoryOptions = new List<(string Name, Guid? Id, bool IsChecked)>
     {
-        new {Id=1,  Name = "Colombia Dark Roast", Image = "/media/tkddexzl/colombiadarkroast.png", Price = "682,000 VNĐ", Category = "Coffees" },
-        new {Id=2, Name = "Swiss Water Decaf", Image = "/media/zqdncqg0/swisswaterdecaf.png", Price = "682,000 VNĐ", Category = "Coffees" },
-        new {Id=3, Name = "Holiday Blend", Image = "/media/xiihorp0/holidayblend.png", Price = "682,000 VNĐ", Category = "Coffees" },
-        new { Id=4,Name = "House Blend", Image = "/media/p3mhqekq/houseblend.png", Price = "682,000 VNĐ", Category = "Coffees" },
-        new {Id=5, Name = "Colombia Wilton Benitez", Image = "/media/kgymu0pv/honeygreentea.png", Price = "850,000 VNĐ", Category = "Coffees" },
-        new {Id=6, Name = "Assam Black Tea", Image = "/media/aptfsaia/assamblacktea.png", Price = "320,000 VNĐ", Category = "Bubble Tea" },
-        new { Id=7,Name = "Honey Milk Tea", Image = "/media/cvxlg5q1/honeymilktea.png", Price = "350,000 VNĐ", Category = "Bubble Tea" },
-        new {Id=8, Name = "Bubble Tea", Image = "/media/ydfosnna/bubbletee.png", Price = "400,000 VNĐ", Category = "Bubble Tea" },
-        new { Id=9,Name = "Green Tea", Image = "/media/5jebon54/whiteitem.png", Price = "280,000 VNĐ", Category = "Bubble Tea" },
-        new {Id=10, Name = "Honey Green Tea", Image = "/media/kgymu0pv/honeygreentea.png", Price = "320,000 VNĐ", Category = "Bubble Tea" },
-        new { Id=11,Name = "Carribe Coffee", Image = "/media/kgymu0pv/honeygreentea.png", Price = "620,000 VNĐ", Category = "Coffees" },
-        new {Id=12, Name = "Sweet Doughs", Image = "/media/nm0p0uau/sweetdoughs.png", Price = "180,000 VNĐ", Category = "Sweet Doughs" }
+        ("All categories", null, selectedCategoryId == null)
     };
 
-    // Filter configuration data
-    var filterConfig = new[]
+    foreach (var category in categories)
     {
-        new
-        {
-            Id = "category",
-            Title = "Product Category",
-            Options = new[] { "All categories", "Coffees", "Bubble Tea", "Sweet Doughs" },
-            CheckedStates = new[] { true, true, true, true },
-            HasBottomBorder = true
-        },
-        new
-        {
-            Id = "flavour",
-            Title = "Flavour Profile",
-            Options = new[] { "Balanced", "Bold and Bitter", "Chocolatey and Nutty", "Delicate and Complex", "Experimental", "Fruity and Punchy" },
-            CheckedStates = (bool[])null,
-            HasBottomBorder = true
-        },
-        new
-        {
-            Id = "availability",
-            Title = "Availability",
-            Options = new[] { "Instock (30)", "Out of stock (3)" },
-            CheckedStates = (bool[])null,
-            HasBottomBorder = true
-        },
-        new
-        {
-            Id = "equipment",
-            Title = "Equipment",
-            Options = new[] { "Aeropress", "Channi", "Cold Brew", "Espresso", "French Press", "Inverted Aeropress", "Moka Pot", "Pourover", "South Indian Filter" },
-            CheckedStates = (bool[])null,
-            HasBottomBorder = false
-        }
-    };
-
-    // Helper function to render checkbox
-    void RenderCheckbox(string label, bool isChecked = false)
-    {
-        <label class="flex items-center cursor-pointer hover:bg-primary/10 p-2 -m-2 rounded transition-colors">
-            <input type="checkbox" class="w-5 h-5 accent-primary border-gray-300 rounded focus:ring-primary" @(isChecked ? "checked" : "")>
-            <span class="ml-3 text-sm text-gray-700">@label</span>
-        </label>
+        categoryOptions.Add((category.Name, category.Id, selectedCategoryId == category.Id));
     }
 
-    // Helper function to render filter section
-    void RenderFilterSection(string id, string title, string[] options, bool hasBottomBorder = true, bool[] checkedStates = null)
+    // Build flavour profile options from API
+    var flavourOptions = filters?.FlavourProfiles?.Select(fp => new
     {
-        <div class="@(hasBottomBorder ? "border-b border-gray-200 pb-4" : "pb-4")">
-            <button class="flex items-center justify-between w-full text-left font-semibold text-gray-900 mb-4" onclick="toggleFilter('@id')">
-                <span>@title</span>
-                <i class="fas fa-chevron-up" id="@id-icon"></i>
-            </button>
-            <div id="@id-filter" class="space-y-3">
-                @for (int i = 0; i < options.Length; i++)
-                {
-                    bool isChecked = checkedStates != null && i < checkedStates.Length && checkedStates[i];
-                    RenderCheckbox(options[i], isChecked);
-                }
-            </div>
-        </div>
-    }
+        Id = fp.Id.ToString(),
+        Name = fp.Name,
+        IsChecked = selectedFlavourIds.Contains(fp.Id.ToString())
+    }).ToList();
+
+    // Build equipment options from API
+    var equipmentOptions = filters?.Equipments?.Select(eq => new
+    {
+        Id = eq.Id.ToString(),
+        Name = eq.Name,
+        IsChecked = selectedEquipmentIds.Contains(eq.Id.ToString())
+    }).ToList();
+
+    // Build availability options from API
+    var inStockCount = filters?.Availability?.InStockCount ?? 0;
+    var outOfStockCount = filters?.Availability?.OutOfStockCount ?? 0;
 }
 
 <!-- Products Grid Section -->
@@ -92,23 +58,31 @@
             <!-- Filters Sidebar -->
             <aside class="w-full lg:w-48 flex-shrink-0">
                 <div class="space-y-6">
-                    @foreach (var filter in filterConfig)
-                    {
-                        RenderFilterSection(
-                            filter.Id,
-                            filter.Title,
-                            filter.Options,
-                            filter.HasBottomBorder,
-                            filter.CheckedStates
-                        );
-                    }
-                </div>
-            </aside>
+                    <!-- Category Filter (Dynamic from Backend) -->
+                    <div class="border-b border-gray-200 pb-4">
+                        <button
+                            class="flex items-center justify-between w-full text-left font-semibold text-gray-900 mb-4"
+                            onclick="toggleFilter('category')">
+                            <span>Product Category</span>
+                            <i class="fas fa-chevron-up" id="category-icon"></i>
+                        </button>
+                        <div id="category-filter" class="space-y-3">
+                            @foreach (var option in categoryOptions)
+                            {
+                                <label
+                                    class="flex items-center cursor-pointer hover:bg-primary/10 p-2 -m-2 rounded transition-colors">
+                                    <input type="checkbox"
+                                        class="category-checkbox w-5 h-5 accent-primary border-gray-300 rounded focus:ring-primary"
+                                        data-category-id="@option.Id" @(option.IsChecked ? "checked" : "")
+                                        onchange="filterByCategory('@option.Id')">
+                                    <span class="ml-3 text-sm text-gray-700">@option.Name</span>
+                                </label>
+                            }
+                        </div>
+                    </div>
 
-            <!-- Products Grid -->
-            <div class="lg:min-w-80">
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-8 mb-12">
-                    @foreach (var product in mockProducts)
+                    <!-- Flavour Profile Filter (Dynamic from API) -->
+                    @if (flavourOptions != null && flavourOptions.Any())
                     {
                         var priceNumber = product.Price.Replace(" VNĐ", "").Replace(",", "").Replace(".", "").Trim();
                         var productNameJson = System.Text.Json.JsonSerializer.Serialize(product.Name);
@@ -125,9 +99,14 @@
                                 }
                                 else
                                 {
-                                    <div class="w-full h-full bg-[#E8DCC4] flex items-center justify-center">
-                                        <i class="fas fa-coffee text-6xl text-gray-400"></i>
-                                    </div>
+                                    <label
+                                        class="flex items-center cursor-pointer hover:bg-primary/10 p-2 -m-2 rounded transition-colors">
+                                        <input type="checkbox"
+                                            class="flavour-checkbox w-5 h-5 accent-primary border-gray-300 rounded focus:ring-primary"
+                                            data-flavour-id="@option.Id" @(option.IsChecked ? "checked" : "")
+                                            onchange="filterByFlavour()">
+                                        <span class="ml-3 text-sm text-gray-700">@option.Name</span>
+                                    </label>
                                 }
                             </a>
 
@@ -142,6 +121,8 @@
                                 <!-- Price -->
                                 <p class="text-gray-600 mb-4">From <span class="font-semibold">@product.Price</span></p>
                             </div>
+                        </div>
+                    }
 
                             <!-- Buy Now Button -->
                             <button type="button"
@@ -166,60 +147,251 @@
                         </div>
                     }
                 </div>
+            </aside>
+
+            <!-- Products Grid -->
+            <div class="lg:min-w-80">
+                @if (products.Any())
+                {
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-8 mb-12">
+                        @foreach (var product in products)
+                        {
+                            var productUrl = $"/productdetails?id={product.Id}";
+
+                            <!-- Product Card -->
+                            <div class="group">
+                                <!-- Product Image -->
+                                <a href="@productUrl" class="block overflow-hidden mb-4 flex items-center justify-center bg-[#E8DCC4] w-full h-[420px] relative cursor-pointer">
+                                    @if (!string.IsNullOrEmpty(product.ImageUrl))
+                                    {
+                                        <img src="@product.ImageUrl" alt="@product.Name"
+                                            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                                    }
+                                    else
+                                    {
+                                        <div class="w-full h-full bg-[#E8DCC4] flex items-center justify-center">
+                                            <i class="fas fa-coffee text-6xl text-gray-400"></i>
+                                        </div>
+                                    }
+
+                                    @* Show discount badge if applicable *@
+                                    @if (product.DiscountPrice.HasValue && product.DiscountPrice > 0)
+                                    {
+                                        <span class="absolute top-2 right-2 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold">Sale</span>
+                                    }
+                                </a>
+
+                                <!-- Product Info -->
+                                <div class="text-center w-full mb-4">
+                                    <!-- Category -->
+                                    <p class="text-sm font-medium text-gray-500 uppercase mb-1">@product.CategoryName</p>
+
+                                    <!-- Title -->
+                                    <h3 class="text-lg font-bold text-gray-900 mb-2 uppercase">
+                                        <a href="@productUrl" class="hover:text-primary transition-colors">@product.Name</a>
+                                    </h3>
+
+                                    <!-- Price -->
+                                    <div class="text-gray-600 mb-4">
+                                        @if (product.DiscountPrice.HasValue && product.DiscountPrice > 0)
+                                        {
+                                            <span class="text-gray-400 line-through mr-2">@product.Price.ToString("N0") VNĐ</span>
+                                            <span class="font-semibold text-red-600">@product.DiscountPrice.Value.ToString("N0") VNĐ</span>
+                                        }
+                                        else
+                                        {
+                                            <span>From <span class="font-semibold">@product.Price.ToString("N0") VNĐ</span></span>
+                                        }
+                                    </div>
+                                </div>
+
+                                <!-- Buy Now Button -->
+                                <a href="@productUrl"
+                                    class="block w-full px-4 py-3 border-2 border-primary text-primary font-semibold hover:bg-primary hover:text-white transition-all duration-300 cursor-pointer flex items-center justify-center gap-2">
+                                    <i class="fas fa-shopping-cart"></i>
+                                    <span>Buy Now</span>
+                                </a>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-12">
+                        <i class="fas fa-coffee text-6xl text-gray-300 mb-4"></i>
+                        <p class="text-gray-500 text-lg">No products found.</p>
+                    </div>
+                }
 
                 <!-- Pagination -->
-                <div class="flex justify-center items-center gap-2 mt-8">
-                    <!-- Previous Button -->
-                    <button type="button" class="w-12 h-12 flex items-center justify-center border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors rounded cursor-pointer">
-                        <i class="fas fa-chevron-left"></i>
-                    </button>
+                @if (totalPages > 1)
+                {
+                    <div class="flex justify-center items-center gap-2 mt-8">
+                        <!-- Previous Button -->
+                        @if (currentPage > 1)
+                        {
+                            <a href="?page=@(currentPage - 1)@(selectedCategoryId.HasValue ? $"&category={selectedCategoryId.Value}" : "")@(!string.IsNullOrEmpty(searchTerm) ? $"&search={searchTerm}" : "")"
+                                class="w-12 h-12 flex items-center justify-center border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors rounded cursor-pointer">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        }
+                        else
+                        {
+                            <span
+                                class="w-12 h-12 flex items-center justify-center border border-gray-300 text-gray-300 rounded cursor-not-allowed">
+                                <i class="fas fa-chevron-left"></i>
+                            </span>
+                        }
 
-                    <!-- Page 1 (Active) -->
-                    <button type="button" class="w-12 h-12 flex items-center justify-center border-2 border-primary bg-primary text-white font-medium transition-colors rounded cursor-pointer">
-                        1
-                    </button>
+                        @* Show first few pages *@
+                            @for (int i = 1; i <= Math.Min(3, totalPages); i++)
+                        {
+                            if (i == currentPage)
+                            {
+                                <span
+                                    class="w-12 h-12 flex items-center justify-center border-2 border-primary bg-primary text-white font-medium transition-colors rounded">
+                                    @i
+                                </span>
+                            }
+                            else
+                            {
+                                <a href="?page=@i@(selectedCategoryId.HasValue ? $"&category={selectedCategoryId.Value}" : "")@(!string.IsNullOrEmpty(searchTerm) ? $"&search={searchTerm}" : "")"
+                                    class="w-12 h-12 flex items-center justify-center border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors rounded cursor-pointer">
+                                    @i
+                                </a>
+                            }
+                        }
 
-                    <!-- Page 2 -->
-                    <button type="button" class="w-12 h-12 flex items-center justify-center border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors rounded cursor-pointer">
-                        2
-                    </button>
+                        @* Show dots if there are more pages *@
+                            @if (totalPages > 4)
+                        {
+                            <span class="px-2 text-gray-500">...</span>
 
-                    <!-- Page 3 -->
-                    <button type="button" class="w-12 h-12 flex items-center justify-center border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors rounded cursor-pointer">
-                        3
-                    </button>
+                            @* Show last page *@
+                                    if (currentPage == totalPages)
+                            {
+                                <span
+                                    class="w-12 h-12 flex items-center justify-center border-2 border-primary bg-primary text-white font-medium transition-colors rounded">
+                                    @totalPages
+                                </span>
+                            }
+                            else
+                            {
+                                <a href="?page=@totalPages@(selectedCategoryId.HasValue ? $"&category={selectedCategoryId.Value}" : "")@(!string.IsNullOrEmpty(searchTerm) ? $"&search={searchTerm}" : "")"
+                                    class="w-12 h-12 flex items-center justify-center border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors rounded cursor-pointer">
+                                    @totalPages
+                                </a>
+                            }
+                        }
 
-                    <!-- Dots -->
-                    <span class="px-2 text-gray-500">...</span>
-
-                    <!-- Last Page -->
-                    <button type="button" class="w-12 h-12 flex items-center justify-center border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors rounded cursor-pointer">
-                        99
-                    </button>
-
-                    <!-- Next Button -->
-                    <button type="button" class="w-12 h-12 flex items-center justify-center border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors rounded cursor-pointer">
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
-                </div>
+                        <!-- Next Button -->
+                        @if (currentPage < totalPages)
+                        {
+                            <a href="?page=@(currentPage + 1)@(selectedCategoryId.HasValue ? $"&category={selectedCategoryId.Value}" : "")@(!string.IsNullOrEmpty(searchTerm) ? $"&search={searchTerm}" : "")"
+                                class="w-12 h-12 flex items-center justify-center border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors rounded cursor-pointer">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        }
+                        else
+                        {
+                            <span
+                                class="w-12 h-12 flex items-center justify-center border border-gray-300 text-gray-300 rounded cursor-not-allowed">
+                                <i class="fas fa-chevron-right"></i>
+                            </span>
+                        }
+                    </div>
+                }
             </div>
         </div>
     </div>
 </section>
 
 <script>
-function toggleFilter(filterId) {
-    const filterDiv = document.getElementById(filterId + '-filter');
-    const icon = document.getElementById(filterId + '-icon');
+    function toggleFilter(filterId) {
+        const filterDiv = document.getElementById(filterId + '-filter');
+        const icon = document.getElementById(filterId + '-icon');
 
-    if (filterDiv.style.display === 'none') {
-        filterDiv.style.display = 'block';
-        icon.classList.remove('fa-chevron-down');
-        icon.classList.add('fa-chevron-up');
-    } else {
-        filterDiv.style.display = 'none';
-        icon.classList.remove('fa-chevron-up');
-        icon.classList.add('fa-chevron-down');
+        if (filterDiv.style.display === 'none') {
+            filterDiv.style.display = 'block';
+            icon.classList.remove('fa-chevron-down');
+            icon.classList.add('fa-chevron-up');
+        } else {
+            filterDiv.style.display = 'none';
+            icon.classList.remove('fa-chevron-up');
+            icon.classList.add('fa-chevron-down');
+        }
     }
-}
+
+    function filterByCategory(categoryId) {
+        // Uncheck all other category checkboxes
+        const checkboxes = document.querySelectorAll('.category-checkbox');
+        checkboxes.forEach(cb => {
+            if (cb.getAttribute('data-category-id') !== categoryId) {
+                cb.checked = false;
+            }
+        });
+
+        // Build URL with category filter
+        const url = new URL(window.location.href);
+        if (categoryId && categoryId !== 'null' && categoryId !== '') {
+            url.searchParams.set('category', categoryId);
+        } else {
+            url.searchParams.delete('category');
+        }
+        url.searchParams.set('page', '1'); // Reset to first page when filtering
+
+        // Navigate to filtered URL
+        window.location.href = url.toString();
+    }
+
+    function filterByFlavour() {
+        const url = new URL(window.location.href);
+
+        // Get all checked flavour checkboxes
+        const checkedFlavours = Array.from(document.querySelectorAll('.flavour-checkbox:checked'))
+            .map(cb => cb.getAttribute('data-flavour-id'));
+
+        // Remove existing flavour parameters
+        url.searchParams.delete('flavour');
+
+        // Add new flavour parameters
+        checkedFlavours.forEach(id => {
+            url.searchParams.append('flavour', id);
+        });
+
+        url.searchParams.set('page', '1'); // Reset to first page when filtering
+        window.location.href = url.toString();
+    }
+
+    function filterByEquipment() {
+        const url = new URL(window.location.href);
+
+        // Get all checked equipment checkboxes
+        const checkedEquipment = Array.from(document.querySelectorAll('.equipment-checkbox:checked'))
+            .map(cb => cb.getAttribute('data-equipment-id'));
+
+        // Remove existing equipment parameters
+        url.searchParams.delete('equipment');
+
+        // Add new equipment parameters
+        checkedEquipment.forEach(id => {
+            url.searchParams.append('equipment', id);
+        });
+
+        url.searchParams.set('page', '1'); // Reset to first page when filtering
+        window.location.href = url.toString();
+    }
+
+    function filterByAvailability(inStock) {
+        const url = new URL(window.location.href);
+
+        if (inStock === null) {
+            url.searchParams.delete('inStock');
+        } else {
+            url.searchParams.set('inStock', inStock);
+        }
+
+        url.searchParams.set('page', '1'); // Reset to first page when filtering
+        window.location.href = url.toString();
+    }
 </script>
