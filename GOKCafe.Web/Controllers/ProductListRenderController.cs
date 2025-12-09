@@ -54,10 +54,17 @@ namespace GOKCafe.Web.Controllers
 
                 _logger.LogInformation($"ProductListController: Fetching products - Page: {pageNumber}, PageSize: {pageSize}, Category: {categoryId}, Search: {searchTerm}, Flavours: {flavourProfileIds.Count}, Equipment: {equipmentIds.Count}, InStock: {inStock}");
 
-                // Get products with pagination and filters
-                var products = _productService.GetProducts(pageNumber, pageSize, categoryId, searchTerm, flavourProfileIds, equipmentIds, inStock);
-                var categories = _categoryService.GetAllCategories().ToList();
-                var filters = _productService.GetProductFilters();
+                // Get products with pagination and filters - run in parallel
+                var productsTask = _productService.GetProductsAsync(pageNumber, pageSize, categoryId, searchTerm, flavourProfileIds, equipmentIds, inStock);
+                var categoriesTask = _categoryService.GetAllCategoriesAsync();
+                var filtersTask = _productService.GetProductFiltersAsync();
+
+                // Wait for all tasks to complete in parallel
+                Task.WaitAll(productsTask, categoriesTask, filtersTask);
+
+                var products = productsTask.Result;
+                var categories = categoriesTask.Result.ToList();
+                var filters = filtersTask.Result;
 
                 _logger.LogInformation($"ProductListController: Got {products.Items.Count()} products, {categories.Count} categories");
 

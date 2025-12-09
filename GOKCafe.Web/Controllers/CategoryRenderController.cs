@@ -30,16 +30,23 @@ namespace GOKCafe.Web.Controllers
             if (currentPage == null)
                 return NotFound();
 
-            var category = _categoryService.GetCategoryById(currentPage.Key);
-            if (category == null)
-                return NotFound();
+            // Get category and products in parallel
+            var categoryTask = _categoryService.GetCategoryByIdAsync(currentPage.Key);
 
             // Get query parameters
             var pageNumber = int.TryParse(Request.Query["page"], out var page) ? page : 1;
             var pageSize = 12;
 
+            Task.WaitAll(categoryTask);
+            var category = categoryTask.Result;
+
+            if (category == null)
+                return NotFound();
+
             // Get products for this category
-            var products = _productService.GetProducts(pageNumber, pageSize, category.Id.ToString());
+            var productsTask = _productService.GetProductsAsync(pageNumber, pageSize, category.Id.ToString());
+            Task.WaitAll(productsTask);
+            var products = productsTask.Result;
 
             var viewModel = new CategoryViewModel
             {

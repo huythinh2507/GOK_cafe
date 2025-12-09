@@ -5,6 +5,7 @@ using GOKCafe.Infrastructure.Data;
 using GOKCafe.Infrastructure.Repositories;
 using GOKCafe.Infrastructure.Services;
 using GOKCafe.Web.Services.Implementations;
+using Gotik.Commerce.Composing;
 using Microsoft.EntityFrameworkCore;
 using Umbraco.Cms.Core.Composing;
 using Umbraco.Cms.Core.DependencyInjection;

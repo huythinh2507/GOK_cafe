@@ -8,7 +8,7 @@
 
     <!-- NuGet Package Metadata -->
     <PackageId>Gotik.Commerce</PackageId>
-    <Version>1.0.0</Version>
+    <Version>1.1.0</Version>
     <Authors>GOK Cafe Team</Authors>
     <Company>GOK Cafe</Company>
     <Product>Gotik Commerce - Complete E-Commerce Solution for Umbraco</Product>

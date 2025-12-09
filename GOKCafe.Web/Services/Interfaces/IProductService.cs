@@ -4,12 +4,12 @@ namespace GOKCafe.Web.Services.Interfaces
 {
     public interface IProductService
     {
-        IEnumerable<ProductDto> GetFeaturedProducts(int count = 8);
-        IEnumerable<ProductDto> GetAllProducts();
-        IEnumerable<ProductDto> GetProductsByCategory(Guid categoryId);
-        ProductDto? GetProductById(Guid id);
-        ProductDto? GetProductBySlug(string slug);
-        PaginatedResponse<ProductDto> GetProducts(
+        Task<IEnumerable<ProductDto>> GetFeaturedProductsAsync(int count = 8);
+        Task<IEnumerable<ProductDto>> GetAllProductsAsync();
+        Task<IEnumerable<ProductDto>> GetProductsByCategoryAsync(Guid categoryId);
+        Task<ProductDto?> GetProductByIdAsync(Guid id);
+        Task<ProductDto?> GetProductBySlugAsync(string slug);
+        Task<PaginatedResponse<ProductDto>> GetProductsAsync(
             int pageNumber = 1,
             int pageSize = 12,
             string? categoryId = null,
@@ -17,6 +17,6 @@ namespace GOKCafe.Web.Services.Interfaces
             List<string>? flavourProfileIds = null,
             List<string>? equipmentIds = null,
             bool? inStock = null);
-        ProductFiltersDto? GetProductFilters();
+        Task<ProductFiltersDto?> GetProductFiltersAsync();
     }
 }

@@ -30,11 +30,11 @@ namespace GOKCafe.Web.Controllers.Api
         [HttpGet]
         [ProducesResponseType<ApiResponse<IEnumerable<CategoryDto>>>(StatusCodes.Status200OK)]
         [ProducesResponseType<ApiResponse<object>>(StatusCodes.Status500InternalServerError)]
-        public IActionResult GetAllCategories()
+        public async Task<IActionResult> GetAllCategories()
         {
             try
             {
-                var categories = _categoryService.GetAllCategories();
+                var categories = await _categoryService.GetAllCategoriesAsync();
                 return Ok(ApiResponse<IEnumerable<CategoryDto>>.SuccessResult(categories));
             }
             catch (Exception ex)
@@ -56,11 +56,11 @@ namespace GOKCafe.Web.Controllers.Api
         [ProducesResponseType<ApiResponse<CategoryDto>>(StatusCodes.Status200OK)]
         [ProducesResponseType<ApiResponse<object>>(StatusCodes.Status404NotFound)]
         [ProducesResponseType<ApiResponse<object>>(StatusCodes.Status500InternalServerError)]
-        public IActionResult GetCategoryById(Guid id)
+        public async Task<IActionResult> GetCategoryById(Guid id)
         {
             try
             {
-                var category = _categoryService.GetCategoryById(id);
+                var category = await _categoryService.GetCategoryByIdAsync(id);
                 if (category == null)
                     return NotFound(ApiResponse<object>.FailureResult("Category not found"));
 
@@ -85,11 +85,11 @@ namespace GOKCafe.Web.Controllers.Api
         [ProducesResponseType<ApiResponse<CategoryDto>>(StatusCodes.Status200OK)]
         [ProducesResponseType<ApiResponse<object>>(StatusCodes.Status404NotFound)]
         [ProducesResponseType<ApiResponse<object>>(StatusCodes.Status500InternalServerError)]
-        public IActionResult GetCategoryBySlug(string slug)
+        public async Task<IActionResult> GetCategoryBySlug(string slug)
         {
             try
             {
-                var category = _categoryService.GetCategoryBySlug(slug);
+                var category = await _categoryService.GetCategoryBySlugAsync(slug);
                 if (category == null)
                     return NotFound(ApiResponse<object>.FailureResult("Category not found"));
 
