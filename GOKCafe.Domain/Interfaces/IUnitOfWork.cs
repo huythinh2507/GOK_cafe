@@ -24,6 +24,8 @@ public interface IUnitOfWork : IDisposable
     IRepository<Cart> Carts { get; }
     IRepository<CartItem> CartItems { get; }
     IRepository<RevokedToken> RevokedTokens { get; }
+    IRepository<Coupon> Coupons { get; }
+    IRepository<CouponUsage> CouponUsages { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     Task BeginTransactionAsync();

@@ -38,6 +38,7 @@ builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IHomeService, HomeService>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IOdooService, OdooService>();
+builder.Services.AddScoped<ICouponService, CouponService>();
 
 // Register HttpClient for external API calls
 builder.Services.AddHttpClient();
