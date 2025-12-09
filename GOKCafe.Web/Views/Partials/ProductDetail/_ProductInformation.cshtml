@@ -15,18 +15,18 @@
     var stockStatusClass = Model.StockQuantity > 0 ? "text-[#22C55E]" : "text-red-600";
 }
 
-<div class="w-full bg-white">
+<div class=" w-full bg-white">
     <!-- Top Section: Image and Information -->
-    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:max-h-[720px]">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:h-[640px]">
         <div class="grid grid-cols-12 gap-8">
             <!-- Left Column: Product Image (4/12) -->
-            <div class="col-span-12 lg:col-span-4">
-                <div class="flex items-center justify-center h-full lg:max-h-[640px] overflow-hidden">
+            <div class="col-span-12 sm:col-span-8 lg:col-span-6 xl:col-span-4">
+                <div class="flex items-center justify-center h-full lg:h-[640px] overflow-hidden">
                     @if (!string.IsNullOrEmpty(Model.ImageUrl))
                     {
                         <img src="@Model.ImageUrl"
                              alt="@Model.Name"
-                             class="w-full h-full object-cover  lg:object-contain" />
+                             class="w-full h-full object-cover " />
                     }
                     else
                     {
@@ -41,7 +41,7 @@
             </div>
 
             <!-- Right Column: Product Information (8/12) -->
-            <div class="col-span-12 lg:col-span-8">
+            <div class="col-span-12 sm:col-span-4 lg:col-span-6 xl:col-span-8 ">
                 <div class="flex flex-col justify-between h-full">
                     <!-- Top Section: Product Details -->
                     <div class="flex flex-col space-y-4">

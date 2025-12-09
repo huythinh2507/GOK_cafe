@@ -35,10 +35,36 @@
             <!-- Product Name -->
             <h2 id="modalProductName" class="text-3xl font-semibold text-gray-900 mb-4">Product Name</h2>
 
+            <!-- Category -->
+            <p id="modalProductCategory" class="text-sm font-medium text-gray-500 uppercase mb-3"></p>
+
             <!-- Price -->
             <div class="mb-6">
-                <p class="text-gray-600 text-sm mb-1">₹ <span id="modalProductPrice" class="text-2xl font-bold text-gray-900">700</span></p>
+                <p class="text-gray-600 text-sm mb-1">VNĐ <span id="modalProductPrice" class="text-2xl font-bold text-gray-900">700</span></p>
                 <p class="text-xs text-gray-500" id="modalProductPriceNote">MRP (Inclusive of all taxes)</p>
+            </div>
+
+            <!-- Short Description -->
+            <div id="modalShortDescriptionContainer" class="mb-6 hidden">
+                <p id="modalShortDescription" class="text-gray-600 text-sm"></p>
+            </div>
+
+            <!-- Product Details (Tasting Note, Region, Process) -->
+            <div id="modalProductDetailsContainer" class="mb-6 hidden">
+                <div class="space-y-2 text-sm">
+                    <div id="modalTastingNoteContainer" class="hidden">
+                        <span class="font-semibold text-gray-900">Tasting Notes:</span>
+                        <span id="modalTastingNote" class="text-gray-600"></span>
+                    </div>
+                    <div id="modalRegionContainer" class="hidden">
+                        <span class="font-semibold text-gray-900">Region:</span>
+                        <span id="modalRegion" class="text-gray-600"></span>
+                    </div>
+                    <div id="modalProcessContainer" class="hidden">
+                        <span class="font-semibold text-gray-900">Process:</span>
+                        <span id="modalProcess" class="text-gray-600"></span>
+                    </div>
+                </div>
             </div>
 
             <!-- SIZE Section -->

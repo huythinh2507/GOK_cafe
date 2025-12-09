@@ -3,7 +3,7 @@
 @if (Model != null && Model.Any())
 {
     <!-- You May Also Like Section -->
-    <section class="bg-white pt-8">
+    <section class="bg-white pt-16">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Section Title -->
             <div class="mb-8">
@@ -11,14 +11,14 @@
             </div>
 
             <!-- Products Grid -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-8">
                 @foreach (var product in Model.Take(4))
                 {
                     var productPrice = product.Price.ToString("N0", new System.Globalization.CultureInfo("vi-VN")).Replace(",", ".");
 
                     <div class="group">
                         <!-- Product Image -->
-                        <a href="/@product.Slug" class="overflow-hidden mb-4 flex items-center justify-center bg-gray-100" style="height: 513px;">
+                        <a href="/@product.Slug" class="overflow-hidden mb-4 flex items-center justify-center bg-gray-100 h-[480px]">
                             @if (!string.IsNullOrEmpty(product.ImageUrl))
                             {
                                 <img src="@product.ImageUrl"
