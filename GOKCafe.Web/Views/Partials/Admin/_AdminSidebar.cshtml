@@ -1,0 +1,90 @@
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+
+<!-- Sidebar Container -->
+<aside id="adminSidebar" class="admin-sidebar bg-admin-sidebar text-white w-64 flex-shrink-0 transition-all duration-300 ease-in-out">
+    <!-- Logo Section -->
+    <div class="sidebar-header p-6 border-b border-gray-700">
+        <div class="flex items-center justify-between">
+            <a href="/admin/dashboard" class="flex items-center">
+                <img src="~/logoGK.png" alt="GOK Cafe" class="h-8 w-auto" />
+                <span class="ml-3 text-xl font-bold sidebar-text">GOK Admin</span>
+            </a>
+            <button id="sidebarToggle" class="text-gray-400 hover:text-white focus:outline-none lg:hidden">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Navigation Menu -->
+    <nav class="sidebar-nav flex-1 overflow-y-auto py-6 px-4">
+        <ul class="space-y-2">
+            <!-- Dashboard -->
+            <li>
+                <a href="/admin/dashboard" class="sidebar-link flex items-center px-4 py-3 text-gray-300 hover:bg-admin-sidebar-hover hover:text-white rounded-lg transition-colors">
+                    <i class="fas fa-chart-line w-5"></i>
+                    <span class="ml-3 sidebar-text">Dashboard</span>
+                </a>
+            </li>
+
+            <!-- Products -->
+            <li>
+                <a href="/admin/products" class="sidebar-link flex items-center px-4 py-3 text-gray-300 hover:bg-admin-sidebar-hover hover:text-white rounded-lg transition-colors">
+                    <i class="fas fa-coffee w-5"></i>
+                    <span class="ml-3 sidebar-text">Products</span>
+                </a>
+            </li>
+
+            <!-- Categories -->
+            <li>
+                <a href="/admin/categories" class="sidebar-link flex items-center px-4 py-3 text-gray-300 hover:bg-admin-sidebar-hover hover:text-white rounded-lg transition-colors">
+                    <i class="fas fa-tags w-5"></i>
+                    <span class="ml-3 sidebar-text">Categories</span>
+                </a>
+            </li>
+
+            <!-- Orders -->
+            <li>
+                <a href="/admin/orders" class="sidebar-link flex items-center px-4 py-3 text-gray-300 hover:bg-admin-sidebar-hover hover:text-white rounded-lg transition-colors">
+                    <i class="fas fa-shopping-bag w-5"></i>
+                    <span class="ml-3 sidebar-text">Orders</span>
+                    <span class="ml-auto bg-red-500 text-white text-xs px-2 py-1 rounded-full sidebar-text">3</span>
+                </a>
+            </li>
+
+            <!-- Customers -->
+            <li>
+                <a href="/admin/customers" class="sidebar-link flex items-center px-4 py-3 text-gray-300 hover:bg-admin-sidebar-hover hover:text-white rounded-lg transition-colors">
+                    <i class="fas fa-users w-5"></i>
+                    <span class="ml-3 sidebar-text">Customers</span>
+                </a>
+            </li>
+
+            <!-- Vouchers/Coupons -->
+            <li>
+                <a href="/admin/vouchers" class="sidebar-link flex items-center px-4 py-3 text-gray-300 hover:bg-admin-sidebar-hover hover:text-white rounded-lg transition-colors">
+                    <i class="fas fa-ticket-alt w-5"></i>
+                    <span class="ml-3 sidebar-text">Vouchers</span>
+                </a>
+            </li>
+
+            <!-- Settings -->
+            <li>
+                <a href="/admin/settings" class="sidebar-link flex items-center px-4 py-3 text-gray-300 hover:bg-admin-sidebar-hover hover:text-white rounded-lg transition-colors">
+                    <i class="fas fa-cog w-5"></i>
+                    <span class="ml-3 sidebar-text">Settings</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Logout Button (Bottom) -->
+    <div class="sidebar-footer p-4 border-t border-gray-700">
+        <a href="/umbraco/logout" class="flex items-center px-4 py-3 text-gray-300 hover:bg-red-600 hover:text-white rounded-lg transition-colors">
+            <i class="fas fa-sign-out-alt w-5"></i>
+            <span class="ml-3 sidebar-text">Logout</span>
+        </a>
+    </div>
+</aside>
+
+<!-- Sidebar Overlay for Mobile -->
+<div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden lg:hidden"></div>

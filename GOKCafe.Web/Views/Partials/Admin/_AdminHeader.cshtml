@@ -1,0 +1,110 @@
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+
+<header class="admin-header bg-white shadow-sm border-b border-gray-200 z-10">
+    <div class="flex items-center justify-between px-6 py-4">
+        <!-- Left Section: Mobile Menu + Page Title -->
+        <div class="flex items-center">
+            <!-- Mobile Hamburger -->
+            <button id="mobileSidebarToggle" class="text-gray-500 hover:text-gray-700 focus:outline-none lg:hidden mr-4">
+                <i class="fas fa-bars text-2xl"></i>
+            </button>
+
+            <!-- Page Title -->
+            <h1 class="text-2xl font-semibold text-gray-800">@(ViewData["PageTitle"] ?? "Dashboard")</h1>
+        </div>
+
+        <!-- Right Section: Search, Notifications, User -->
+        <div class="flex items-center space-x-4">
+            <!-- Search Bar -->
+            <div class="hidden md:flex items-center">
+                <div class="relative">
+                    <input type="text"
+                           placeholder="Search..."
+                           class="w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                    <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                </div>
+            </div>
+
+            <!-- Notifications -->
+            <div class="relative">
+                <button class="relative text-gray-600 hover:text-gray-800 focus:outline-none" onclick="toggleNotifications()">
+                    <i class="fas fa-bell text-xl"></i>
+                    <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">5</span>
+                </button>
+
+                <!-- Notifications Dropdown (Hidden by default) -->
+                <div id="notificationsDropdown" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                    <div class="p-4 border-b border-gray-200">
+                        <h3 class="text-sm font-semibold text-gray-800">Notifications</h3>
+                    </div>
+                    <div class="max-h-96 overflow-y-auto">
+                        <!-- Notification items -->
+                        <a href="#" class="block p-4 hover:bg-gray-50 border-b border-gray-100">
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-shopping-bag text-primary"></i>
+                                </div>
+                                <div class="ml-3 flex-1">
+                                    <p class="text-sm text-gray-800">New order #12345</p>
+                                    <p class="text-xs text-gray-500 mt-1">5 minutes ago</p>
+                                </div>
+                            </div>
+                        </a>
+                        <a href="#" class="block p-4 hover:bg-gray-50 border-b border-gray-100">
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-user text-green-500"></i>
+                                </div>
+                                <div class="ml-3 flex-1">
+                                    <p class="text-sm text-gray-800">New customer registered</p>
+                                    <p class="text-xs text-gray-500 mt-1">10 minutes ago</p>
+                                </div>
+                            </div>
+                        </a>
+                        <a href="#" class="block p-4 hover:bg-gray-50 border-b border-gray-100">
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-exclamation-circle text-red-500"></i>
+                                </div>
+                                <div class="ml-3 flex-1">
+                                    <p class="text-sm text-gray-800">Low stock alert</p>
+                                    <p class="text-xs text-gray-500 mt-1">30 minutes ago</p>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="p-3 text-center border-t border-gray-200">
+                        <a href="/admin/notifications" class="text-sm text-primary hover:text-primary-dark font-medium">View all</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- User Profile Dropdown -->
+            <div class="relative">
+                <button class="flex items-center space-x-3 focus:outline-none" onclick="toggleUserMenu()">
+                    <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-semibold">
+                        A
+                    </div>
+                    <span class="hidden md:block text-sm font-medium text-gray-700">Admin User</span>
+                    <i class="fas fa-chevron-down text-gray-500 text-xs"></i>
+                </button>
+
+                <!-- User Menu Dropdown -->
+                <div id="userMenuDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                    <a href="/admin/profile" class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 border-b border-gray-100">
+                        <i class="fas fa-user mr-2"></i>Profile
+                    </a>
+                    <a href="/admin/settings" class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 border-b border-gray-100">
+                        <i class="fas fa-cog mr-2"></i>Settings
+                    </a>
+                    <a href="/" class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 border-b border-gray-100">
+                        <i class="fas fa-globe mr-2"></i>View Site
+                    </a>
+                    <a href="/umbraco/logout" class="block px-4 py-3 text-sm text-red-600 hover:bg-red-50">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>

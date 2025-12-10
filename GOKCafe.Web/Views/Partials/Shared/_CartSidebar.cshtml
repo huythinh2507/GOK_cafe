@@ -1,10 +1,10 @@
 @inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
 
 <!-- Cart Sidebar Overlay -->
-<div id="cartOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden transition-opacity duration-300" onclick="closeCartSidebar()"></div>
+<div id="cartOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-[60] hidden transition-opacity duration-300" onclick="closeCartSidebar()"></div>
 
 <!-- Cart Sidebar Panel -->
-<div id="cartSidebar" class="fixed top-0 right-0 h-full w-full md:w-[400px] bg-white shadow-2xl z-50 transform translate-x-full transition-transform duration-300 flex flex-col">
+<div id="cartSidebar" class="fixed top-0 right-0 h-full w-full md:w-[400px] bg-white shadow-2xl z-[70] transform translate-x-full transition-transform duration-300 flex flex-col">
 
     <!-- Cart Header -->
     <div class="flex items-center justify-between px-5 py-4 border-b border-gray-200">
@@ -61,7 +61,10 @@
                             </div>
 
                             <!-- Price -->
-                            <p class="font-semibold text-sm text-gray-900 cart-item-price">32,000 VND</p>
+                            <div class="text-right">
+                                <p class="text-xs text-gray-400 line-through cart-item-original-price hidden"></p>
+                                <p class="font-semibold text-sm text-gray-900 cart-item-price">32,000 VND</p>
+                            </div>
                         </div>
                     </div>
                 </div>

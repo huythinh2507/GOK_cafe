@@ -1,0 +1,160 @@
+@*
+    Remove Product Confirmation Modal
+*@
+
+<!-- Remove Product Modal Overlay -->
+<div id="removeProductOverlay" class="hidden fixed inset-0 bg-black bg-opacity-50 z-[9998] transition-opacity duration-300"></div>
+
+<!-- Remove Product Modal -->
+<div id="removeProductModal" class="hidden fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-[9999] w-full max-w-md">
+    <div class="bg-white rounded-lg shadow-2xl p-8 mx-4">
+        <!-- Title -->
+        <h3 class="text-2xl font-bold text-gray-900 mb-4 text-center">Confirm Delete</h3>
+
+        <!-- Message -->
+        <p class="text-gray-600 text-center mb-8">
+            Are you sure you want to remove product from your cart?
+        </p>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-row gap-3">
+            <!-- Cancel Button -->
+            <button type="button"
+                    onclick="closeRemoveProductModal()"
+                    class="w-full px-6 py-3 border-2 border-primary text-primary hover:bg-primary hover:text-white font-semibold uppercase tracking-wider hover:bg-primary/5 transition-colors duration-200">
+                Cancel
+            </button>
+            <!-- Confirm Button -->
+            <button type="button"
+                    onclick="confirmRemoveProduct()"
+                    class="w-full px-6 py-3 bg-primary text-white font-semibold uppercase tracking-wider hover:bg-primary/90 transition-colors duration-200">
+                Confirm
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Modal Animation */
+    #removeProductModal.show {
+        animation: modalSlideIn 0.3s ease-out;
+    }
+
+    #removeProductModal.hide {
+        animation: modalSlideOut 0.3s ease-in;
+    }
+
+    #removeProductOverlay.show {
+        opacity: 1;
+        transition: opacity 0.3s ease-out;
+    }
+
+    #removeProductOverlay.hide {
+        opacity: 0;
+        transition: opacity 0.3s ease-in;
+    }
+
+    @@keyframes modalSlideIn {
+        from {
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.9);
+        }
+        to {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+    }
+
+    @@keyframes modalSlideOut {
+        from {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+        to {
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.9);
+        }
+    }
+</style>
+
+<script>
+    // Global variable to store the product ID to be removed
+    let productToRemove = null;
+
+    // Open remove product modal
+    window.openRemoveProductModal = function(productId) {
+        productToRemove = productId;
+
+        const modal = document.getElementById('removeProductModal');
+        const overlay = document.getElementById('removeProductOverlay');
+
+
+        // Add show class for animation after a brief delay
+        setTimeout(() => {
+        // Show modal and overlay
+        overlay.classList.remove('hidden');
+        modal.classList.remove('hidden');
+            overlay.classList.add('show');
+            modal.classList.add('show');
+        }, 10);
+
+        // Prevent body scroll
+        document.body.style.overflow = 'hidden';
+    };
+
+    // Close remove product modal
+    window.closeRemoveProductModal = function() {
+        const modal = document.getElementById('removeProductModal');
+        const overlay = document.getElementById('removeProductOverlay');
+
+        // Remove show class and add hide class for animation
+        overlay.classList.remove('show');
+        overlay.classList.add('hide');
+        modal.classList.remove('show');
+        modal.classList.add('hide');
+
+        // Hide after animation completes
+        setTimeout(() => {
+            overlay.classList.add('hidden');
+            modal.classList.add('hidden');
+            overlay.classList.remove('hide');
+            modal.classList.remove('hide');
+            document.body.style.overflow = '';
+            productToRemove = null;
+        }, 100);
+    };
+
+    // Confirm remove product
+    window.confirmRemoveProduct = function() {
+        if (productToRemove) {
+            // Remove the item from cart
+            cart.removeItem(productToRemove);
+
+            // Refresh cart sidebar UI
+            if (typeof renderCartSidebar === 'function') {
+                renderCartSidebar();
+            }
+
+            // Close modal
+            closeRemoveProductModal();
+        }
+    };
+
+    // Close modal when clicking outside
+    document.addEventListener('DOMContentLoaded', function() {
+        const overlay = document.getElementById('removeProductOverlay');
+        if (overlay) {
+            overlay.addEventListener('click', closeRemoveProductModal);
+        }
+    });
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            const modal = document.getElementById('removeProductModal');
+            if (modal && !modal.classList.contains('hidden')) {
+                closeRemoveProductModal();
+            }
+        }
+    });
+</script>
