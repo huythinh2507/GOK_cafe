@@ -38,6 +38,30 @@
     <!-- Umbraco UI Library -->
     <script type="module" src="https://cdn.jsdelivr.net/npm/@("@")umbraco-ui/uui@("@")1.8.0/dist/uui.js"></script>
 
+    <!-- Custom Global Styles -->
+    <style>
+        /* Hide scrollbar for all browsers */
+        * {
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE and Edge */
+        }
+
+        *::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera */
+        }
+
+        /* Apply to html and body */
+        html, body {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        html::-webkit-scrollbar,
+        body::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body class="flex flex-col min-h-screen bg-gray-50">
@@ -52,6 +76,9 @@
 
     <!-- Product Detail Modal -->
     @await Html.PartialAsync("~/Views/Partials/Shared/_ProductDetailModal.cshtml")
+
+    <!-- Remove Product Modal -->
+    @await Html.PartialAsync("~/Views/Partials/Cart/_RemoveProductModal.cshtml")
 
     <!-- Cart Sidebar -->
     @await Html.PartialAsync("~/Views/Partials/Shared/_CartSidebar.cshtml")

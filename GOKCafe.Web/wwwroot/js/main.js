@@ -78,39 +78,52 @@ class ShoppingCart {
         // Create notification element
         const notification = document.createElement('div');
         notification.className = `cart-notification ${type}`;
+
+        // Set background color based on type
+        let bgColor = '#10B981'; // success - green
+        let icon = 'fa-check-circle';
+        if (type === 'error') {
+            bgColor = '#EF4444'; // error - red
+            icon = 'fa-exclamation-circle';
+        } else if (type === 'info') {
+            bgColor = '#3B82F6'; // info - blue
+            icon = 'fa-info-circle';
+        }
+
         notification.style.cssText = `
             position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%) translateY(100px);
+            top: 20px;
+            right: 20px;
+            transform: translateX(400px);
             z-index: 10000;
-            background: #10B981;
+            background: ${bgColor};
             color: white;
             padding: 16px 24px;
             border-radius: 8px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             display: flex;
             align-items: center;
             gap: 12px;
             font-weight: 500;
             min-width: 320px;
+            max-width: 400px;
             transition: transform 0.3s ease;
         `;
         notification.innerHTML = `
-            <i class="fas fa-check-circle" style="font-size: 20px;"></i>
+            <i class="fas ${icon}" style="font-size: 20px;"></i>
             <span>${message}</span>
         `;
 
         document.body.appendChild(notification);
 
-        // Slide up animation
+        // Slide in animation from right
         setTimeout(() => {
-            notification.style.transform = 'translateX(-50%) translateY(0)';
+            notification.style.transform = 'translateX(0)';
         }, 10);
 
         // Remove after 3 seconds
         setTimeout(() => {
-            notification.style.transform = 'translateX(-50%) translateY(100px)';
+            notification.style.transform = 'translateX(400px)';
             setTimeout(() => notification.remove(), 300);
         }, 3000);
     }
@@ -449,9 +462,40 @@ function createCartItemElement(item) {
 
     // Set price
     const priceElement = clone.querySelector('.cart-item-price');
-    const priceNum = parseInt(item.price) || 32000;
-    const itemPrice = priceNum * item.quantity;
-    priceElement.textContent = formatPrice(itemPrice);
+    const originalPriceElement = clone.querySelector('.cart-item-original-price');
+
+    console.log('Cart item data:', {
+        name: item.name,
+        price: item.price,
+        originalPrice: item.originalPrice,
+        quantity: item.quantity
+    });
+
+    // Check if item has both original and discount price
+    if (item.originalPrice && item.price && item.originalPrice > item.price) {
+        // Show both prices
+        const originalPriceNum = parseInt(item.originalPrice) || 0;
+        const discountPriceNum = parseInt(item.price) || 0;
+        const originalItemPrice = originalPriceNum * item.quantity;
+        const discountItemPrice = discountPriceNum * item.quantity;
+
+        console.log('Displaying discount prices:', {
+            original: originalItemPrice,
+            discount: discountItemPrice
+        });
+
+        originalPriceElement.textContent = formatPrice(originalItemPrice);
+        originalPriceElement.classList.remove('hidden');
+        priceElement.textContent = formatPrice(discountItemPrice);
+        priceElement.classList.add('text-primary');
+    } else {
+        // Show only one price
+        const priceNum = parseInt(item.price) || 32000;
+        const itemPrice = priceNum * item.quantity;
+        priceElement.textContent = formatPrice(itemPrice);
+        originalPriceElement.classList.add('hidden');
+        priceElement.classList.remove('text-primary');
+    }
 
     // Attach event listeners
     const decreaseBtn = clone.querySelector('.cart-decrease-btn');
@@ -471,10 +515,7 @@ function createCartItemElement(item) {
     });
 
     removeBtn.addEventListener('click', () => {
-        if (confirm('Remove this item from cart?')) {
-            cart.removeItem(item.productId);
-            renderCartSidebar();
-        }
+        openRemoveProductModal(item.productId);
     });
 
     return clone;
@@ -846,6 +887,7 @@ window.addToCartFromModal = function() {
         name: currentProduct.name,
         imageUrl: currentProduct.imageUrl,
         price: currentProduct.price,
+        originalPrice: currentProduct.originalPrice,
         quantity: quantity,
         packaging: selectedSize,
         grind: selectedGrind
@@ -857,7 +899,9 @@ window.addToCartFromModal = function() {
     // Update cart item with full data
     const existingItem = cart.items.find(item => item.productId === cartItem.productId);
     if (existingItem) {
+        const currentQuantity = existingItem.quantity; // Preserve the updated quantity
         Object.assign(existingItem, cartItem);
+        existingItem.quantity = currentQuantity; // Restore the quantity after merge
         cart.saveCart();
     }
 
@@ -1097,31 +1141,31 @@ function loadVouchers() {
     const mockVouchers = [
         {
             id: 'voucher1',
-            code: 'CMFW25',
+            code: 'GTIK12',
             discount: 50000,
             type: 'fixed',
             minOrder: 1,
-            description: 'Save 50K for orders from 499K (applies to equipment)',
+            description: 'Save 50K orders from 499K',
             expiry: 'EXP: 31/12/2025',
             progress: { current: 0, target: 499000, show: true }
         },
         {
             id: 'voucher2',
-            code: 'COOLNEW',
+            code: 'GTIK123',
             discount: 50000,
             type: 'fixed',
             minOrder: 1,
-            description: '[New Customer] Enter COOLNEW Save 50K first order from 299k',
+            description: 'Save 50K order from 299k',
             expiry: 'EXP: 31/12/2025',
             progress: null
         },
         {
             id: 'voucher3',
-            code: 'SAVE100',
+            code: 'GTIK124',
             discount: 100000,
             type: 'fixed',
             minOrder: 1,
-            description: 'Save 100K for orders from 500K',
+            description: 'Save 100K orders from 500K',
             expiry: 'EXP: 31/12/2025',
             progress: null
         }
