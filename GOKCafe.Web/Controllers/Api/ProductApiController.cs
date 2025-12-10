@@ -42,7 +42,8 @@ namespace GOKCafe.Web.Controllers.Api
         {
             try
             {
-                var result = await _productService.GetProductsAsync(pageNumber, pageSize, categoryId, searchTerm);
+                var categoryIds = !string.IsNullOrEmpty(categoryId) ? new List<string> { categoryId } : null;
+                var result = await _productService.GetProductsAsync(pageNumber, pageSize, categoryIds, searchTerm);
                 return Ok(ApiResponse<PaginatedResponse<ProductDto>>.SuccessResult(result));
             }
             catch (Exception ex)

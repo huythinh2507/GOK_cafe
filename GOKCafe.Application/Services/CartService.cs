@@ -11,11 +11,13 @@ namespace GOKCafe.Application.Services;
 public class CartService : ICartService
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ICouponService _couponService;
     private const int CartExpirationDays = 30;
 
-    public CartService(IUnitOfWork unitOfWork)
+    public CartService(IUnitOfWork unitOfWork, ICouponService couponService)
     {
         _unitOfWork = unitOfWork;
+        _couponService = couponService;
     }
 
     public async Task<ApiResponse<CartDto>> GetCartAsync(Guid? userId, string? sessionId)
@@ -82,6 +84,8 @@ public class CartService : ICartService
                     Quantity = dto.Quantity,
                     UnitPrice = product.Price,
                     DiscountPrice = product.DiscountPrice,
+                    SelectedSize = dto.SelectedSize,
+                    SelectedGrind = dto.SelectedGrind,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 };
@@ -422,15 +426,111 @@ public class CartService : ICartService
                 Quantity = item.Quantity,
                 UnitPrice = item.UnitPrice,
                 DiscountPrice = item.DiscountPrice,
-                TotalPrice = item.TotalPrice,
-                StockQuantity = product.StockQuantity
+                Subtotal = item.TotalPrice,
+                StockQuantity = product.StockQuantity,
+                SelectedSize = item.SelectedSize,
+                SelectedGrind = item.SelectedGrind
             });
         }
 
-        cartDto.TotalAmount = cartDto.Items.Sum(i => i.TotalPrice);
+        // Calculate pricing
+        cartDto.Subtotal = cart.Subtotal;
+        cartDto.ShippingFee = cart.ShippingFee;
+        cartDto.DiscountAmount = cart.DiscountAmount;
+        cartDto.Total = cart.Total;
+        cartDto.AppliedCouponCode = cart.AppliedCouponCode;
+        cartDto.AppliedCouponId = cart.AppliedCouponId;
         cartDto.TotalItems = cartDto.Items.Sum(i => i.Quantity);
 
         return Task.FromResult(cartDto);
+    }
+
+    #endregion
+
+    #region Coupon Management
+
+    public async Task<ApiResponse<CartDto>> ApplyCouponToCartAsync(Guid? userId, string? sessionId, string couponCode)
+    {
+        try
+        {
+            var cart = await GetOrCreateCartAsync(userId, sessionId);
+
+            if (!cart.CartItems.Any())
+            {
+                return ApiResponse<CartDto>.FailureResult("Cannot apply coupon to an empty cart");
+            }
+
+            // Calculate cart subtotal
+            var subtotal = cart.Subtotal;
+
+            // Apply coupon using CouponService
+            var applyCouponRequest = new Application.DTOs.Coupon.ApplyCouponRequest
+            {
+                CouponCode = couponCode,
+                OrderAmount = subtotal,
+                UserId = userId,
+                SessionId = sessionId
+            };
+
+            var couponResult = await _couponService.ApplyCouponAsync(applyCouponRequest);
+
+            if (!couponResult.Success || couponResult.Data == null)
+            {
+                return ApiResponse<CartDto>.FailureResult(couponResult.Message);
+            }
+
+            // Update cart with coupon information
+            cart.AppliedCouponId = couponResult.Data.Coupon?.Id;
+            cart.AppliedCouponCode = couponCode;
+            cart.DiscountAmount = couponResult.Data.DiscountAmount;
+            cart.UpdatedAt = DateTime.UtcNow;
+
+            await _unitOfWork.SaveChangesAsync();
+
+            // Reload and return updated cart
+            cart = await GetCartWithItemsAsync(cart.Id);
+            var cartDto = await MapToCartDtoAsync(cart);
+
+            return ApiResponse<CartDto>.SuccessResult(
+                cartDto,
+                $"Coupon '{couponCode}' applied successfully! You saved {couponResult.Data.DiscountAmount:N0} VND"
+            );
+        }
+        catch (Exception ex)
+        {
+            return ApiResponse<CartDto>.FailureResult($"Error applying coupon: {ex.Message}");
+        }
+    }
+
+    public async Task<ApiResponse<CartDto>> RemoveCouponFromCartAsync(Guid? userId, string? sessionId)
+    {
+        try
+        {
+            var cart = await GetOrCreateCartAsync(userId, sessionId);
+
+            if (cart.AppliedCouponId == null)
+            {
+                return ApiResponse<CartDto>.FailureResult("No coupon is currently applied to this cart");
+            }
+
+            // Clear coupon information
+            cart.AppliedCouponId = null;
+            cart.AppliedCouponCode = null;
+            cart.DiscountAmount = 0;
+            cart.UpdatedAt = DateTime.UtcNow;
+
+            await _unitOfWork.SaveChangesAsync();
+
+            // Reload and return updated cart
+            cart = await GetCartWithItemsAsync(cart.Id);
+            var cartDto = await MapToCartDtoAsync(cart);
+
+            return ApiResponse<CartDto>.SuccessResult(cartDto, "Coupon removed from cart successfully");
+        }
+        catch (Exception ex)
+        {
+            return ApiResponse<CartDto>.FailureResult($"Error removing coupon: {ex.Message}");
+        }
     }
 
     #endregion

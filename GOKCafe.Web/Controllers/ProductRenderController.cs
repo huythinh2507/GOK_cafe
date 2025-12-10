@@ -109,7 +109,7 @@ namespace GOKCafe.Web.Controllers
                     var relatedProductsTask = _productService.GetProductsAsync(
                         pageNumber: 1,
                         pageSize: 4,
-                        categoryId: product.CategoryId.ToString()
+                        categoryIds: new List<string> { product.CategoryId.ToString() }
                     );
                     Task.WaitAll(relatedProductsTask);
                     var relatedProductsResponse = relatedProductsTask.Result;

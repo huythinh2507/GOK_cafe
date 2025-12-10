@@ -33,6 +33,10 @@ public class UnitOfWork : IUnitOfWork
         Carts = new Repository<Cart>(_context);
         CartItems = new Repository<CartItem>(_context);
         RevokedTokens = new Repository<RevokedToken>(_context);
+        Coupons = new Repository<Coupon>(_context);
+        CouponUsages = new Repository<CouponUsage>(_context);
+        Payments = new Repository<Payment>(_context);
+        BankTransferConfigs = new Repository<BankTransferConfig>(_context);
     }
 
     public IRepository<User> Users { get; }
@@ -55,6 +59,10 @@ public class UnitOfWork : IUnitOfWork
     public IRepository<Cart> Carts { get; }
     public IRepository<CartItem> CartItems { get; }
     public IRepository<RevokedToken> RevokedTokens { get; }
+    public IRepository<Coupon> Coupons { get; }
+    public IRepository<CouponUsage> CouponUsages { get; }
+    public IRepository<Payment> Payments { get; }
+    public IRepository<BankTransferConfig> BankTransferConfigs { get; }
 
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {

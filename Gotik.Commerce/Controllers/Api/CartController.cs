@@ -169,6 +169,52 @@ public class CartController : ControllerBase
         return result.Success ? Ok(result) : BadRequest(result);
     }
 
+    /// <summary>
+    /// Apply coupon code to cart
+    /// </summary>
+    /// <param name="couponCode">Coupon code to apply</param>
+    /// <param name="sessionId">Session ID for anonymous users (optional if authenticated)</param>
+    [HttpPost("apply-coupon")]
+    [ProducesResponseType<ApiResponse<CartDto>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ApiResponse<CartDto>>(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ApplyCoupon([FromQuery] string couponCode, [FromQuery] string? sessionId = null)
+    {
+        var userId = GetUserId();
+
+        if (!userId.HasValue && string.IsNullOrEmpty(sessionId))
+        {
+            return BadRequest(ApiResponse<CartDto>.FailureResult("Either authentication or sessionId is required"));
+        }
+
+        if (string.IsNullOrWhiteSpace(couponCode))
+        {
+            return BadRequest(ApiResponse<CartDto>.FailureResult("Coupon code is required"));
+        }
+
+        var result = await _cartService.ApplyCouponToCartAsync(userId, sessionId, couponCode);
+        return result.Success ? Ok(result) : BadRequest(result);
+    }
+
+    /// <summary>
+    /// Remove applied coupon from cart
+    /// </summary>
+    /// <param name="sessionId">Session ID for anonymous users (optional if authenticated)</param>
+    [HttpDelete("remove-coupon")]
+    [ProducesResponseType<ApiResponse<CartDto>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ApiResponse<CartDto>>(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> RemoveCoupon([FromQuery] string? sessionId = null)
+    {
+        var userId = GetUserId();
+
+        if (!userId.HasValue && string.IsNullOrEmpty(sessionId))
+        {
+            return BadRequest(ApiResponse<CartDto>.FailureResult("Either authentication or sessionId is required"));
+        }
+
+        var result = await _cartService.RemoveCouponFromCartAsync(userId, sessionId);
+        return result.Success ? Ok(result) : BadRequest(result);
+    }
+
     #region Private Helpers
 
     private Guid? GetUserId()

@@ -13,4 +13,8 @@ public interface ICartService
     Task<ApiResponse<bool>> ClearCartAsync(Guid? userId, string? sessionId);
     Task<ApiResponse<int>> GetCartItemCountAsync(Guid? userId, string? sessionId);
     Task<ApiResponse<OrderDto>> CheckoutFromCartAsync(Guid? userId, string? sessionId, CheckoutDto dto);
+
+    // Coupon management
+    Task<ApiResponse<CartDto>> ApplyCouponToCartAsync(Guid? userId, string? sessionId, string couponCode);
+    Task<ApiResponse<CartDto>> RemoveCouponFromCartAsync(Guid? userId, string? sessionId);
 }

@@ -29,6 +29,7 @@ builder.Services.AddSingleton<ICacheService, CacheService>();
 
 // Register infrastructure services
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
+builder.Services.AddScoped<IQRCodeService, QRCodeService>();
 
 // Register application services
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -38,6 +39,8 @@ builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IHomeService, HomeService>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IOdooService, OdooService>();
+builder.Services.AddScoped<ICouponService, CouponService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
 
 // Register HttpClient for external API calls
 builder.Services.AddHttpClient();
