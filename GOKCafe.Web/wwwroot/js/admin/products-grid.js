@@ -205,6 +205,11 @@ function renderProductsGrid(products) {
 
                 <!-- Actions -->
                 <div class="flex gap-2 mt-3">
+                    <a href="/admin/products/details/${product.id}"
+                       class="flex-1 px-3 py-2 bg-gray-600 text-white text-sm rounded hover:bg-gray-700 transition text-center"
+                       title="View Details">
+                        <i class="fas fa-eye"></i>
+                    </a>
                     <a href="/admin/products/edit/${product.id}"
                        class="flex-1 px-3 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition text-center">
                         <i class="fas fa-edit mr-1"></i>Edit
@@ -275,6 +280,9 @@ function renderProductsList(products) {
             </td>
             <td class="px-4 py-3">
                 <div class="flex gap-2">
+                    <a href="/admin/products/details/${product.id}" class="px-3 py-1 bg-gray-600 text-white text-sm rounded hover:bg-gray-700" title="View Details">
+                        <i class="fas fa-eye"></i>
+                    </a>
                     <a href="/admin/products/edit/${product.id}" class="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700">
                         <i class="fas fa-edit"></i>
                     </a>

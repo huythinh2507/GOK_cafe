@@ -117,16 +117,17 @@
                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
                         </div>
 
-                        <!-- SKU -->
+                        <!-- Active Status -->
                         <div>
-                            <label for="sku" class="block text-sm font-medium text-gray-700 mb-2">
-                                SKU
+                            <label class="flex items-center space-x-2 cursor-pointer">
+                                <input type="checkbox"
+                                       id="isActive"
+                                       name="isActive"
+                                       @(Model.IsActive ? "checked" : "")
+                                       class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
+                                <span class="text-sm font-medium text-gray-700">Product Active</span>
                             </label>
-                            <input type="text"
-                                   id="sku"
-                                   name="sku"
-                                   value="@Model.Sku"
-                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <p class="text-xs text-gray-500 mt-1">Make this product visible in the store</p>
                         </div>
                     </div>
                 </div>
@@ -174,28 +175,28 @@
                     <h2 class="text-xl font-semibold text-gray-800 mb-4">Category & Status</h2>
 
                     <div class="space-y-4">
-                        <!-- Categories -->
+                        <!-- Category -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Categories <span class="text-red-500">*</span>
+                            <label for="categoryId" class="block text-sm font-medium text-gray-700 mb-2">
+                                Category <span class="text-red-500">*</span>
                             </label>
-                            <div class="space-y-2 max-h-48 overflow-y-auto border border-gray-300 rounded-lg p-3">
-                                @{
-                                    var productCategoryIds = Model.Categories?.Select(c => c.Id.ToString()).ToList() ?? new List<string>();
-                                }
+                            <select id="categoryId"
+                                    name="categoryId"
+                                    required
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                                <option value="">Select a category</option>
                                 @foreach (dynamic category in ViewBag.Categories)
                                 {
-                                    var isChecked = productCategoryIds.Contains(category.Id.ToString());
-                                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
-                                        <input type="checkbox"
-                                               name="categoryIds"
-                                               value="@category.Id"
-                                               @(isChecked ? "checked" : "")
-                                               class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
-                                        <span class="text-sm text-gray-700">@category.Name</span>
-                                    </label>
+                                    if (category.Id == Model.CategoryId)
+                                    {
+                                        <option value="@category.Id" selected>@category.Name</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@category.Id">@category.Name</option>
+                                    }
                                 }
-                            </div>
+                            </select>
                         </div>
 
                         <!-- Is Featured -->
