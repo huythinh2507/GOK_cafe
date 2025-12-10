@@ -13,6 +13,7 @@ using WebProductService = GOKCafe.Web.Services.Interfaces.IProductService;
 using WebCategoryService = GOKCafe.Web.Services.Interfaces.ICategoryService;
 using AppProductService = GOKCafe.Application.Services.Interfaces.IProductService;
 using AppCategoryService = GOKCafe.Application.Services.Interfaces.ICategoryService;
+using AppCouponService = GOKCafe.Application.Services.Interfaces.ICouponService;
 
 namespace GOKCafe.Web.Composers
 {
@@ -39,6 +40,7 @@ namespace GOKCafe.Web.Composers
             // Register application services (direct from GOKCafe.Application)
             builder.Services.AddScoped<AppProductService, GOKCafe.Application.Services.ProductService>();
             builder.Services.AddScoped<AppCategoryService, GOKCafe.Application.Services.CategoryService>();
+            builder.Services.AddScoped<AppCouponService, GOKCafe.Application.Services.CouponService>();
             builder.Services.AddScoped<ICartService, CartService>();
             builder.Services.AddScoped<IOrderService, OrderService>();
             builder.Services.AddScoped<IHomeService, HomeService>();
