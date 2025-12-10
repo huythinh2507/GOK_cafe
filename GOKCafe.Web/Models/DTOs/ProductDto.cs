@@ -29,6 +29,10 @@ namespace GOKCafe.Web.Models.DTOs
         public List<ProductImageDto> Images { get; set; } = new();
         public List<FlavourProfileDto> FlavourProfiles { get; set; } = new();
         public List<EquipmentDto> Equipments { get; set; } = new();
+
+        // Available product options
+        public List<string>? AvailableSizes { get; set; }
+        public List<string>? AvailableGrinds { get; set; }
     }
 
     public class ProductImageDto

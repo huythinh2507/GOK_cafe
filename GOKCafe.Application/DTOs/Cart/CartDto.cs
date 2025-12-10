@@ -10,6 +10,9 @@ public class AddToCartDto
     [Required]
     [Range(1, 100, ErrorMessage = "Quantity must be between 1 and 100")]
     public int Quantity { get; set; } = 1;
+
+    public string? SelectedSize { get; set; }
+    public string? SelectedGrind { get; set; }
 }
 
 public class UpdateCartItemDto
@@ -25,8 +28,21 @@ public class CartDto
     public Guid? UserId { get; set; }
     public string? SessionId { get; set; }
     public List<CartItemDto> Items { get; set; } = new();
-    public decimal TotalAmount { get; set; }
+
+    // Pricing breakdown
+    public decimal Subtotal { get; set; }
+    public decimal ShippingFee { get; set; }
+    public decimal DiscountAmount { get; set; }
+    public decimal Total { get; set; }
+
+    // Coupon information
+    public string? AppliedCouponCode { get; set; }
+    public Guid? AppliedCouponId { get; set; }
+
+    // Legacy field for backward compatibility
+    public decimal TotalAmount => Total;
     public int TotalItems { get; set; }
+
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
 }
@@ -41,8 +57,13 @@ public class CartItemDto
     public int Quantity { get; set; }
     public decimal UnitPrice { get; set; }
     public decimal? DiscountPrice { get; set; }
-    public decimal TotalPrice { get; set; }
+    public decimal Subtotal { get; set; } // Unit price * quantity
+    public decimal TotalPrice => Subtotal; // Backward compatibility
     public int StockQuantity { get; set; } // Available stock
+
+    // Product options
+    public string? SelectedSize { get; set; }
+    public string? SelectedGrind { get; set; }
 }
 
 public class CheckoutDto

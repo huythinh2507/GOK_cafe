@@ -24,6 +24,10 @@ public class ProductDto
     public bool IsFeatured { get; set; }
     public Guid CategoryId { get; set; }
     public string CategoryName { get; set; } = string.Empty;
+    public string? ShortDescription { get; set; }
+    public string? TastingNote { get; set; }
+    public string? Region { get; set; }
+    public string? Process { get; set; }
 
     /// <summary>
     /// Complete gallery of product images for detail views.
@@ -33,6 +37,16 @@ public class ProductDto
 
     public List<FlavourProfileDto> FlavourProfiles { get; set; } = new();
     public List<EquipmentDto> Equipments { get; set; } = new();
+
+    /// <summary>
+    /// Available size options (e.g., ["250g", "500g", "1kg"])
+    /// </summary>
+    public List<string>? AvailableSizes { get; set; }
+
+    /// <summary>
+    /// Available grind options (e.g., ["Whole Bean", "French Press", "Filter", "Espresso"])
+    /// </summary>
+    public List<string>? AvailableGrinds { get; set; }
 }
 
 /// <summary>

@@ -48,7 +48,9 @@ namespace GOKCafe.Web.Controllers.Api
                         process = product.Process,
                         stockQuantity = product.StockQuantity,
                         isActive = product.IsActive,
-                        slug = product.Slug
+                        slug = product.Slug,
+                        availableSizes = product.AvailableSizes ?? new List<string>(),
+                        availableGrinds = product.AvailableGrinds ?? new List<string>()
                     }
                 });
             }

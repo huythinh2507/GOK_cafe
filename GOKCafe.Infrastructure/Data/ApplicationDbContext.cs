@@ -32,6 +32,10 @@ public class ApplicationDbContext : DbContext
     public DbSet<Cart> Carts { get; set; }
     public DbSet<CartItem> CartItems { get; set; }
     public DbSet<RevokedToken> RevokedTokens { get; set; }
+    public DbSet<Coupon> Coupons { get; set; }
+    public DbSet<CouponUsage> CouponUsages { get; set; }
+    public DbSet<Payment> Payments { get; set; }
+    public DbSet<BankTransferConfig> BankTransferConfigs { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -59,6 +63,10 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<Equipment>().HasQueryFilter(e => !e.IsDeleted);
         modelBuilder.Entity<Cart>().HasQueryFilter(e => !e.IsDeleted);
         modelBuilder.Entity<CartItem>().HasQueryFilter(e => !e.IsDeleted);
+        modelBuilder.Entity<Coupon>().HasQueryFilter(e => !e.IsDeleted);
+        modelBuilder.Entity<CouponUsage>().HasQueryFilter(e => !e.IsDeleted);
+        modelBuilder.Entity<Payment>().HasQueryFilter(e => !e.IsDeleted);
+        modelBuilder.Entity<BankTransferConfig>().HasQueryFilter(e => !e.IsDeleted);
     }
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
