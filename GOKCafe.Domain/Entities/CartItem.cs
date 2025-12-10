@@ -8,6 +8,10 @@ public class CartItem : BaseEntity
     public decimal UnitPrice { get; set; } // Price at the time of adding to cart
     public decimal? DiscountPrice { get; set; } // Discount price at the time of adding
 
+    // Product options
+    public string? SelectedSize { get; set; }
+    public string? SelectedGrind { get; set; }
+
     // Navigation properties
     public virtual Cart Cart { get; set; } = null!;
     public virtual Product Product { get; set; } = null!;

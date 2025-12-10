@@ -1,0 +1,149 @@
+@{
+    ViewData["Title"] = "Dashboard";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="admin-dashboard">
+    <!-- Welcome Section -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-800">Welcome to GOK Cafe Admin</h1>
+        <p class="text-gray-600 mt-2">Manage your coffee shop products, orders, and customers</p>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <!-- Products -->
+        <div class="bg-white rounded-lg shadow-sm p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 text-sm">Total Products</p>
+                    <p class="text-3xl font-bold text-gray-800 mt-2" id="totalProducts">-</p>
+                </div>
+                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-box text-2xl text-blue-600"></i>
+                </div>
+            </div>
+            <a href="/admin/products" class="text-sm text-primary hover:underline mt-4 inline-block">
+                View all products →
+            </a>
+        </div>
+
+        <!-- Orders -->
+        <div class="bg-white rounded-lg shadow-sm p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 text-sm">Total Orders</p>
+                    <p class="text-3xl font-bold text-gray-800 mt-2" id="totalOrders">-</p>
+                </div>
+                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-shopping-cart text-2xl text-green-600"></i>
+                </div>
+            </div>
+            <a href="/admin/orders" class="text-sm text-primary hover:underline mt-4 inline-block">
+                View all orders →
+            </a>
+        </div>
+
+        <!-- Revenue -->
+        <div class="bg-white rounded-lg shadow-sm p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 text-sm">Total Revenue</p>
+                    <p class="text-3xl font-bold text-gray-800 mt-2" id="totalRevenue">-</p>
+                </div>
+                <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-dollar-sign text-2xl text-yellow-600"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Customers -->
+        <div class="bg-white rounded-lg shadow-sm p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 text-sm">Total Customers</p>
+                    <p class="text-3xl font-bold text-gray-800 mt-2" id="totalCustomers">-</p>
+                </div>
+                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-users text-2xl text-purple-600"></i>
+                </div>
+            </div>
+            <a href="/admin/customers" class="text-sm text-primary hover:underline mt-4 inline-block">
+                View all customers →
+            </a>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <!-- Quick Links -->
+        <div class="bg-white rounded-lg shadow-sm p-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Quick Actions</h2>
+            <div class="space-y-3">
+                <a href="/admin/products/create" class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+                    <i class="fas fa-plus-circle text-primary mr-3"></i>
+                    <span class="font-medium">Add New Product</span>
+                </a>
+                <a href="/admin/orders" class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+                    <i class="fas fa-shopping-cart text-primary mr-3"></i>
+                    <span class="font-medium">View Recent Orders</span>
+                </a>
+                <a href="/admin/coupons/create" class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+                    <i class="fas fa-ticket-alt text-primary mr-3"></i>
+                    <span class="font-medium">Create Coupon</span>
+                </a>
+                <a href="/umbraco" class="flex items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition">
+                    <i class="fas fa-cog text-primary mr-3"></i>
+                    <span class="font-medium">Umbraco CMS</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- System Info -->
+        <div class="bg-white rounded-lg shadow-sm p-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">System Information</h2>
+            <div class="space-y-3">
+                <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                    <span class="text-gray-600">Platform</span>
+                    <span class="font-semibold text-gray-800">GOK Cafe</span>
+                </div>
+                <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                    <span class="text-gray-600">Backend API</span>
+                    <span class="font-semibold text-green-600">
+                        <i class="fas fa-circle text-xs mr-1"></i>Active
+                    </span>
+                </div>
+                <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                    <span class="text-gray-600">Commerce Package</span>
+                    <span class="font-semibold text-gray-800">Gotik.Commerce</span>
+                </div>
+                <div class="flex justify-between items-center py-2">
+                    <span class="text-gray-600">CMS</span>
+                    <span class="font-semibold text-gray-800">Umbraco</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Load dashboard stats
+        document.addEventListener('DOMContentLoaded', async function() {
+            await loadDashboardStats();
+        });
+
+        async function loadDashboardStats() {
+            try {
+                // Load products count
+                const productsResponse = await fetch('https://localhost:7045/api/v1/products?pageSize=1');
+                const productsData = await productsResponse.json();
+                if (productsData.success) {
+                    document.getElementById('totalProducts').textContent = productsData.data.totalCount;
+                }
+            } catch (error) {
+                console.error('Error loading dashboard stats:', error);
+            }
+        }
+    </script>
+}

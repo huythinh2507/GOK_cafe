@@ -151,6 +151,55 @@ class ApiService {
         return this.post('/cart/checkout', checkoutData, { sessionId: this.sessionId });
     }
 
+    /**
+     * Apply coupon code to cart
+     * @param {string} couponCode - Coupon code to apply
+     * @returns {Promise<Object>} Updated cart with discount
+     */
+    async applyCouponToCart(couponCode) {
+        return this.post('/cart/apply-coupon', null, {
+            couponCode,
+            sessionId: this.sessionId
+        });
+    }
+
+    /**
+     * Remove coupon from cart
+     * @returns {Promise<Object>} Updated cart without discount
+     */
+    async removeCouponFromCart() {
+        return this.delete('/cart/remove-coupon', {
+            sessionId: this.sessionId
+        });
+    }
+
+    // ========================================
+    // Coupon API Methods
+    // ========================================
+
+    /**
+     * Get available system coupons
+     * @param {number} pageNumber - Page number
+     * @param {number} pageSize - Page size
+     * @returns {Promise<Object>} Paginated coupons
+     */
+    async getAvailableCoupons(pageNumber = 1, pageSize = 10) {
+        return this.get('/coupons/system', { pageNumber, pageSize });
+    }
+
+    /**
+     * Validate coupon before applying
+     * @param {string} couponCode - Coupon code
+     * @param {number} orderAmount - Order amount to validate against
+     * @returns {Promise<Object>} Validation result
+     */
+    async validateCoupon(couponCode, orderAmount) {
+        return this.post('/coupons/validate', {
+            couponCode,
+            orderAmount
+        });
+    }
+
     // ========================================
     // Product API Methods
     // ========================================

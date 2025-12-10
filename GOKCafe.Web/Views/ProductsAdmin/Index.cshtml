@@ -1,0 +1,130 @@
+@{
+    ViewData["Title"] = "Products";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="admin-products-page p-6">
+    <!-- Header Section -->
+    <div class="mb-6">
+        <div class="flex justify-between items-center mb-4">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-800">Products</h1>
+            </div>
+            <div class="flex items-center space-x-3">
+                <!-- View Toggle -->
+                <div class="bg-white border border-gray-300 rounded-lg p-1 flex">
+                    <button onclick="switchView('grid')" id="gridViewBtn" class="px-3 py-1 rounded bg-primary text-white">
+                        <i class="fas fa-th"></i>
+                    </button>
+                    <button onclick="switchView('list')" id="listViewBtn" class="px-3 py-1 rounded hover:bg-gray-100">
+                        <i class="fas fa-list"></i>
+                    </button>
+                </div>
+
+                <!-- Search -->
+                <div class="relative">
+                    <input type="text"
+                           id="searchInput"
+                           placeholder="Search products..."
+                           class="w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                    <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                </div>
+
+                <!-- Create Button -->
+                <a href="/admin/products/create" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center">
+                    <i class="fas fa-plus mr-2"></i>Create Product Page
+                </a>
+            </div>
+        </div>
+
+        <!-- Filters Bar -->
+        <div class="bg-white border border-gray-200 rounded-lg p-3 flex items-center space-x-4">
+            <select id="categoryFilter" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-transparent">
+                <option value="">All Categories</option>
+                @if (ViewBag.Categories != null)
+                {
+                    @foreach (dynamic category in ViewBag.Categories)
+                    {
+                        <option value="@category.Id">@category.Name</option>
+                    }
+                }
+            </select>
+
+            <select id="stockFilter" class="px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-primary focus:border-transparent">
+                <option value="">All Status</option>
+                <option value="true">In Stock</option>
+                <option value="false">Out of Stock</option>
+            </select>
+
+            <button onclick="applyFilters()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded transition">
+                <i class="fas fa-filter mr-2"></i>Apply
+            </button>
+
+            <button onclick="clearFilters()" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded transition">
+                <i class="fas fa-times mr-2"></i>Clear
+            </button>
+        </div>
+    </div>
+
+    <!-- Grid View (Default) -->
+    <div id="gridView">
+        <div id="productsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <!-- Products will be loaded via JavaScript -->
+            <div class="col-span-full flex justify-center items-center py-12">
+                <i class="fas fa-spinner fa-spin text-3xl text-gray-400 mr-3"></i>
+                <span class="text-gray-500">Loading products...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- List View (Hidden by default) -->
+    <div id="listView" class="hidden">
+        <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+            <table class="w-full">
+                <thead class="bg-gray-50 border-b border-gray-200">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Product</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Category</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Price</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Stock</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="productsListBody" class="divide-y divide-gray-200">
+                    <!-- Products will be loaded here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="mt-6 flex items-center justify-between">
+        <div class="text-sm text-gray-600">
+            Showing <span id="showingFrom">0</span>-<span id="showingTo">0</span> of <span id="totalProducts">0</span> products
+        </div>
+        <div class="flex space-x-2" id="paginationControls">
+            <!-- Pagination buttons will be generated via JavaScript -->
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+    <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
+        <h3 class="text-xl font-bold text-gray-900 mb-4">Delete Product</h3>
+        <p class="text-gray-600 mb-6">Are you sure you want to delete "<span id="deleteProductName" class="font-semibold"></span>"? This action cannot be undone.</p>
+        <div class="flex justify-end space-x-3">
+            <button onclick="closeDeleteModal()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition">
+                Cancel
+            </button>
+            <button onclick="confirmDelete()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
+                <i class="fas fa-trash mr-2"></i>Delete
+            </button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/admin/products-grid.js"></script>
+}
