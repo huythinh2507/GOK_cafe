@@ -19,17 +19,35 @@ class ShoppingCart {
         this.updateCartUI();
     }
 
-    addItem(productId, quantity = 1) {
+    addItem(productIdOrItem, quantity = 1) {
+        // Support both old format (productId, quantity) and new format (item object)
+        let productId, itemData;
+
+        if (typeof productIdOrItem === 'object') {
+            // New format: full item object passed
+            itemData = productIdOrItem;
+            productId = itemData.productId;
+            quantity = itemData.quantity || 1;
+        } else {
+            // Old format: just productId and quantity
+            productId = productIdOrItem;
+            itemData = {
+                productId: productId,
+                quantity: quantity,
+                addedAt: new Date().toISOString()
+            };
+        }
+
         const existingItem = this.items.find(item => item.productId === productId);
 
         if (existingItem) {
             existingItem.quantity += quantity;
-        } else {
-            this.items.push({
-                productId: productId,
-                quantity: quantity,
-                addedAt: new Date().toISOString()
+            // Merge any additional properties from itemData
+            Object.assign(existingItem, itemData, {
+                quantity: existingItem.quantity // Preserve the updated quantity
             });
+        } else {
+            this.items.push(itemData);
         }
 
         this.saveCart();
@@ -854,18 +872,12 @@ window.addToCartFromModal = function() {
         price: currentProduct.price,
         quantity: quantity,
         packaging: selectedSize,
-        grind: selectedGrind
+        grind: selectedGrind,
+        addedAt: new Date().toISOString()
     };
 
-    // Add to cart
-    cart.addItem(cartItem.productId, quantity);
-
-    // Update cart item with full data
-    const existingItem = cart.items.find(item => item.productId === cartItem.productId);
-    if (existingItem) {
-        Object.assign(existingItem, cartItem);
-        cart.saveCart();
-    }
+    // Add to cart with full item data
+    cart.addItem(cartItem);
 
     // Close modal
     closeProductModal();
@@ -907,13 +919,44 @@ window.openProductModalFromCard = function(button) {
 // ========================================
 // Cart Calculation & Discount Management
 // ========================================
-let currentDiscount = {
-    couponCode: null,
-    couponDiscount: 0,
-    voucherId: null,
-    voucherDiscount: 0,
-    voucherType: null // 'percentage' or 'fixed'
-};
+
+// Load discount from localStorage or initialize
+function loadDiscount() {
+    const saved = localStorage.getItem('gok_cart_discount');
+    if (saved) {
+        try {
+            return JSON.parse(saved);
+        } catch (e) {
+            console.error('Error parsing saved discount:', e);
+        }
+    }
+    return {
+        couponCode: null,
+        couponDiscount: 0,
+        voucherId: null,
+        voucherDiscount: 0,
+        voucherType: null // 'percentage' or 'fixed'
+    };
+}
+
+// Save discount to localStorage
+function saveDiscount() {
+    localStorage.setItem('gok_cart_discount', JSON.stringify(currentDiscount));
+}
+
+// Clear discount from localStorage
+function clearDiscount() {
+    localStorage.removeItem('gok_cart_discount');
+    currentDiscount = {
+        couponCode: null,
+        couponDiscount: 0,
+        voucherId: null,
+        voucherDiscount: 0,
+        voucherType: null
+    };
+}
+
+let currentDiscount = loadDiscount();
 
 const SHIPPING_FEE = 150000; // Fixed shipping fee 30,000 VND
 
@@ -950,6 +993,19 @@ function updateCartTotal() {
     document.getElementById('shippingFee').textContent = formatPriceVND(shippingFee);
     document.getElementById('cartTotal').textContent = formatPriceVND(total);
 
+    // Show/hide coupon discount
+    const couponContainer = document.getElementById('couponDiscountContainer');
+    if (currentDiscount.couponDiscount > 0) {
+        couponContainer.classList.remove('hidden');
+        document.getElementById('couponDiscount').textContent = '-' + formatPriceVND(currentDiscount.couponDiscount);
+        const appliedCodeElement = document.getElementById('appliedCouponCode');
+        if (appliedCodeElement && currentDiscount.couponCode) {
+            appliedCodeElement.textContent = `(${currentDiscount.couponCode})`;
+        }
+    } else {
+        couponContainer.classList.add('hidden');
+    }
+
     // Show/hide voucher discount
     const voucherContainer = document.getElementById('voucherDiscountContainer');
     if (currentDiscount.voucherDiscount > 0) {
@@ -972,43 +1028,96 @@ window.applyCoupon = async function() {
     successElement.classList.add('hidden');
 
     if (!couponCode) {
-        errorElement.textContent = 'Please enter discout code';
+        errorElement.textContent = 'Please enter discount code';
         errorElement.classList.remove('hidden');
         return;
     }
 
     try {
-        // TODO: Call API to validate coupon
-        // For now, use mock validation
-        const mockCoupons = {
-            'WELCOME10': { discount: 10000, type: 'fixed' },
-            'SAVE20': { discount: 20000, type: 'fixed' },
-            'DISCOUNT15': { discount: 15, type: 'percentage' }
-        };
+        // Call backend API to apply coupon to cart
+        const response = await window.apiService.applyCouponToCart(couponCode);
 
-        if (mockCoupons[couponCode]) {
-            const coupon = mockCoupons[couponCode];
-            const subtotal = getCartSubtotal();
+        if (response.success && response.data) {
+            const cartData = response.data;
 
-            if (coupon.type === 'percentage') {
-                currentDiscount.couponDiscount = Math.floor(subtotal * coupon.discount / 100);
-            } else {
-                currentDiscount.couponDiscount = coupon.discount;
-            }
-
+            // Update discount from API response
             currentDiscount.couponCode = couponCode;
+            currentDiscount.couponDiscount = cartData.discountAmount || 0;
 
-            successElement.textContent = `Coupon applied successfully! Save ${formatPriceVND(currentDiscount.couponDiscount)}`;
+            // Save discount to localStorage
+            saveDiscount();
+
+            // Show success message
+            successElement.textContent = response.message || `Coupon applied successfully! Save ${formatPriceVND(currentDiscount.couponDiscount)}`;
             successElement.classList.remove('hidden');
 
+            // Update cart totals
             updateCartTotal();
+
+            // Optionally refresh cart items if backend modified them
+            if (cartData.items && cartData.items.length > 0) {
+                // Update cart items from backend response
+                cart.items = cartData.items.map(item => ({
+                    productId: item.productId,
+                    name: item.productName,
+                    imageUrl: item.productImageUrl,
+                    price: item.unitPrice,
+                    quantity: item.quantity,
+                    packaging: item.selectedOptions?.packaging,
+                    grind: item.selectedOptions?.grind
+                }));
+                cart.saveCart();
+                renderCartSidebar();
+            }
         } else {
-            errorElement.textContent = 'Invalid discount code';
+            // Show error message from API
+            errorElement.textContent = response.message || 'Invalid discount code';
             errorElement.classList.remove('hidden');
         }
     } catch (error) {
         console.error('Error applying coupon:', error);
-        errorElement.textContent = 'An error occurred. Please try again';
+        errorElement.textContent = error.message || 'An error occurred. Please try again';
+        errorElement.classList.remove('hidden');
+    }
+};
+
+// Remove coupon code
+window.removeCoupon = async function() {
+    const errorElement = document.getElementById('couponError');
+    const successElement = document.getElementById('couponSuccess');
+    const couponInput = document.getElementById('couponCode');
+
+    // Hide previous messages
+    errorElement.classList.add('hidden');
+    successElement.classList.add('hidden');
+
+    try {
+        // Call backend API to remove coupon from cart
+        const response = await window.apiService.removeCouponFromCart();
+
+        if (response.success) {
+            // Reset coupon discount
+            currentDiscount.couponCode = null;
+            currentDiscount.couponDiscount = 0;
+
+            // Save updated discount to localStorage
+            saveDiscount();
+
+            // Clear input field
+            couponInput.value = '';
+
+            // Show success message
+            cart.showNotification('Coupon removed successfully', 'info');
+
+            // Update cart totals
+            updateCartTotal();
+        } else {
+            errorElement.textContent = response.message || 'Failed to remove coupon';
+            errorElement.classList.remove('hidden');
+        }
+    } catch (error) {
+        console.error('Error removing coupon:', error);
+        errorElement.textContent = error.message || 'An error occurred. Please try again';
         errorElement.classList.remove('hidden');
     }
 };
@@ -1025,6 +1134,7 @@ window.selectVoucher = function(cardElement) {
         currentDiscount.voucherId = null;
         currentDiscount.voucherDiscount = 0;
         currentDiscount.voucherType = null;
+        saveDiscount();
         updateCartTotal();
         return;
     }
@@ -1062,6 +1172,9 @@ window.selectVoucher = function(cardElement) {
         // Update current discount
         currentDiscount.voucherId = voucherId;
         currentDiscount.voucherType = voucher.type;
+
+        // Save discount to localStorage
+        saveDiscount();
 
         // Mark card as selected
         cardElement.classList.add('border-primary', 'bg-blue-50');

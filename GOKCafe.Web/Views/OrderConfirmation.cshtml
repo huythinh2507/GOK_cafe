@@ -1,0 +1,191 @@
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@{
+    Layout = "_Layout.cshtml";
+    ViewData["Title"] = "Order Confirmation";
+}
+
+<!-- Order Confirmation Page -->
+<div class="min-h-screen bg-gray-50 py-12">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Success Message -->
+        <div class="bg-white rounded-lg shadow-lg p-8 text-center">
+            <div class="mb-6">
+                <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4">
+                    <i class="fas fa-check text-3xl text-green-600"></i>
+                </div>
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">Order Placed Successfully!</h1>
+                <p class="text-gray-600">Thank you for your order. We've received it and will process it soon.</p>
+            </div>
+
+            <!-- Order Details -->
+            <div id="orderDetailsContainer" class="bg-gray-50 rounded-lg p-6 mb-6 text-left">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-semibold text-gray-900">Order Details</h2>
+                    <span class="text-sm text-gray-500" id="orderDate"></span>
+                </div>
+
+                <div class="space-y-3">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Order Number:</span>
+                        <span class="font-semibold" id="orderNumber">Loading...</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Customer:</span>
+                        <span class="font-medium" id="customerName">Loading...</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Email:</span>
+                        <span class="font-medium" id="customerEmail">Loading...</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Phone:</span>
+                        <span class="font-medium" id="customerPhone">Loading...</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Payment Method:</span>
+                        <span class="font-medium" id="paymentMethod">Loading...</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">Payment Status:</span>
+                        <span class="font-medium" id="paymentStatus">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                Pending
+                            </span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Items -->
+            <div class="bg-gray-50 rounded-lg p-6 mb-6 text-left">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Order Items</h3>
+                <div id="orderItemsContainer" class="space-y-3">
+                    <!-- Items will be loaded dynamically -->
+                </div>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="bg-gray-50 rounded-lg p-6 mb-6 text-left">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Order Summary</h3>
+                <div class="space-y-2">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-600">Subtotal:</span>
+                        <span class="font-medium" id="orderSubtotal">0đ</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-600">Shipping:</span>
+                        <span class="font-medium" id="orderShipping">0đ</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-600">Tax:</span>
+                        <span class="font-medium" id="orderTax">0đ</span>
+                    </div>
+                    <div class="border-t border-gray-300 pt-2 mt-2">
+                        <div class="flex justify-between">
+                            <span class="text-base font-semibold text-gray-900">Total:</span>
+                            <span class="text-xl font-bold text-primary" id="orderTotal">0đ</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shipping Address -->
+            <div class="bg-gray-50 rounded-lg p-6 mb-6 text-left">
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">Shipping Address</h3>
+                <p class="text-gray-600" id="shippingAddress">Loading...</p>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                <a href="/"
+                   class="inline-flex items-center justify-center px-6 py-3 border-2 border-primary text-primary font-medium rounded-lg hover:bg-primary hover:text-white transition-colors">
+                    <i class="fas fa-home mr-2"></i>
+                    Continue Shopping
+                </a>
+                <button type="button"
+                        onclick="window.print()"
+                        class="inline-flex items-center justify-center px-6 py-3 bg-gray-100 text-gray-700 font-medium rounded-lg hover:bg-gray-200 transition-colors">
+                    <i class="fas fa-print mr-2"></i>
+                    Print Order
+                </button>
+            </div>
+
+            <!-- Email Notification -->
+            <p class="text-sm text-gray-500 mt-6">
+                <i class="fas fa-envelope mr-1"></i>
+                A confirmation email has been sent to your email address
+            </p>
+        </div>
+
+        <!-- What's Next Section -->
+        <div class="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
+            <h3 class="text-lg font-semibold text-blue-900 mb-3">What happens next?</h3>
+            <ol class="space-y-2 text-sm text-blue-800">
+                <li class="flex items-start">
+                    <i class="fas fa-check-circle text-blue-600 mr-2 mt-0.5"></i>
+                    <span>We'll send you an email confirmation with your order details</span>
+                </li>
+                <li class="flex items-start">
+                    <i class="fas fa-box text-blue-600 mr-2 mt-0.5"></i>
+                    <span>Your order will be processed and packed within 1-2 business days</span>
+                </li>
+                <li class="flex items-start">
+                    <i class="fas fa-shipping-fast text-blue-600 mr-2 mt-0.5"></i>
+                    <span>You'll receive a shipping notification when your order is dispatched</span>
+                </li>
+                <li class="flex items-start">
+                    <i class="fas fa-phone text-blue-600 mr-2 mt-0.5"></i>
+                    <span>Contact us if you have any questions about your order</span>
+                </li>
+            </ol>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Get order ID from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const orderId = urlParams.get('orderId');
+
+        if (!orderId) {
+            alert('Order ID not found');
+            window.location.href = '/';
+        }
+
+        // Load order details
+        async function loadOrderDetails() {
+            try {
+                // Note: You'll need to create an Orders API endpoint
+                // For now, we'll use mock data based on cart
+                displayOrderConfirmation();
+            } catch (error) {
+                console.error('Error loading order details:', error);
+            }
+        }
+
+        function displayOrderConfirmation() {
+            // Clear cart
+            localStorage.removeItem('gok_cart');
+
+            // For demo purposes, show order confirmation
+            // In production, fetch actual order data from backend
+            document.getElementById('orderNumber').textContent = `ORD-${Date.now().toString().slice(-8)}`;
+            document.getElementById('orderDate').textContent = new Date().toLocaleDateString('vi-VN');
+
+            // Update cart count
+            const cartCountElements = document.querySelectorAll('.cart-count');
+            cartCountElements.forEach(el => {
+                el.textContent = '0';
+                el.style.display = 'none';
+            });
+        }
+
+        function formatCurrency(amount) {
+            return amount.toLocaleString('vi-VN') + 'đ';
+        }
+
+        // Load order details on page load
+        loadOrderDetails();
+    </script>
+}
