@@ -11,6 +11,7 @@
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.0" />
     <PackageReference Include="Umbraco.Cms" Version="16.3.4" />
     <PackageReference Include="Umbraco.Commerce" Version="16.0.0" />
+    <PackageReference Include="Umbraco.Commerce.Checkout" Version="16.0.0" />
     <PackageReference Include="uSync" Version="16.0.0" />
     <PackageReference Include="uSync.Complete" Version="16.0.0" />
   </ItemGroup>

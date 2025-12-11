@@ -26,7 +26,7 @@
 }
 
 <!-- Header -->
-<header id="stickyHeader" class="sticky top-0 z-50 bg-gray-50 border-b border-gray-200 transition-shadow duration-300">
+<header id="stickyHeader" class="sticky top-0 z-10 bg-gray-50 border-b border-gray-200 transition-shadow duration-300">
     <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-20">
             <!-- Mobile menu button -->
@@ -54,7 +54,7 @@
             </div>
             <div class="flex items-center gap-4">
                 <!-- Search Icon -->
-                <button type="button" class="text-gray-700 hover:text-primary transition-colors">
+                <button type="button" class="text-gray-700 hover:text-primary transition-colors" onclick="openSearchModal()">
                     <i class="fas fa-search text-lg"></i>
                 </button>
 
@@ -98,3 +98,87 @@
         menu.classList.toggle('hidden');
     }
 </script>
+
+
+<!-- Search Modal -->
+<div id="searchModalOverlay" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 transition-opacity duration-300" onclick="closeSearchModal()"></div>
+<div id="searchModal" class="fixed top-0 left-0 right-0 bg-white shadow-lg hidden z-50 transition-all duration-300" style="transform: translateY(-100%);">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <!-- Search Input -->
+        <div class="flex items-center gap-4 mb-6">
+            <div class="flex-1 relative">
+                <input
+                    type="text"
+                    id="searchInput"
+                    placeholder="Search for products..."
+                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-primary focus:outline-none text-lg"
+                    autocomplete="off"
+                />
+                <button type="button" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-primary" onclick="clearSearch()">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <button type="button" class="text-gray-700 hover:text-primary transition-colors" onclick="closeSearchModal()">
+                <i class="fas fa-times text-2xl"></i>
+            </button>
+        </div>
+
+        <!-- Search Results Title -->
+        <h3 id="searchResultsTitle" class="text-lg font-semibold mb-4 hidden">Search results</h3>
+
+        <!-- Search Results Grid -->
+        <div id="searchResultsGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6 max-h-96 overflow-y-auto">
+            <!-- Results will be populated here by JavaScript -->
+        </div>
+
+        <!-- No Results Message -->
+        <div id="noResultsMessage" class="text-center text-gray-500 py-8 hidden">
+            <i class="fas fa-search text-5xl mb-4 text-gray-300"></i>
+            <p class="text-lg">No products found</p>
+        </div>
+
+        <!-- Loading State -->
+        <div id="searchLoading" class="text-center py-8 hidden">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <p class="mt-2 text-gray-600">Searching...</p>
+        </div>
+
+        <!-- View All Results Button -->
+        <div id="viewAllResultsContainer" class="text-center hidden">
+            <button
+                type="button"
+                class="bg-black text-white px-8 py-3 rounded-lg hover:bg-gray-800 transition-colors font-medium"
+                onclick="viewAllSearchResults()"
+            >
+                VIEW ALL
+            </button>
+        </div>
+    </div>
+</div>
+
+    <!-- Hide native scrollbars globally but preserve scroll functionality -->
+    <style>
+        /* IE and Edge */
+        html, body, * {
+            -ms-overflow-style: none !important;
+            scrollbar-width: none !important; /* Firefox */
+        }
+
+        /* WebKit browsers (Chrome, Safari, newer Edge) */
+        *::-webkit-scrollbar {
+            width: 0 !important;
+            height: 0 !important;
+        }
+
+        /* Search Modal Animations */
+        #searchModal.show {
+            display: block !important;
+            transform: translateY(0) !important;
+        }
+
+        #searchModalOverlay.show {
+            display: block !important;
+            opacity: 1 !important;
+        }
+    </style>
+
