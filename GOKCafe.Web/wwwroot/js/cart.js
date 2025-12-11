@@ -80,9 +80,9 @@ class ShoppingCart {
         notification.className = `cart-notification ${type}`;
         notification.style.cssText = `
             position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%) translateY(100px);
+            top: 20px;
+            right: 20px;
+            transform: translateX(400px);
             z-index: 10000;
             background: #10B981;
             color: white;
@@ -94,6 +94,7 @@ class ShoppingCart {
             gap: 12px;
             font-weight: 500;
             min-width: 320px;
+            max-width: 400px;
             transition: transform 0.3s ease;
         `;
         notification.innerHTML = `
@@ -103,14 +104,14 @@ class ShoppingCart {
 
         document.body.appendChild(notification);
 
-        // Slide up animation
+        // Slide in animation from right
         setTimeout(() => {
-            notification.style.transform = 'translateX(-50%) translateY(0)';
+            notification.style.transform = 'translateX(0)';
         }, 10);
 
         // Remove after 3 seconds
         setTimeout(() => {
-            notification.style.transform = 'translateX(-50%) translateY(100px)';
+            notification.style.transform = 'translateX(400px)';
             setTimeout(() => notification.remove(), 300);
         }, 3000);
     }
@@ -471,10 +472,7 @@ function createCartItemElement(item) {
     });
 
     removeBtn.addEventListener('click', () => {
-        if (confirm('Remove this item from cart?')) {
-            cart.removeItem(item.productId);
-            renderCartSidebar();
-        }
+        openConfirmDeleteModal(item.productId);
     });
 
     return clone;

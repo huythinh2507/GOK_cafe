@@ -132,9 +132,14 @@ function getFormData() {
         isFeatured: document.getElementById('isFeatured')?.checked || false
     };
 
-    // Get category IDs
-    const categoryCheckboxes = document.querySelectorAll('input[name="categoryIds"]:checked');
-    formData.categoryIds = Array.from(categoryCheckboxes).map(cb => cb.value);
+    // Get category ID from dropdown
+    const categorySelect = document.getElementById('categoryId');
+    const categoryId = categorySelect?.value;
+    if (categoryId) {
+        formData.categoryIds = [categoryId];
+    } else {
+        formData.categoryIds = [];
+    }
 
     // Get available sizes (comma-separated to array)
     const sizesInput = document.getElementById('availableSizes')?.value.trim();

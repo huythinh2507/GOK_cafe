@@ -3,7 +3,9 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - GOK Cafe Admin</title>
+        <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="16x16" href="~/logoGK.png" />
+    <title>GOK Cafe Admin</title>
 
     <!-- Tailwind CSS via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -62,9 +64,9 @@
         <!-- Sidebar -->
         <aside id="sidebar" class="sidebar bg-white shadow-lg flex flex-col">
             <!-- Logo -->
-            <div class="p-6 border-b border-gray-200">
+            <div class="p-4 border-b border-gray-200 h-20">
                 <div class="flex items-center space-x-3">
-                    <i class="fas fa-coffee text-3xl text-primary"></i>
+                    <img src="~/logoGK.png" alt="GOK Cafe Logo" class="w-10 h-10 object-contain" />
                     <div id="logoText">
                         <h1 class="text-xl font-bold text-gray-800">GOK Cafe</h1>
                         <p class="text-xs text-gray-500">Admin Panel</p>
@@ -77,43 +79,43 @@
                 <ul class="space-y-1 px-3">
                     <li>
                         <a href="/admin/dashboard" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg">
-                            <i class="fas fa-home w-5"></i>
+                            <i class="fas fa-home w-5 text-primary"></i>
                             <span class="sidebar-text">Dashboard</span>
                         </a>
                     </li>
                     <li>
                         <a href="/admin/products" class="sidebar-link active flex items-center space-x-3 px-4 py-3 rounded-lg">
-                            <i class="fas fa-box w-5"></i>
+                            <i class="fas fa-box w-5 text-primary"></i>
                             <span class="sidebar-text">Products</span>
                         </a>
                     </li>
                     <li>
                         <a href="/admin/categories" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg">
-                            <i class="fas fa-tags w-5"></i>
+                            <i class="fas fa-tags w-5 text-primary"></i>
                             <span class="sidebar-text">Categories</span>
                         </a>
                     </li>
                     <li>
                         <a href="/admin/orders" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg">
-                            <i class="fas fa-shopping-cart w-5"></i>
+                            <i class="fas fa-shopping-cart w-5 text-primary"></i>
                             <span class="sidebar-text">Orders</span>
                         </a>
                     </li>
                     <li>
                         <a href="/admin/coupons" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg">
-                            <i class="fas fa-ticket-alt w-5"></i>
+                            <i class="fas fa-ticket-alt w-5 text-primary"></i>
                             <span class="sidebar-text">Coupons</span>
                         </a>
                     </li>
                     <li>
                         <a href="/admin/customers" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg">
-                            <i class="fas fa-users w-5"></i>
-                            <span class="sidebar-text">Customers</span>
+                            <i class="fas fa-users w-5 text-primary"></i>
+                            <span class="sidebar-text ">Customers</span>
                         </a>
                     </li>
                     <li class="mt-6 pt-6 border-t border-gray-200">
                         <a href="/admin/settings" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg">
-                            <i class="fas fa-cog w-5"></i>
+                            <i class="fas fa-cog w-5 text-primary"></i>
                             <span class="sidebar-text">Settings</span>
                         </a>
                     </li>
@@ -137,8 +139,8 @@
         <!-- Main Content -->
         <div class="flex-1 flex flex-col overflow-hidden">
             <!-- Top Header -->
-            <header class="bg-white shadow-sm z-10">
-                <div class="flex items-center justify-between px-6 py-4">
+            <header class="bg-white border-b border-x border-gray-200 z-10 h-20">
+                <div class="flex items-center justify-between p-4 ">
                     <div class="flex items-center space-x-4">
                         <button onclick="toggleSidebar()" class="text-gray-600 hover:text-gray-800">
                             <i class="fas fa-bars text-xl"></i>
@@ -150,18 +152,15 @@
 
                     <div class="flex items-center space-x-4">
                         <!-- Notifications -->
-                        <button class="relative text-gray-600 hover:text-gray-800">
-                            <i class="fas fa-bell text-xl"></i>
-                            <span class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
-                        </button>
+                    
 
                         <!-- View Website -->
                         <a href="/" target="_blank" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition">
-                            <i class="fas fa-external-link-alt mr-2"></i>View Website
+                            <i class="fas fa-external-link-alt mr-2"></i>Web
                         </a>
 
                         <!-- Logout -->
-                        <a href="/umbraco" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition">
+                        <a href="/umbraco" target="_blank" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition">
                             <i class="fas fa-sign-out-alt mr-2"></i>Umbraco
                         </a>
                     </div>
