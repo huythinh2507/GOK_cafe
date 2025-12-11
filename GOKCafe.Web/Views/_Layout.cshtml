@@ -54,7 +54,7 @@
     @await Html.PartialAsync("~/Views/Partials/Shared/_ProductDetailModal.cshtml")
 
     <!-- Cart Sidebar -->
-    @await Html.PartialAsync("~/Views/Partials/Shared/_CartSidebar.cshtml")
+    @await Html.PartialAsync("~/Views/cart.cshtml")
 
     <!-- Scripts -->
     <script>
@@ -69,6 +69,7 @@
 
     <!-- Application Scripts -->
     <script src="~/js/main.js" asp-append-version="true"></script>
+    <script src="~/js/search.js" asp-append-version="true"></script>
     <script src="~/js/cart.js" asp-append-version="true"></script>
     <script src="~/js/cart-api.js" asp-append-version="true"></script>
     <script src="~/js/product.js" asp-append-version="true"></script>

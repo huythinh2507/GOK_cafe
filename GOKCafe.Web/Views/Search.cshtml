@@ -1,0 +1,254 @@
+﻿@using Umbraco.Cms.Core.Models.PublishedContent
+@using Umbraco.Extensions
+@using GOKCafe.Web.Models.DTOs
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@{
+    Layout = "_Layout.cshtml";
+    var searchTerm = Context.Request.Query["content"].ToString();
+}
+
+<!-- Search Results Page -->
+<div class="bg-gray-50 py-8">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Search Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Search results</h1>
+            <p class="text-gray-600">
+                @if (!string.IsNullOrEmpty(searchTerm))
+                {
+                    <span>Search for: <strong>"@searchTerm"</strong></span>
+                }
+                else
+                {
+                    <span>Enter keywords to search for products</span>
+                }
+            </p>
+        </div>
+
+        <!-- Search Input -->
+        <div class="mb-8">
+            <div class="max-w-2xl">
+                <div class="relative">
+                    <input
+                        type="text"
+                        id="searchPageInput"
+                        value="@searchTerm"
+                        placeholder="Search for products..."
+                        class="w-full px-4 py-3 pl-12 border-2 border-gray-300 rounded-lg focus:border-primary focus:outline-none text-lg"
+                    />
+                    <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Count -->
+        <div id="resultsCount" class="mb-6 text-gray-600 hidden">
+            <span id="resultCountText"></span>
+        </div>
+
+        <!-- Loading State -->
+        <div id="searchPageLoading" class="text-center py-16">
+            <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            <p class="mt-4 text-gray-600 text-lg">Searching...</p>
+        </div>
+
+        <!-- No Results Message -->
+        <div id="noSearchResults" class="text-center py-16 hidden">
+            <i class="fas fa-search text-6xl mb-6 text-gray-300"></i>
+            <h2 class="text-2xl font-semibold text-gray-700 mb-2">No products found</h2>
+            <p class="text-gray-600">Please try again with another keyword</p>
+        </div>
+
+        <!-- Search Results Grid -->
+        <div id="searchPageResultsGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Results will be populated here by JavaScript -->
+        </div>
+
+        <!-- Pagination -->
+        <div id="searchPagination" class="flex justify-center items-center gap-2 mt-8 hidden">
+            <button
+                id="prevPageBtn"
+                class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                onclick="loadPreviousPage()"
+            >
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <span id="pageInfo" class="px-4 py-2 text-gray-700"></span>
+            <button
+                id="nextPageBtn"
+                class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                onclick="loadNextPage()"
+            >
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentPage = 1;
+    let totalPages = 1;
+    let currentSearchTerm = '@searchTerm';
+
+    // Initialize search on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        if (currentSearchTerm) {
+            performSearch(currentSearchTerm, currentPage);
+        } else {
+            document.getElementById('searchPageLoading').classList.add('hidden');
+        }
+
+        // Listen for search input
+        const searchInput = document.getElementById('searchPageInput');
+        let searchTimeout;
+
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            const value = this.value.trim();
+
+            if (value.length === 0) {
+                document.getElementById('searchPageResultsGrid').innerHTML = '';
+                document.getElementById('searchPageLoading').classList.add('hidden');
+                document.getElementById('noSearchResults').classList.add('hidden');
+                document.getElementById('resultsCount').classList.add('hidden');
+                document.getElementById('searchPagination').classList.add('hidden');
+                return;
+            }
+
+            if (value.length < 2) {
+                return;
+            }
+
+            searchTimeout = setTimeout(() => {
+                currentSearchTerm = value;
+                currentPage = 1;
+                performSearch(value, 1);
+                // Update URL
+                const newUrl = `${window.location.pathname}?content=${encodeURIComponent(value)}`;
+                window.history.pushState({}, '', newUrl);
+            }, 500);
+        });
+
+        // Allow Enter key to search
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                clearTimeout(searchTimeout);
+                const value = this.value.trim();
+                if (value.length >= 2) {
+                    currentSearchTerm = value;
+                    currentPage = 1;
+                    performSearch(value, 1);
+                    const newUrl = `${window.location.pathname}?content=${encodeURIComponent(value)}`;
+                    window.history.pushState({}, '', newUrl);
+                }
+            }
+        });
+    });
+
+    async function performSearch(searchTerm, page = 1) {
+        const resultsGrid = document.getElementById('searchPageResultsGrid');
+        const loading = document.getElementById('searchPageLoading');
+        const noResults = document.getElementById('noSearchResults');
+        const resultsCount = document.getElementById('resultsCount');
+        const pagination = document.getElementById('searchPagination');
+
+        // Show loading
+        loading.classList.remove('hidden');
+        noResults.classList.add('hidden');
+        resultsCount.classList.add('hidden');
+        pagination.classList.add('hidden');
+        resultsGrid.innerHTML = '';
+
+        try {
+            const response = await fetch(`/api/v1/products?searchTerm=${encodeURIComponent(searchTerm)}&pageNumber=${page}&pageSize=12`);
+            const result = await response.json();
+
+            loading.classList.add('hidden');
+
+            if (result.success && result.data && result.data.items && result.data.items.length > 0) {
+                const products = result.data.items;
+                totalPages = result.data.totalPages;
+                currentPage = page;
+
+                // Show results count
+                resultsCount.classList.remove('hidden');
+                document.getElementById('resultCountText').textContent = `Tìm thấy ${result.data.totalCount} sản phẩm`;
+
+                // Render products
+                products.forEach(product => {
+                    const productCard = createSearchProductCard(product);
+                    resultsGrid.appendChild(productCard);
+                });
+
+                // Show pagination if needed
+                if (totalPages > 1) {
+                    pagination.classList.remove('hidden');
+                    updatePaginationUI();
+                }
+            } else {
+                noResults.classList.remove('hidden');
+            }
+        } catch (error) {
+            console.error('Search error:', error);
+            loading.classList.add('hidden');
+            noResults.classList.remove('hidden');
+        }
+    }
+
+    function createSearchProductCard(product) {
+        const div = document.createElement('div');
+        div.className = 'bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden group cursor-pointer';
+        div.onclick = () => openProductModal(product.id);
+
+        const hasDiscount = product.discountPrice && product.discountPrice < product.price;
+        const displayPrice = hasDiscount ? product.discountPrice : product.price;
+
+        div.innerHTML = `
+            <div class="relative aspect-square overflow-hidden">
+                <img src="${product.imageUrl || '/images/placeholder-product.jpg'}"
+                     alt="${product.name}"
+                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
+                ${hasDiscount ? `
+                    <div class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded text-xs font-bold">
+                        -${Math.round((1 - product.discountPrice / product.price) * 100)}%
+                    </div>
+                ` : ''}
+            </div>
+            <div class="p-4">
+                <h3 class="font-semibold text-gray-800 mb-2 line-clamp-2">${product.name}</h3>
+                <div class="flex items-center gap-2">
+                    <span class="text-lg font-bold text-primary">${displayPrice.toLocaleString('vi-VN')}đ</span>
+                    ${hasDiscount ? `
+                        <span class="text-sm text-gray-400 line-through">${product.price.toLocaleString('vi-VN')}đ</span>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+
+        return div;
+    }
+
+    function updatePaginationUI() {
+        const prevBtn = document.getElementById('prevPageBtn');
+        const nextBtn = document.getElementById('nextPageBtn');
+        const pageInfo = document.getElementById('pageInfo');
+
+        prevBtn.disabled = currentPage === 1;
+        nextBtn.disabled = currentPage === totalPages;
+        pageInfo.textContent = `Trang ${currentPage} / ${totalPages}`;
+    }
+
+    function loadPreviousPage() {
+        if (currentPage > 1) {
+            performSearch(currentSearchTerm, currentPage - 1);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+
+    function loadNextPage() {
+        if (currentPage < totalPages) {
+            performSearch(currentSearchTerm, currentPage + 1);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }
+</script>

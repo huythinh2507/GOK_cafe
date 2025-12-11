@@ -216,12 +216,6 @@
                                             <i class="fas fa-coffee text-6xl text-gray-400"></i>
                                         </div>
                                     }
-
-                                    @* Show discount badge if applicable *@
-                                    @if (product.DiscountPrice.HasValue && product.DiscountPrice > 0)
-                                    {
-                                        <span class="absolute top-2 right-2 bg-red-500 text-white px-3 py-1 rounded-full text-sm font-semibold">Sale</span>
-                                    }
                                 </a>
 
                                 <!-- Product Info -->
@@ -239,7 +233,7 @@
                                         @if (product.DiscountPrice.HasValue && product.DiscountPrice > 0)
                                         {
                                             <span class="text-gray-400 line-through mr-2">@product.Price.ToString("N0") VNĐ</span>
-                                            <span class="font-semibold text-red-600">@product.DiscountPrice.Value.ToString("N0") VNĐ</span>
+                                            <span class="font-semibold text-primary">@product.DiscountPrice.Value.ToString("N0") VNĐ</span>
                                         }
                                         else
                                         {
