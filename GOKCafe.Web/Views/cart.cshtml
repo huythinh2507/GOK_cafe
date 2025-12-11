@@ -175,6 +175,25 @@
                     <p id="couponSuccess" class="text-xs text-green-600 hidden"></p>
                 </div>
 
+                <!-- Coupon Discount (Applied) -->
+                <div id="couponDiscountContainer" class="hidden">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm text-gray-700">Coupon discount</span>
+                            <span class="text-xs text-gray-500" id="appliedCouponCode"></span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-semibold text-green-600" id="couponDiscount">-0đ</span>
+                            <button type="button"
+                                    onclick="removeCoupon()"
+                                    class="text-xs text-red-600 hover:text-red-800"
+                                    title="Remove coupon">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Voucher Selection -->
                 <div class="space-y-2">
                     <div class="flex items-center justify-between">
@@ -266,17 +285,13 @@
                 </label>
             </div> *@
 
-            <!-- Checkout Buttons -->
-            <div class="space-y-2">
+            <!-- Checkout Button -->
+            <div>
                 <button type="button"
-                        class="w-full bg-primary text-white font-semibold py-2.5 text-sm hover:bg-primary/90 transition-colors uppercase tracking-wide"
-                        onclick="buyNow()">
-                    Buy Now
-                </button>
-                <button type="button"
-                        class="w-full border-2 border-primary text-primary font-semibold py-2.5 text-sm hover:bg-primary hover:text-white transition-colors uppercase tracking-wide"
+                        class="w-full bg-primary text-white font-semibold py-3 text-sm hover:bg-primary/90 transition-colors uppercase tracking-wide rounded-lg"
                         onclick="proceedToCheckout()">
-                    Check Out
+                    <i class="fas fa-shopping-bag mr-2"></i>
+                    Proceed to Checkout
                 </button>
             </div>
 

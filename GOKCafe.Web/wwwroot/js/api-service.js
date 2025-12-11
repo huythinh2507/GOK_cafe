@@ -3,8 +3,18 @@
 
 class ApiService {
     constructor() {
-        // Get API base URL from environment or default to current host
-        this.baseUrl = '/api/v1';
+        // Get API base URL from environment or default to localhost API
+        // Check if we're on localhost and use the API server URL
+        const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+
+        if (isLocalhost) {
+            // Use the API server running on port 7045
+            this.baseUrl = 'https://localhost:7045/api/v1';
+        } else {
+            // In production, API might be on same host or different domain
+            this.baseUrl = '/api/v1';
+        }
+
         this.sessionId = this.getOrCreateSessionId();
     }
 
@@ -241,6 +251,72 @@ class ApiService {
      */
     async getCategory(categoryId) {
         return this.get(`/categories/${categoryId}`);
+    }
+
+    // ========================================
+    // Payment API Methods
+    // ========================================
+
+    /**
+     * Create a payment for an order
+     * @param {Object} paymentData - { orderId, paymentMethod, bankCode }
+     * @returns {Promise<Object>} Payment details with QR code info
+     */
+    async createPayment(paymentData) {
+        return this.post('/payments', paymentData);
+    }
+
+    /**
+     * Get payment by ID
+     * @param {string} paymentId - Payment ID
+     * @returns {Promise<Object>} Payment details
+     */
+    async getPayment(paymentId) {
+        return this.get(`/payments/${paymentId}`);
+    }
+
+    /**
+     * Get payment by order ID
+     * @param {string} orderId - Order ID
+     * @returns {Promise<Object>} Payment details
+     */
+    async getPaymentByOrderId(orderId) {
+        return this.get(`/payments/order/${orderId}`);
+    }
+
+    /**
+     * Verify payment status
+     * @param {Object} verifyData - { paymentId, transactionReference }
+     * @returns {Promise<Object>} Verification result
+     */
+    async verifyPayment(verifyData) {
+        return this.post('/payments/verify', verifyData);
+    }
+
+    /**
+     * Cancel payment
+     * @param {string} paymentId - Payment ID
+     * @returns {Promise<Object>} Cancellation result
+     */
+    async cancelPayment(paymentId) {
+        return this.post(`/payments/${paymentId}/cancel`, {});
+    }
+
+    /**
+     * Get active bank transfer configurations
+     * @returns {Promise<Array>} List of active bank configs
+     */
+    async getActiveBankConfigs() {
+        return this.get('/payments/bank-configs');
+    }
+
+    /**
+     * Get bank config by bank code
+     * @param {string} bankCode - Bank code
+     * @returns {Promise<Object>} Bank configuration
+     */
+    async getBankConfig(bankCode) {
+        return this.get(`/payments/bank-configs/${bankCode}`);
     }
 
     // ========================================
