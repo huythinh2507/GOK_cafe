@@ -123,6 +123,7 @@ public class ProductService : IProductService
                     Region = p.Region,
                     Process = p.Process,
                     Slug = p.Slug,
+                    Sku = p.Sku,
                     Price = p.Price,
                     DiscountPrice = p.DiscountPrice,
                     ImageUrl = p.ImageUrl,
@@ -137,6 +138,11 @@ public class ProductService : IProductService
                     AvailableGrinds = !string.IsNullOrEmpty(p.AvailableGrinds)
                         ? System.Text.Json.JsonSerializer.Deserialize<List<string>>(p.AvailableGrinds)
                         : null,
+                    AvailableColors = !string.IsNullOrEmpty(p.AvailableColors)
+                        ? System.Text.Json.JsonSerializer.Deserialize<List<string>>(p.AvailableColors)
+                        : null,
+                    Material = p.Material,
+                    Style = p.Style,
                     Images = p.ProductImages.Select(pi => new ProductImageDto
                     {
                         Id = pi.Id,

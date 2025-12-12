@@ -1,3 +1,11 @@
+@using Umbraco.Extensions
+@using Umbraco.Cms.Web.Common.PublishedModels
+@using Umbraco.Cms.Web.Common.Views
+@using Umbraco.Cms.Core.Models.PublishedContent
+@using Microsoft.AspNetCore.Html
+@{
+    Layout = null;
+}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -198,6 +206,9 @@
 
     <!-- Scripts -->
     <script src="~/js/api-service.js" asp-append-version="true"></script>
+
+    <!-- Flowbite JS -->
+    <script src="~/lib/flowbite/flowbite.min.js"></script>
 
     <script>
         // Sidebar toggle
