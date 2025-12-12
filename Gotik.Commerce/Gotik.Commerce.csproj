@@ -5,6 +5,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
+    <!-- ADDED: Prevent duplicate file errors -->
+    <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
 
     <!-- NuGet Package Metadata -->
     <PackageId>Gotik.Commerce</PackageId>
@@ -93,13 +95,15 @@
     </Content>
   </ItemGroup>
 
-  <!-- Include uSync Document Types -->
+  <!-- MODIFIED: uSync files - exclude from publish to prevent duplicates -->
   <ItemGroup>
     <Content Include="uSync/**/*.*">
       <Pack>true</Pack>
       <PackagePath>contentFiles/any/net9.0/uSync;content/uSync</PackagePath>
       <BuildAction>Content</BuildAction>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <!-- CHANGED: Don't copy to publish output -->
+      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
 
