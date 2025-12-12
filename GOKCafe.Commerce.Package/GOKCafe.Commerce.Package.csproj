@@ -54,5 +54,9 @@
     <None Remove="uSync\**" />
     <Content Include="uSync\**" CopyToPublishDirectory="Never" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Update="uSync\v16\Content\**\*.config" CopyToPublishDirectory="Never" />
+    <Content Update="uSync\v16\ContentTypes\**\*.config" CopyToPublishDirectory="Never" />
+  </ItemGroup>
 
 </Project>
