@@ -50,13 +50,18 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Completely remove uSync files from any inclusion -->
     <Content Remove="uSync\**" />
     <None Remove="uSync\**" />
-    <Content Include="uSync\**" CopyToPublishDirectory="Never" />
+    <None Include="uSync\**" />
   </ItemGroup>
-  <ItemGroup>
-    <Content Update="uSync\v16\Content\**\*.config" CopyToPublishDirectory="Never" />
-    <Content Update="uSync\v16\ContentTypes\**\*.config" CopyToPublishDirectory="Never" />
+
+  <!-- Force exclusion even if something else includes them -->
+  <ItemGroup Condition="'$(TargetFramework)' != ''">
+    <Content Update="uSync\**\*.*">
+      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>
