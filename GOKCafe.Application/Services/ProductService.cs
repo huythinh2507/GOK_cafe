@@ -240,14 +240,32 @@ public class ProductService : IProductService
                 Id = Guid.NewGuid(),
                 Name = dto.Name,
                 Description = dto.Description,
+                ShortDescription = dto.ShortDescription,
                 Slug = slug,
+                Sku = dto.Sku,
                 Price = dto.Price,
                 DiscountPrice = dto.DiscountPrice,
                 ImageUrl = dto.ImageUrl,
                 StockQuantity = dto.StockQuantity,
                 IsFeatured = dto.IsFeatured,
                 CategoryId = dto.CategoryId,
-                IsActive = true
+                IsActive = true,
+                // Coffee-specific fields
+                TastingNote = dto.TastingNote,
+                Region = dto.Region,
+                Process = dto.Process,
+                AvailableSizes = dto.AvailableSizes != null && dto.AvailableSizes.Any()
+                    ? System.Text.Json.JsonSerializer.Serialize(dto.AvailableSizes)
+                    : null,
+                AvailableGrinds = dto.AvailableGrinds != null && dto.AvailableGrinds.Any()
+                    ? System.Text.Json.JsonSerializer.Serialize(dto.AvailableGrinds)
+                    : null,
+                // Clothes-specific fields
+                AvailableColors = dto.AvailableColors != null && dto.AvailableColors.Any()
+                    ? System.Text.Json.JsonSerializer.Serialize(dto.AvailableColors)
+                    : null,
+                Material = dto.Material,
+                Style = dto.Style
             };
 
             // Add flavour profile relationships
@@ -317,7 +335,9 @@ public class ProductService : IProductService
 
             product.Name = dto.Name;
             product.Description = dto.Description;
+            product.ShortDescription = dto.ShortDescription;
             product.Slug = GenerateSlug(dto.Name);
+            product.Sku = dto.Sku;
             product.Price = dto.Price;
             product.DiscountPrice = dto.DiscountPrice;
             product.ImageUrl = dto.ImageUrl;
@@ -325,6 +345,24 @@ public class ProductService : IProductService
             product.IsActive = dto.IsActive;
             product.IsFeatured = dto.IsFeatured;
             product.CategoryId = dto.CategoryId;
+
+            // Update coffee-specific fields
+            product.TastingNote = dto.TastingNote;
+            product.Region = dto.Region;
+            product.Process = dto.Process;
+            product.AvailableSizes = dto.AvailableSizes != null && dto.AvailableSizes.Any()
+                ? System.Text.Json.JsonSerializer.Serialize(dto.AvailableSizes)
+                : null;
+            product.AvailableGrinds = dto.AvailableGrinds != null && dto.AvailableGrinds.Any()
+                ? System.Text.Json.JsonSerializer.Serialize(dto.AvailableGrinds)
+                : null;
+
+            // Update clothes-specific fields
+            product.AvailableColors = dto.AvailableColors != null && dto.AvailableColors.Any()
+                ? System.Text.Json.JsonSerializer.Serialize(dto.AvailableColors)
+                : null;
+            product.Material = dto.Material;
+            product.Style = dto.Style;
 
             // Update flavour profile relationships
             product.ProductFlavourProfiles.Clear();
@@ -489,6 +527,7 @@ public class ProductService : IProductService
             Region = product.Region,
             Process = product.Process,
             Slug = product.Slug,
+            Sku = product.Sku,
             Price = product.Price,
             DiscountPrice = product.DiscountPrice,
             ImageUrl = product.ImageUrl,
@@ -503,6 +542,11 @@ public class ProductService : IProductService
             AvailableGrinds = !string.IsNullOrEmpty(product.AvailableGrinds)
                 ? System.Text.Json.JsonSerializer.Deserialize<List<string>>(product.AvailableGrinds)
                 : null,
+            AvailableColors = !string.IsNullOrEmpty(product.AvailableColors)
+                ? System.Text.Json.JsonSerializer.Deserialize<List<string>>(product.AvailableColors)
+                : null,
+            Material = product.Material,
+            Style = product.Style,
             Images = product.ProductImages?.Select(pi => new ProductImageDto
             {
                 Id = pi.Id,

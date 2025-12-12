@@ -5,6 +5,7 @@ public class Product : BaseEntity
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }
     public string Slug { get; set; } = string.Empty;
+    public string? Sku { get; set; } // Product SKU/Code
     public decimal Price { get; set; }
     public decimal? DiscountPrice { get; set; }
     public string? ImageUrl { get; set; }
@@ -20,11 +21,20 @@ public class Product : BaseEntity
     public string? Process { get; set; }
 
     // Product options stored as JSON arrays
-    // Example: ["250g", "500g", "1kg"]
+    // Example: ["250g", "500g", "1kg"] for coffee or ["S", "M", "L", "XL"] for clothes
     public string? AvailableSizes { get; set; }
 
-    // Example: ["Whole Bean", "French Press", "Filter", "Espresso"]
+    // Coffee-specific: ["Whole Bean", "French Press", "Filter", "Espresso"]
     public string? AvailableGrinds { get; set; }
+
+    // Clothes-specific: ["Black", "White", "Navy", "Grey"]
+    public string? AvailableColors { get; set; }
+
+    // Clothes-specific: Material information (e.g., "100% Cotton", "Polyester")
+    public string? Material { get; set; }
+
+    // Clothes-specific: Style/Fit information (e.g., "Regular Fit", "Slim Fit")
+    public string? Style { get; set; }
 
     // Navigation properties
     public virtual Category Category { get; set; } = null!;
