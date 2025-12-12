@@ -1,0 +1,46 @@
+<!-- Confirm Delete Modal -->
+<div id="confirmDeleteModal" class="fixed inset-0 z-[100] hidden">
+    <!-- Overlay -->
+    <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity duration-300" onclick="closeConfirmDeleteModal()"></div>
+
+    <!-- Modal Content -->
+    <div class="fixed inset-0 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-2xl max-w-sm w-full transform transition-all duration-300 scale-95 opacity-0" id="confirmDeleteModalContent">
+            <!-- Modal Header -->
+            <div class="px-6 pt-6 pb-4 text-center">
+                <h3 class="text-xl font-bold text-gray-900">Confirm Delete</h3>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="px-6 pb-6 text-center">
+                <p class="text-gray-600 text-base">Are you sure you want to remove this item from cart?</p>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="px-6 pb-6 flex gap-3">
+                <button type="button"
+                        onclick="closeConfirmDeleteModal()"
+                        class="flex-1 border-2 border-primary text-primary font-semibold py-2.5 text-sm hover:bg-primary hover:text-white transition-colors uppercase tracking-wide">
+                    CANCEL
+                </button>
+                <button type="button"
+                        onclick="confirmDeleteItem()"
+                        class="flex-1 bg-primary text-white font-semibold py-2.5 text-sm hover:bg-primary/90 transition-colors uppercase tracking-wide">
+                    CONFIRM
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Confirm Delete Modal Animations */
+#confirmDeleteModal.show {
+    display: block;
+}
+
+#confirmDeleteModal.show #confirmDeleteModalContent {
+    transform: scale(1);
+    opacity: 1;
+}
+</style>

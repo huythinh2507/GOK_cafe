@@ -9,7 +9,7 @@
         <div class="flex items-center justify-between">
             <div>
                 <h1 class="text-3xl font-bold text-gray-800">Create New Product</h1>
-                <p class="text-gray-600 mt-1">Add a new coffee product to your catalog</p>
+                <p class="text-gray-600 mt-1">Add a new product (coffee, clothes) to your catalog</p>
             </div>
             <a href="/admin/products" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition">
                 <i class="fas fa-arrow-left mr-2"></i>Back to Products
@@ -25,8 +25,20 @@
                 <!-- Basic Info Card -->
                 <div class="bg-white rounded-lg shadow-sm p-6">
                     <h2 class="text-xl font-semibold text-gray-800 mb-4">Basic Information</h2>
+                    
 
-                    <div class="space-y-4">
+                    <div class="space-y-4">                 
+                        <!-- SKU -->
+                        <div>
+                            <label for="sku" class="block text-sm font-medium text-gray-700 mb-2">
+                                SKU
+                            </label>
+                            <input type="text"
+                                    id="sku"
+                                    name="sku"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                    placeholder="COFFEE-001">
+                        </div>
                         <!-- Product Name -->
                         <div>
                             <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
@@ -36,9 +48,11 @@
                                    id="name"
                                    name="name"
                                    required
+                                   maxlength="100"
                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                                    placeholder="e.g., Ethiopian Yirgacheffe">
                         </div>
+                    
 
                         <!-- Description -->
                         <div>
@@ -47,14 +61,15 @@
                             </label>
                             <textarea id="description"
                                       name="description"
-                                      rows="4"
+                                      rows="3"
                                       required
+                                      maxlength="500"
                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                                       placeholder="Describe the product's characteristics, flavor notes, origin..."></textarea>
                         </div>
 
                         <!-- Short Description -->
-                        <div>
+                        @* <div>
                             <label for="shortDescription" class="block text-sm font-medium text-gray-700 mb-2">
                                 Short Description
                             </label>
@@ -63,7 +78,7 @@
                                    name="shortDescription"
                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                                    placeholder="Brief one-liner description">
-                        </div>
+                        </div> *@
                     </div>
                 </div>
 
@@ -87,45 +102,7 @@
                                    placeholder="150000">
                         </div>
 
-                        <!-- Discount Price -->
-                        <div>
-                            <label for="discountPrice" class="block text-sm font-medium text-gray-700 mb-2">
-                                Discount Price (VND)
-                            </label>
-                            <input type="number"
-                                   id="discountPrice"
-                                   name="discountPrice"
-                                   min="0"
-                                   step="1000"
-                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                   placeholder="120000">
-                        </div>
-
-                        <!-- Stock Quantity -->
-                        <div>
-                            <label for="stockQuantity" class="block text-sm font-medium text-gray-700 mb-2">
-                                Stock Quantity <span class="text-red-500">*</span>
-                            </label>
-                            <input type="number"
-                                   id="stockQuantity"
-                                   name="stockQuantity"
-                                   required
-                                   min="0"
-                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                   placeholder="100">
-                        </div>
-
-                        <!-- SKU -->
-                        <div>
-                            <label for="sku" class="block text-sm font-medium text-gray-700 mb-2">
-                                SKU
-                            </label>
-                            <input type="text"
-                                   id="sku"
-                                   name="sku"
-                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                   placeholder="COFFEE-001">
-                        </div>
+            
                     </div>
                 </div>
 
@@ -133,32 +110,278 @@
                 <div class="bg-white rounded-lg shadow-sm p-6">
                     <h2 class="text-xl font-semibold text-gray-800 mb-4">Product Options</h2>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <!-- Available Sizes -->
-                        <div>
-                            <label for="availableSizes" class="block text-sm font-medium text-gray-700 mb-2">
-                                Available Sizes (comma-separated)
-                            </label>
-                            <input type="text"
-                                   id="availableSizes"
-                                   name="availableSizes"
-                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                   placeholder="200g, 340g, 500g, 1kg">
-                            <p class="text-xs text-gray-500 mt-1">Separate multiple sizes with commas</p>
+                    <!-- Coffee Options (default hidden) -->
+                    <div id="coffeeOptions" class="product-options hidden">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Available Sizes - Multi-select Dropdown -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    Available Sizes
+                                </label>
+                                <div class="relative">
+                                    <!-- Dropdown Button -->
+                                    <button type="button"
+                                            id="sizesDropdownButton"
+                                            onclick="toggleSizesDropdown()"
+                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white text-left flex items-center justify-between min-h-[42px]">
+                                        <div id="sizesSelectedContent" class="flex-1 flex items-center gap-2 flex-wrap">
+                                            <span id="sizesSelectedText" class="text-gray-500">Select sizes</span>
+                                        </div>
+                                        <i class="fas fa-chevron-down text-gray-400 ml-2"></i>
+                                    </button>
+
+                                    <!-- Dropdown Menu -->
+                                    <div id="sizesDropdownMenu"
+                                         class="hidden absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                                        <!-- Search Box -->
+                                        <div class="p-2 border-b border-gray-200">
+                                            <div class="relative">
+                                                <input type="text"
+                                                       id="sizesSearchInput"
+                                                       placeholder="Search sizes..."
+                                                       onkeyup="filterSizes()"
+                                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent">
+                                                <i class="fas fa-search absolute right-3 top-3 text-gray-400 text-sm"></i>
+                                            </div>
+                                        </div>
+
+                                        <!-- Options List -->
+                                        <div id="sizesOptionsList" class="py-1">
+                                            <label class="flex items-center px-4 py-2 hover:bg-gray-50 cursor-pointer">
+                                                <input type="checkbox"
+                                                       value="200g"
+                                                       onchange="updateSizesSelection()"
+                                                       class="size-checkbox w-4 h-4 accent-primary border-gray-300 rounded focus:ring-primary">
+                                                <span class="ml-3 text-sm text-gray-700">200g</span>
+                                            </label>
+                                            <label class="flex items-center px-4 py-2 hover:bg-gray-50 cursor-pointer">
+                                                <input type="checkbox"
+                                                       value="340g"
+                                                       onchange="updateSizesSelection()"
+                                                       class="size-checkbox w-4 h-4 accent-primary border-gray-300 rounded focus:ring-primary">
+                                                <span class="ml-3 text-sm text-gray-700">340g</span>
+                                            </label>
+                                            <label class="flex items-center px-4 py-2 hover:bg-gray-50 cursor-pointer">
+                                                <input type="checkbox"
+                                                       value="500g"
+                                                       onchange="updateSizesSelection()"
+                                                       class="size-checkbox w-4 h-4 accent-primary border-gray-300 rounded focus:ring-primary">
+                                                <span class="ml-3 text-sm text-gray-700">500g</span>
+                                            </label>
+                                            <label class="flex items-center px-4 py-2 hover:bg-gray-50 cursor-pointer">
+                                                <input type="checkbox"
+                                                       value="1kg"
+                                                       onchange="updateSizesSelection()"
+                                                       class="size-checkbox w-4 h-4 accent-primary border-gray-300 rounded focus:ring-primary">
+                                                <span class="ml-3 text-sm text-gray-700">1kg</span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <!-- Hidden Input to store selected values -->
+                                    <input type="hidden" id="availableSizes" name="availableSizes" value="">
+                                </div>
+                            </div>
+
+                            <!-- Available Grinds - Multi-select Dropdown -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    Available Grinds
+                                </label>
+                                <div class="relative">
+                                    <button type="button"
+                                            id="grindsDropdownButton"
+                                            onclick="toggleGrindsDropdown()"
+                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white text-left flex items-center justify-between min-h-[42px]">
+                                        <div id="grindsSelectedContent" class="flex-1 flex items-center gap-2 flex-wrap">
+                                            <span class="text-gray-500">Select grinds</span>
+                                        </div>
+                                        <i class="fas fa-chevron-down text-gray-400 ml-2"></i>
+                                    </button>
+
+                                    <div id="grindsDropdownMenu"
+                                         class="hidden absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                                        <div class="p-2 border-b border-gray-200">
+                                            <div class="relative">
+                                                <input type="text"
+                                                       id="grindsSearchInput"
+                                                       placeholder="Search grinds..."
+                                                       onkeyup="filterGrinds()"
+                                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent">
+                                                <i class="fas fa-search absolute right-3 top-3 text-gray-400 text-sm"></i>
+                                            </div>
+                                        </div>
+
+                                        <div id="grindsOptionsList" class="py-1">
+                                            <label class="flex items-center px-4 py-2 hover:bg-gray-50 cursor-pointer">
+                                                <input type="checkbox" value="Whole Bean" onchange="updateGrindsSelection()" class="grind-checkbox w-4 h-4 accent-primary border-gray-300 rounded focus:ring-primary">
+                                                <span class="ml-3 text-sm text-gray-700">Whole Bean</span>
+                                            </label>
+                                            <label class="flex items-center px-4 py-2 hover:bg-gray-50 cursor-pointer">
+                                                <input type="checkbox" value="Espresso" onchange="updateGrindsSelection()" class="grind-checkbox w-4 h-4 accent-primary border-gray-300 rounded focus:ring-primary">
+                                                <span class="ml-3 text-sm text-gray-700">Espresso</span>
+                                            </label>
+                                            <label class="flex items-center px-4 py-2 hover:bg-gray-50 cursor-pointer">
+                                                <input type="checkbox" value="Filter" onchange="updateGrindsSelection()" class="grind-checkbox w-4 h-4 accent-primary border-gray-300 rounded focus:ring-primary">
+                                                <span class="ml-3 text-sm text-gray-700">Filter</span>
+                                            </label>
+                                            <label class="flex items-center px-4 py-2 hover:bg-gray-50 cursor-pointer">
+                                                <input type="checkbox" value="French Press" onchange="updateGrindsSelection()" class="grind-checkbox w-4 h-4 accent-primary border-gray-300 rounded focus:ring-primary">
+                                                <span class="ml-3 text-sm text-gray-700">French Press</span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <input type="hidden" id="availableGrinds" name="availableGrinds" value="">
+                                </div>
+                            </div>
                         </div>
 
-                        <!-- Available Grinds -->
-                        <div>
-                            <label for="availableGrinds" class="block text-sm font-medium text-gray-700 mb-2">
-                                Available Grinds (comma-separated)
+                        <!-- Coffee Specific Fields -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                            <!-- Region/Origin - Single Select Dropdown -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    Region/Origin
+                                </label>
+                                <div class="relative">
+                                    <button type="button"
+                                            id="regionDropdownButton"
+                                            onclick="toggleRegionDropdown()"
+                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white text-left flex items-center justify-between">
+                                        <span id="regionSelectedText" class="text-gray-500">Select region</span>
+                                        <i class="fas fa-chevron-down text-gray-400 ml-2"></i>
+                                    </button>
+
+                                    <div id="regionDropdownMenu"
+                                         class="hidden absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                                        <div class="p-2 border-b border-gray-200">
+                                            <div class="relative">
+                                                <input type="text"
+                                                       id="regionSearchInput"
+                                                       placeholder="Search regions..."
+                                                       onkeyup="filterRegions()"
+                                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent">
+                                                <i class="fas fa-search absolute right-3 top-3 text-gray-400 text-sm"></i>
+                                            </div>
+                                        </div>
+
+                                        <div id="regionOptionsList" class="py-1">
+                                            <label class="flex items-center px-4 py-2 hover:bg-gray-50 cursor-pointer">
+                                                <input type="radio" name="regionRadio" value="Ethiopia" onchange="updateRegionSelection()" class="region-radio w-4 h-4 accent-primary border-gray-300 focus:ring-primary">
+                                                <span class="ml-3 text-sm text-gray-700">Ethiopia</span>
+                                            </label>
+                                            <label class="flex items-center px-4 py-2 hover:bg-gray-50 cursor-pointer">
+                                                <input type="radio" name="regionRadio" value="Colombia" onchange="updateRegionSelection()" class="region-radio w-4 h-4 accent-primary border-gray-300 focus:ring-primary">
+                                                <span class="ml-3 text-sm text-gray-700">Colombia</span>
+                                            </label>
+                                            <label class="flex items-center px-4 py-2 hover:bg-gray-50 cursor-pointer">
+                                                <input type="radio" name="regionRadio" value="Brazil" onchange="updateRegionSelection()" class="region-radio w-4 h-4 accent-primary border-gray-300 focus:ring-primary">
+                                                <span class="ml-3 text-sm text-gray-700">Brazil</span>
+                                            </label>
+                                            <label class="flex items-center px-4 py-2 hover:bg-gray-50 cursor-pointer">
+                                                <input type="radio" name="regionRadio" value="Kenya" onchange="updateRegionSelection()" class="region-radio w-4 h-4 accent-primary border-gray-300 focus:ring-primary">
+                                                <span class="ml-3 text-sm text-gray-700">Kenya</span>
+                                            </label>
+                                            <label class="flex items-center px-4 py-2 hover:bg-gray-50 cursor-pointer">
+                                                <input type="radio" name="regionRadio" value="Vietnam" onchange="updateRegionSelection()" class="region-radio w-4 h-4 accent-primary border-gray-300 focus:ring-primary">
+                                                <span class="ml-3 text-sm text-gray-700">Vietnam</span>
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <input type="hidden" id="region" name="region" value="">
+                                </div>
+                            </div>
+
+                            <!-- Process -->
+                            <div>
+                                <label for="process" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Process Method
+                                </label>
+                                <input type="text"
+                                       id="process"
+                                       name="process"
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                       placeholder="e.g., Washed, Natural, Honey">
+                            </div>
+                        </div>
+
+                        <!-- Tasting Notes -->
+                        <div class="mt-4">
+                            <label for="tastingNote" class="block text-sm font-medium text-gray-700 mb-2">
+                                Tasting Notes
                             </label>
                             <input type="text"
-                                   id="availableGrinds"
-                                   name="availableGrinds"
+                                   id="tastingNote"
+                                   name="tastingNote"
                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                   placeholder="Whole Bean, Espresso, Filter, French Press">
-                            <p class="text-xs text-gray-500 mt-1">Separate multiple grinds with commas</p>
+                                   placeholder="e.g., Citrus, Chocolate, Floral">
                         </div>
+                    </div>
+
+                    <!-- Clothes Options (default hidden) -->
+                    <div id="clothesOptions" class="product-options hidden">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Available Sizes for Clothes -->
+                            <div>
+                                <label for="clothesSizes" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Available Sizes (comma-separated)
+                                </label>
+                                <input type="text"
+                                       id="clothesSizes"
+                                       name="clothesSizes"
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                       placeholder="S, M, L, XL, XXL">
+                                <p class="text-xs text-gray-500 mt-1">Separate multiple sizes with commas</p>
+                            </div>
+
+                            <!-- Available Colors -->
+                            <div>
+                                <label for="availableColors" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Available Colors (comma-separated)
+                                </label>
+                                <input type="text"
+                                       id="availableColors"
+                                       name="availableColors"
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                       placeholder="Black, White, Navy, Grey">
+                                <p class="text-xs text-gray-500 mt-1">Separate multiple colors with commas</p>
+                            </div>
+                        </div>
+
+                        <!-- Clothes Specific Fields -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                            <!-- Material -->
+                            <div>
+                                <label for="material" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Material
+                                </label>
+                                <input type="text"
+                                       id="material"
+                                       name="material"
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                       placeholder="e.g., 100% Cotton, Polyester">
+                            </div>
+
+                            <!-- Style -->
+                            <div>
+                                <label for="style" class="block text-sm font-medium text-gray-700 mb-2">
+                                    Style/Fit
+                                </label>
+                                <input type="text"
+                                       id="style"
+                                       name="style"
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                       placeholder="e.g., Regular Fit, Slim Fit">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Placeholder message when no type selected -->
+                    <div id="optionsPlaceholder" class="text-center py-8 text-gray-500">
+                        <i class="fas fa-box-open text-4xl mb-2"></i>
+                        <p>Please select a product type to see available options</p>
                     </div>
                 </div>
             </div>
@@ -170,27 +393,40 @@
                     <h2 class="text-xl font-semibold text-gray-800 mb-4">Category & Status</h2>
 
                     <div class="space-y-4">
+                        <!-- Product Type -->
+                        <div>
+                            <label for="productType" class="block text-sm font-medium text-gray-700 mb-2">
+                                Product Type <span class="text-red-500">*</span>
+                            </label>
+                            <select id="productType"
+                                    name="productType"
+                                    required
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                                <option value="">Select product type</option>
+                                <option value="coffee">Coffee</option>
+                                <option value="clothes">Clothes</option>
+                            </select>
+                        </div>
+
                         <!-- Categories -->
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Categories <span class="text-red-500">*</span>
+                            <label for="categoryId" class="block text-sm font-medium text-gray-700 mb-2">
+                                Category <span class="text-red-500">*</span>
                             </label>
-                            <div class="space-y-2 max-h-48 overflow-y-auto border border-gray-300 rounded-lg p-3">
+                            <select id="categoryId"
+                                    name="categoryId"
+                                    required
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                                <option value="">Select a category</option>
                                 @foreach (dynamic category in ViewBag.Categories)
                                 {
-                                    <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
-                                        <input type="checkbox"
-                                               name="categoryIds"
-                                               value="@category.Id"
-                                               class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary">
-                                        <span class="text-sm text-gray-700">@category.Name</span>
-                                    </label>
+                                    <option value="@category.Id">@category.Name</option>
                                 }
-                            </div>
+                            </select>
                         </div>
 
                         <!-- Is Featured -->
-                        <div>
+                        @* <div>
                             <label class="flex items-center space-x-2 cursor-pointer">
                                 <input type="checkbox"
                                        id="isFeatured"
@@ -199,28 +435,62 @@
                                 <span class="text-sm font-medium text-gray-700">Featured Product</span>
                             </label>
                             <p class="text-xs text-gray-500 mt-1">Display this product on the homepage</p>
-                        </div>
+                        </div> *@
                     </div>
                 </div>
 
                 <!-- Image Upload Card -->
                 <div class="bg-white rounded-lg shadow-sm p-6">
-                    <h2 class="text-xl font-semibold text-gray-800 mb-4">Product Image</h2>
+                    <h2 class="text-xl font-semibold text-gray-800 mb-4">Product Images</h2>
 
                     <div>
-                        <label for="imageUrl" class="block text-sm font-medium text-gray-700 mb-2">
-                            Image URL <span class="text-red-500">*</span>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Upload Photos
                         </label>
-                        <input type="url"
-                               id="imageUrl"
-                               name="imageUrl"
-                               required
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent mb-3"
-                               placeholder="https://example.com/image.jpg">
+                        <p class="text-xs text-gray-500 mb-3">Your image will be saved securely.</p>
 
-                        <!-- Image Preview -->
-                        <div id="imagePreview" class="hidden mt-3">
-                            <img id="previewImg" src="" alt="Preview" class="w-full h-48 object-cover rounded-lg border border-gray-300">
+                        <!-- Upload Area -->
+                        <div id="uploadArea"
+                             class="border-2 border-dashed border-primary rounded-lg p-6 text-center cursor-pointer hover:bg-gray-50 transition"
+                             ondrop="handleDrop(event)"
+                             ondragover="handleDragOver(event)"
+                             ondragleave="handleDragLeave(event)"
+                             onclick="document.getElementById('imageFileInput').click()">
+                            <div class="flex flex-col items-center">
+                                <div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center mb-3">
+                                    <i class="fas fa-cloud-upload-alt text-xl text-white"></i>
+                                </div>
+                                <p class="text-sm mb-1">
+                                    <span class="text-primary font-medium">Upload image</span>
+                                </p>
+                                <p class="text-xs text-gray-500 mb-2">Drag and drop files here or click to upload</p>
+                                <p class="text-xs text-gray-400">Supported formats: .png, .jpeg, .pdf</p>
+                            </div>
+                        </div>
+
+                        <!-- Hidden File Input - Allow multiple files -->
+                        <input type="file"
+                               id="imageFileInput"
+                               name="imageFiles"
+                               accept="image/*"
+                               multiple
+                               class="hidden"
+                               onchange="handleFileSelect(event)">
+
+                        <!-- Hidden URL Input (will store the main image URL) -->
+                        <input type="hidden" id="imageUrl" name="imageUrl">
+
+                        <!-- Uploaded Images List -->
+                        <div id="uploadedImagesList" class="mt-4 space-y-2">
+                            <!-- Images will be added here dynamically -->
+                        </div>
+
+                        <!-- Main Image Preview -->
+                        <div id="mainImagePreview" class="hidden mt-4">
+                            <p class="text-sm font-medium text-gray-700 mb-2">Preview</p>
+                            <div class="flex justify-center">
+                                <img id="mainPreviewImg" src="" alt="Preview" class="w-80 h-96 object-cover rounded-lg border border-gray-300">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -242,5 +512,384 @@
 </div>
 
 @section Scripts {
-    <script src="~/js/admin/product-form.js"></script>
+    <script src="~/js/admin/product-form.js?v=@DateTime.Now.Ticks"></script>
+    <script>
+        // ========================================
+        // Multi-select Dropdown for Sizes
+        // ========================================
+
+        function toggleSizesDropdown() {
+            const menu = document.getElementById('sizesDropdownMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        function updateSizesSelection() {
+            const checkboxes = document.querySelectorAll('.size-checkbox:checked');
+            const selectedValues = Array.from(checkboxes).map(cb => cb.value);
+            const hiddenInput = document.getElementById('availableSizes');
+            const selectedContent = document.getElementById('sizesSelectedContent');
+
+            // Update hidden input value (comma-separated)
+            hiddenInput.value = selectedValues.join(', ');
+
+            // Update button content - show selected items inside button
+            if (selectedValues.length === 0) {
+                selectedContent.innerHTML = '<span class="text-gray-500">Select sizes</span>';
+            } else {
+                selectedContent.innerHTML = selectedValues.map(value => `
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-200 text-gray-700 text-sm rounded">
+                        ${value}
+                        <button type="button"
+                                onclick="removeSizeTag('${value}'); event.stopPropagation();"
+                                class="hover:bg-gray-300 rounded-full p-0.5">
+                            <i class="fas fa-times text-xs"></i>
+                        </button>
+                    </span>
+                `).join('');
+            }
+        }
+
+        function removeSizeTag(value) {
+            const checkbox = document.querySelector(`.size-checkbox[value="${value}"]`);
+            if (checkbox) {
+                checkbox.checked = false;
+                updateSizesSelection();
+            }
+        }
+
+        function filterSizes() {
+            const searchInput = document.getElementById('sizesSearchInput');
+            const filter = searchInput.value.toLowerCase();
+            const labels = document.querySelectorAll('#sizesOptionsList label');
+
+            labels.forEach(label => {
+                const text = label.textContent.toLowerCase();
+                if (text.includes(filter)) {
+                    label.style.display = 'flex';
+                } else {
+                    label.style.display = 'none';
+                }
+            });
+        }
+
+        // ========================================
+        // Multi-select Dropdown for Grinds
+        // ========================================
+
+        function toggleGrindsDropdown() {
+            document.getElementById('grindsDropdownMenu').classList.toggle('hidden');
+        }
+
+        function updateGrindsSelection() {
+            const checkboxes = document.querySelectorAll('.grind-checkbox:checked');
+            const selectedValues = Array.from(checkboxes).map(cb => cb.value);
+            const hiddenInput = document.getElementById('availableGrinds');
+            const selectedContent = document.getElementById('grindsSelectedContent');
+
+            hiddenInput.value = selectedValues.join(', ');
+
+            if (selectedValues.length === 0) {
+                selectedContent.innerHTML = '<span class="text-gray-500">Select grinds</span>';
+            } else {
+                selectedContent.innerHTML = selectedValues.map(value => `
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-200 text-gray-700 text-sm rounded">
+                        ${value}
+                        <button type="button" onclick="removeGrindTag('${value}'); event.stopPropagation();" class="hover:bg-gray-300 rounded-full p-0.5">
+                            <i class="fas fa-times text-xs"></i>
+                        </button>
+                    </span>
+                `).join('');
+            }
+        }
+
+        function removeGrindTag(value) {
+            const checkbox = document.querySelector(`.grind-checkbox[value="${value}"]`);
+            if (checkbox) {
+                checkbox.checked = false;
+                updateGrindsSelection();
+            }
+        }
+
+        function filterGrinds() {
+            const filter = document.getElementById('grindsSearchInput').value.toLowerCase();
+            const labels = document.querySelectorAll('#grindsOptionsList label');
+            labels.forEach(label => {
+                label.style.display = label.textContent.toLowerCase().includes(filter) ? 'flex' : 'none';
+            });
+        }
+
+        // ========================================
+        // Single-select Dropdown for Region
+        // ========================================
+
+        function toggleRegionDropdown() {
+            document.getElementById('regionDropdownMenu').classList.toggle('hidden');
+        }
+
+        function updateRegionSelection() {
+            const radio = document.querySelector('.region-radio:checked');
+            const selectedText = document.getElementById('regionSelectedText');
+            const hiddenInput = document.getElementById('region');
+
+            if (radio) {
+                selectedText.textContent = radio.value;
+                selectedText.classList.remove('text-gray-500');
+                selectedText.classList.add('text-gray-900');
+                hiddenInput.value = radio.value;
+            } else {
+                selectedText.textContent = 'Select region';
+                selectedText.classList.add('text-gray-500');
+                selectedText.classList.remove('text-gray-900');
+                hiddenInput.value = '';
+            }
+        }
+
+        function filterRegions() {
+            const filter = document.getElementById('regionSearchInput').value.toLowerCase();
+            const labels = document.querySelectorAll('#regionOptionsList label');
+            labels.forEach(label => {
+                label.style.display = label.textContent.toLowerCase().includes(filter) ? 'flex' : 'none';
+            });
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', function(event) {
+            const sizesDropdown = document.getElementById('sizesDropdownMenu');
+            const sizesButton = document.getElementById('sizesDropdownButton');
+            const grindsDropdown = document.getElementById('grindsDropdownMenu');
+            const grindsButton = document.getElementById('grindsDropdownButton');
+            const regionDropdown = document.getElementById('regionDropdownMenu');
+            const regionButton = document.getElementById('regionDropdownButton');
+
+            if (sizesDropdown && sizesButton && !sizesDropdown.contains(event.target) && !sizesButton.contains(event.target)) {
+                sizesDropdown.classList.add('hidden');
+            }
+            if (grindsDropdown && grindsButton && !grindsDropdown.contains(event.target) && !grindsButton.contains(event.target)) {
+                grindsDropdown.classList.add('hidden');
+            }
+            if (regionDropdown && regionButton && !regionDropdown.contains(event.target) && !regionButton.contains(event.target)) {
+                regionDropdown.classList.add('hidden');
+            }
+        });
+
+        // ========================================
+        // Image Upload Functions
+        // ========================================
+
+        let uploadedImages = []; // Store all uploaded images
+
+        function handleFileSelect(event) {
+            const files = event.target.files;
+            if (files.length > 0) {
+                Array.from(files).forEach(file => processFile(file));
+            }
+        }
+
+        function handleDragOver(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            event.currentTarget.classList.add('bg-gray-100', 'border-primary-dark');
+        }
+
+        function handleDragLeave(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            event.currentTarget.classList.remove('bg-gray-100', 'border-primary-dark');
+        }
+
+        function handleDrop(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            event.currentTarget.classList.remove('bg-gray-100', 'border-primary-dark');
+
+            const files = event.dataTransfer.files;
+            if (files.length > 0) {
+                Array.from(files).forEach(file => processFile(file));
+            }
+        }
+
+        function processFile(file) {
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                alert('Please upload an image file');
+                return;
+            }
+
+            // Validate file size (15MB max)
+            const maxSize = 15 * 1024 * 1024; // 15MB in bytes
+            if (file.size > maxSize) {
+                alert('File size must be less than 15MB');
+                return;
+            }
+
+            // Read file and add to uploaded images
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const imageData = {
+                    id: Date.now() + Math.random(), // Unique ID
+                    name: file.name,
+                    size: file.size,
+                    dataUrl: e.target.result,
+                    isDefault: uploadedImages.length === 0 // First image is default
+                };
+
+                uploadedImages.push(imageData);
+                addImageToList(imageData);
+
+                // Set first image as main image and update hidden input
+                if (imageData.isDefault) {
+                    showMainPreview(imageData);
+                    document.getElementById('imageUrl').value = imageData.dataUrl;
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function addImageToList(imageData) {
+            const listContainer = document.getElementById('uploadedImagesList');
+
+            const imageItem = document.createElement('div');
+            imageItem.id = `image-${imageData.id}`;
+            imageItem.className = 'flex items-center gap-3 p-3 border-2 rounded-lg hover:bg-gray-50 cursor-pointer transition';
+
+            // Set border color based on whether it's default
+            if (imageData.isDefault) {
+                imageItem.classList.add('border-primary', 'bg-blue-50');
+            } else {
+                imageItem.classList.add('border-gray-200');
+            }
+
+            // Click on the container sets as default
+            imageItem.onclick = () => setDefaultImage(imageData.id);
+
+            imageItem.innerHTML = `
+                <div class="w-10 h-10 flex-shrink-0">
+                    <img src="${imageData.dataUrl}" alt="${imageData.name}" class="w-full h-full object-cover rounded">
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 mb-1">
+                        <p class="text-sm font-medium text-gray-700 truncate">${imageData.name}</p>
+                        ${imageData.isDefault ? '<span class="px-2 py-0.5 bg-primary text-white text-xs rounded-full">Default</span>' : ''}
+                    </div>
+                    <p class="text-xs text-gray-500">${formatFileSize(imageData.size)}</p>
+                </div>
+                <div class="flex items-center gap-1">
+                    <button type="button"
+                            onclick="showMainPreview(${JSON.stringify(imageData).replace(/"/g, '&quot;')}); event.stopPropagation();"
+                            class="p-2 text-gray-500 hover:text-primary transition"
+                            title="Preview image">
+                        <i class="fas fa-eye text-sm"></i>
+                    </button>
+                    <button type="button"
+                            onclick="downloadImage('${imageData.dataUrl}', '${imageData.name}'); event.stopPropagation();"
+                            class="p-2 text-gray-500 hover:text-primary transition"
+                            title="Download image">
+                        <i class="fas fa-download text-sm"></i>
+                    </button>
+                    <button type="button"
+                            onclick="removeImageFromList(${imageData.id}); event.stopPropagation();"
+                            class="p-2 text-gray-500 hover:text-red-500 transition"
+                            title="Remove image">
+                        <i class="fas fa-times text-sm"></i>
+                    </button>
+                </div>
+            `;
+
+            listContainer.appendChild(imageItem);
+        }
+
+        function setDefaultImage(imageId) {
+            // Update all images - remove default from all, set only selected one as default
+            uploadedImages.forEach(img => {
+                img.isDefault = (img.id === imageId);
+            });
+
+            // Re-render all images to update star icons and borders
+            const listContainer = document.getElementById('uploadedImagesList');
+            listContainer.innerHTML = '';
+            uploadedImages.forEach(img => addImageToList(img));
+
+            // Update preview and hidden input
+            const defaultImage = uploadedImages.find(img => img.isDefault);
+            if (defaultImage) {
+                showMainPreview(defaultImage);
+                document.getElementById('imageUrl').value = defaultImage.dataUrl;
+            }
+        }
+
+        function showMainPreview(imageData) {
+            const mainPreview = document.getElementById('mainImagePreview');
+            const mainPreviewImg = document.getElementById('mainPreviewImg');
+
+            mainPreview.classList.remove('hidden');
+            mainPreviewImg.src = imageData.dataUrl;
+
+            // Update hidden input with main image URL
+            document.getElementById('imageUrl').value = imageData.dataUrl;
+        }
+
+        function removeImageFromList(imageId) {
+            // Check if removing default image
+            const removingDefault = uploadedImages.find(img => img.id === imageId)?.isDefault;
+
+            // Remove from array
+            uploadedImages = uploadedImages.filter(img => img.id !== imageId);
+
+            // Remove from DOM
+            const imageItem = document.getElementById(`image-${imageId}`);
+            if (imageItem) {
+                imageItem.remove();
+            }
+
+            // If we removed the default image and there are still images left
+            if (removingDefault && uploadedImages.length > 0) {
+                // Set first remaining image as default
+                uploadedImages[0].isDefault = true;
+
+                // Re-render all images
+                const listContainer = document.getElementById('uploadedImagesList');
+                listContainer.innerHTML = '';
+                uploadedImages.forEach(img => addImageToList(img));
+
+                showMainPreview(uploadedImages[0]);
+                document.getElementById('imageUrl').value = uploadedImages[0].dataUrl;
+            } else if (uploadedImages.length === 0) {
+                // No images left
+                const mainPreview = document.getElementById('mainImagePreview');
+                mainPreview.classList.add('hidden');
+                document.getElementById('imageUrl').value = '';
+            }
+        }
+
+        function downloadImage(dataUrl, filename) {
+            const link = document.createElement('a');
+            link.href = dataUrl;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+        }
+
+        // Force reload - immediate execution to ensure script runs
+        console.log('Inline script loaded');
+
+        // Wait a bit to ensure DOM is ready
+        setTimeout(function() {
+            console.log('Checking for product type selector...');
+            const selector = document.getElementById('productType');
+            console.log('Product type selector:', selector);
+
+            if (selector) {
+                console.log('Current value:', selector.value);
+            }
+        }, 500);
+    </script>
 }

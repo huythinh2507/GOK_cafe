@@ -9,6 +9,7 @@ public class ProductDto
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }
     public string Slug { get; set; } = string.Empty;
+    public string? Sku { get; set; }
     public decimal Price { get; set; }
     public decimal? DiscountPrice { get; set; }
 
@@ -39,14 +40,29 @@ public class ProductDto
     public List<EquipmentDto> Equipments { get; set; } = new();
 
     /// <summary>
-    /// Available size options (e.g., ["250g", "500g", "1kg"])
+    /// Available size options (e.g., ["250g", "500g", "1kg"] for coffee or ["S", "M", "L", "XL"] for clothes)
     /// </summary>
     public List<string>? AvailableSizes { get; set; }
 
     /// <summary>
-    /// Available grind options (e.g., ["Whole Bean", "French Press", "Filter", "Espresso"])
+    /// Available grind options for coffee (e.g., ["Whole Bean", "French Press", "Filter", "Espresso"])
     /// </summary>
     public List<string>? AvailableGrinds { get; set; }
+
+    /// <summary>
+    /// Available color options for clothes (e.g., ["Black", "White", "Navy", "Grey"])
+    /// </summary>
+    public List<string>? AvailableColors { get; set; }
+
+    /// <summary>
+    /// Material information for clothes (e.g., "100% Cotton", "Polyester")
+    /// </summary>
+    public string? Material { get; set; }
+
+    /// <summary>
+    /// Style/Fit information for clothes (e.g., "Regular Fit", "Slim Fit")
+    /// </summary>
+    public string? Style { get; set; }
 }
 
 /// <summary>
@@ -82,12 +98,27 @@ public class CreateProductDto
 {
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }
+    public string? ShortDescription { get; set; }
     public decimal Price { get; set; }
     public decimal? DiscountPrice { get; set; }
     public string? ImageUrl { get; set; }
     public int StockQuantity { get; set; }
     public bool IsFeatured { get; set; }
     public Guid CategoryId { get; set; }
+    public string? Sku { get; set; }
+
+    // Coffee-specific fields
+    public string? TastingNote { get; set; }
+    public string? Region { get; set; }
+    public string? Process { get; set; }
+    public List<string>? AvailableSizes { get; set; }
+    public List<string>? AvailableGrinds { get; set; }
+
+    // Clothes-specific fields
+    public List<string>? AvailableColors { get; set; }
+    public string? Material { get; set; }
+    public string? Style { get; set; }
+
     public List<Guid> FlavourProfileIds { get; set; } = new();
     public List<Guid> EquipmentIds { get; set; } = new();
 }
@@ -96,6 +127,7 @@ public class UpdateProductDto
 {
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }
+    public string? ShortDescription { get; set; }
     public decimal Price { get; set; }
     public decimal? DiscountPrice { get; set; }
     public string? ImageUrl { get; set; }
@@ -103,6 +135,20 @@ public class UpdateProductDto
     public bool IsActive { get; set; }
     public bool IsFeatured { get; set; }
     public Guid CategoryId { get; set; }
+    public string? Sku { get; set; }
+
+    // Coffee-specific fields
+    public string? TastingNote { get; set; }
+    public string? Region { get; set; }
+    public string? Process { get; set; }
+    public List<string>? AvailableSizes { get; set; }
+    public List<string>? AvailableGrinds { get; set; }
+
+    // Clothes-specific fields
+    public List<string>? AvailableColors { get; set; }
+    public string? Material { get; set; }
+    public string? Style { get; set; }
+
     public List<Guid> FlavourProfileIds { get; set; } = new();
     public List<Guid> EquipmentIds { get; set; } = new();
 }

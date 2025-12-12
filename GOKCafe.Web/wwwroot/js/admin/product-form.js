@@ -3,6 +3,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     setupFormHandlers();
     setupImagePreview();
+    setupProductTypeSelector();
 });
 
 // Setup form submission handlers
@@ -36,6 +37,135 @@ function setupImagePreview() {
             }
         });
     }
+}
+
+// Setup product type selector to show/hide dynamic options
+function setupProductTypeSelector() {
+    const productTypeSelect = document.getElementById('productType');
+    if (!productTypeSelect) {
+        console.error('Product type select not found!');
+        return;
+    }
+
+    console.log('Product type selector found, setting up event listener');
+
+    productTypeSelect.addEventListener('change', function() {
+        const selectedType = this.value;
+        console.log('Product type changed to:', selectedType);
+
+        // Hide all product option sections
+        const coffeeOptions = document.getElementById('coffeeOptions');
+        const clothesOptions = document.getElementById('clothesOptions');
+        const placeholder = document.getElementById('optionsPlaceholder');
+
+        if (!coffeeOptions || !clothesOptions || !placeholder) {
+            console.error('One or more option sections not found');
+            return;
+        }
+
+        // Reset visibility
+        coffeeOptions.classList.add('hidden');
+        clothesOptions.classList.add('hidden');
+        placeholder.classList.add('hidden');
+
+        // Filter categories based on product type
+        filterCategoriesByType(selectedType);
+
+        // Show relevant section based on selected type
+        if (selectedType === 'coffee') {
+            console.log('Showing coffee options');
+            coffeeOptions.classList.remove('hidden');
+            // Clear clothes-specific fields
+            clearClothesFields();
+        } else if (selectedType === 'clothes') {
+            console.log('Showing clothes options');
+            clothesOptions.classList.remove('hidden');
+            // Clear coffee-specific fields
+            clearCoffeeFields();
+        } else {
+            console.log('Showing placeholder');
+            placeholder.classList.remove('hidden');
+        }
+    });
+
+    // Trigger change event if there's already a selected value
+    if (productTypeSelect.value) {
+        productTypeSelect.dispatchEvent(new Event('change'));
+    }
+}
+
+// Filter categories based on product type
+function filterCategoriesByType(productType) {
+    const categorySelect = document.getElementById('categoryId');
+    if (!categorySelect) return;
+
+    // Store all options (from ViewBag.Categories) if not already stored
+    if (!categorySelect.dataset.allOptions) {
+        const options = Array.from(categorySelect.options);
+        categorySelect.dataset.allOptions = JSON.stringify(
+            options.map(opt => ({ value: opt.value, text: opt.text }))
+        );
+    }
+
+    // Clear current options
+    categorySelect.innerHTML = '<option value="">Select a category</option>';
+
+    if (productType === 'coffee') {
+        // For coffee: Use categories from ViewBag.Categories (database)
+        const allOptions = JSON.parse(categorySelect.dataset.allOptions);
+        allOptions.forEach(option => {
+            if (option.value !== '') {
+                const newOption = document.createElement('option');
+                newOption.value = option.value;
+                newOption.text = option.text;
+                categorySelect.appendChild(newOption);
+            }
+        });
+        console.log('Loaded coffee categories from database');
+
+    } else if (productType === 'clothes') {
+        // For clothes: Use mock data
+        const clothesCategories = ['T-shirt', 'Jeans', 'Coat', 'Hoodie', 'Jacket'];
+
+        clothesCategories.forEach((categoryName, index) => {
+            const newOption = document.createElement('option');
+            // Use a temporary ID format for mock categories (will be handled on backend)
+            newOption.value = `clothes-${index + 1}`;
+            newOption.text = categoryName;
+            categorySelect.appendChild(newOption);
+        });
+        console.log('Loaded clothes categories from mock data');
+
+    } else {
+        // No type selected: show all from database
+        const allOptions = JSON.parse(categorySelect.dataset.allOptions);
+        allOptions.forEach(option => {
+            if (option.value !== '') {
+                const newOption = document.createElement('option');
+                newOption.value = option.value;
+                newOption.text = option.text;
+                categorySelect.appendChild(newOption);
+            }
+        });
+    }
+}
+
+// Clear coffee-specific fields when switching to clothes
+function clearCoffeeFields() {
+    const coffeeFields = ['availableSizes', 'availableGrinds', 'region', 'process', 'tastingNote'];
+    coffeeFields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) field.value = '';
+    });
+}
+
+// Clear clothes-specific fields when switching to coffee
+function clearClothesFields() {
+    const clothesFields = ['clothesSizes', 'availableColors', 'material', 'style'];
+    clothesFields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) field.value = '';
+    });
 }
 
 // Handle create product form submission
@@ -119,6 +249,9 @@ async function handleUpdateProduct(e) {
 
 // Get form data
 function getFormData() {
+    // Get product type
+    const productType = document.getElementById('productType')?.value;
+
     // Get basic fields
     const formData = {
         name: document.getElementById('name').value.trim(),
@@ -126,26 +259,70 @@ function getFormData() {
         shortDescription: document.getElementById('shortDescription')?.value.trim() || null,
         price: parseFloat(document.getElementById('price').value),
         discountPrice: parseFloat(document.getElementById('discountPrice')?.value) || null,
-        stockQuantity: parseInt(document.getElementById('stockQuantity').value),
+        stockQuantity: parseInt(document.getElementById('stockQuantity')?.value || 0),
         sku: document.getElementById('sku')?.value.trim() || null,
         imageUrl: document.getElementById('imageUrl').value.trim(),
         isFeatured: document.getElementById('isFeatured')?.checked || false
     };
 
-    // Get category IDs
-    const categoryCheckboxes = document.querySelectorAll('input[name="categoryIds"]:checked');
-    formData.categoryIds = Array.from(categoryCheckboxes).map(cb => cb.value);
-
-    // Get available sizes (comma-separated to array)
-    const sizesInput = document.getElementById('availableSizes')?.value.trim();
-    if (sizesInput) {
-        formData.availableSizes = sizesInput.split(',').map(s => s.trim()).filter(s => s);
+    // Get category ID from dropdown
+    const categorySelect = document.getElementById('categoryId');
+    const categoryId = categorySelect?.value;
+    if (categoryId) {
+        formData.categoryIds = [categoryId];
+    } else {
+        formData.categoryIds = [];
     }
 
-    // Get available grinds (comma-separated to array)
-    const grindsInput = document.getElementById('availableGrinds')?.value.trim();
-    if (grindsInput) {
-        formData.availableGrinds = grindsInput.split(',').map(g => g.trim()).filter(g => g);
+    // Get product-specific fields based on type
+    if (productType === 'coffee') {
+        // Get coffee-specific fields
+        const sizesInput = document.getElementById('availableSizes')?.value.trim();
+        if (sizesInput) {
+            formData.availableSizes = sizesInput.split(',').map(s => s.trim()).filter(s => s);
+        }
+
+        const grindsInput = document.getElementById('availableGrinds')?.value.trim();
+        if (grindsInput) {
+            formData.availableGrinds = grindsInput.split(',').map(g => g.trim()).filter(g => g);
+        }
+
+        const region = document.getElementById('region')?.value.trim();
+        if (region) {
+            formData.region = region;
+        }
+
+        const process = document.getElementById('process')?.value.trim();
+        if (process) {
+            formData.process = process;
+        }
+
+        const tastingNote = document.getElementById('tastingNote')?.value.trim();
+        if (tastingNote) {
+            formData.tastingNote = tastingNote;
+        }
+
+    } else if (productType === 'clothes') {
+        // Get clothes-specific fields
+        const clothesSizesInput = document.getElementById('clothesSizes')?.value.trim();
+        if (clothesSizesInput) {
+            formData.availableSizes = clothesSizesInput.split(',').map(s => s.trim()).filter(s => s);
+        }
+
+        const colorsInput = document.getElementById('availableColors')?.value.trim();
+        if (colorsInput) {
+            formData.availableColors = colorsInput.split(',').map(c => c.trim()).filter(c => c);
+        }
+
+        const material = document.getElementById('material')?.value.trim();
+        if (material) {
+            formData.material = material;
+        }
+
+        const style = document.getElementById('style')?.value.trim();
+        if (style) {
+            formData.style = style;
+        }
     }
 
     return formData;
@@ -153,6 +330,13 @@ function getFormData() {
 
 // Validate form data
 function validateFormData(data) {
+    // Check product type is selected
+    const productType = document.getElementById('productType')?.value;
+    if (!productType) {
+        showError('Product type is required');
+        return false;
+    }
+
     if (!data.name) {
         showError('Product name is required');
         return false;
@@ -168,7 +352,7 @@ function validateFormData(data) {
         return false;
     }
 
-    if (!data.stockQuantity || data.stockQuantity < 0) {
+    if (data.stockQuantity < 0) {
         showError('Valid stock quantity is required');
         return false;
     }

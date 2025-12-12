@@ -68,7 +68,7 @@ namespace GOKCafe.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("BankTransferConfigs");
+                    b.ToTable("BankTransferConfigs", (string)null);
                 });
 
             modelBuilder.Entity("GOKCafe.Domain.Entities.Banner", b =>
@@ -129,7 +129,7 @@ namespace GOKCafe.Infrastructure.Data.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("Banners");
+                    b.ToTable("Banners", (string)null);
                 });
 
             modelBuilder.Entity("GOKCafe.Domain.Entities.Cart", b =>
@@ -138,8 +138,17 @@ namespace GOKCafe.Infrastructure.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("AppliedCouponCode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("AppliedCouponId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<decimal>("DiscountAmount")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime?>("ExpiresAt")
                         .HasColumnType("datetime2");
@@ -150,6 +159,9 @@ namespace GOKCafe.Infrastructure.Data.Migrations
                     b.Property<string>("SessionId")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<decimal>("ShippingFee")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -158,9 +170,11 @@ namespace GOKCafe.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("AppliedCouponId");
+
                     b.HasIndex("UserId");
 
-                    b.ToTable("Carts");
+                    b.ToTable("Carts", (string)null);
                 });
 
             modelBuilder.Entity("GOKCafe.Domain.Entities.CartItem", b =>
@@ -187,6 +201,12 @@ namespace GOKCafe.Infrastructure.Data.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
+                    b.Property<string>("SelectedGrind")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SelectedSize")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<decimal>("UnitPrice")
                         .HasColumnType("decimal(18,2)");
 
@@ -199,7 +219,7 @@ namespace GOKCafe.Infrastructure.Data.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("CartItems");
+                    b.ToTable("CartItems", (string)null);
                 });
 
             modelBuilder.Entity("GOKCafe.Domain.Entities.Category", b =>
@@ -246,7 +266,7 @@ namespace GOKCafe.Infrastructure.Data.Migrations
                     b.HasIndex("Slug")
                         .IsUnique();
 
-                    b.ToTable("Categories");
+                    b.ToTable("Categories", (string)null);
                 });
 
             modelBuilder.Entity("GOKCafe.Domain.Entities.ContactInfo", b =>
@@ -315,7 +335,7 @@ namespace GOKCafe.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ContactInfos");
+                    b.ToTable("ContactInfos", (string)null);
                 });
 
             modelBuilder.Entity("GOKCafe.Domain.Entities.ContactMessage", b =>
@@ -366,7 +386,7 @@ namespace GOKCafe.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ContactMessages");
+                    b.ToTable("ContactMessages", (string)null);
                 });
 
             modelBuilder.Entity("GOKCafe.Domain.Entities.Coupon", b =>
@@ -441,7 +461,7 @@ namespace GOKCafe.Infrastructure.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Coupons");
+                    b.ToTable("Coupons", (string)null);
                 });
 
             modelBuilder.Entity("GOKCafe.Domain.Entities.CouponUsage", b =>
@@ -494,7 +514,7 @@ namespace GOKCafe.Infrastructure.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("CouponUsages");
+                    b.ToTable("CouponUsages", (string)null);
                 });
 
             modelBuilder.Entity("GOKCafe.Domain.Entities.Equipment", b =>
@@ -536,7 +556,7 @@ namespace GOKCafe.Infrastructure.Data.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Equipments");
+                    b.ToTable("Equipments", (string)null);
                 });
 
             modelBuilder.Entity("GOKCafe.Domain.Entities.FlavourProfile", b =>
@@ -578,7 +598,7 @@ namespace GOKCafe.Infrastructure.Data.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("FlavourProfiles");
+                    b.ToTable("FlavourProfiles", (string)null);
                 });
 
             modelBuilder.Entity("GOKCafe.Domain.Entities.InfoCard", b =>
@@ -626,7 +646,7 @@ namespace GOKCafe.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("InfoCards");
+                    b.ToTable("InfoCards", (string)null);
                 });
 
             modelBuilder.Entity("GOKCafe.Domain.Entities.Mission", b =>
@@ -682,7 +702,7 @@ namespace GOKCafe.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Missions");
+                    b.ToTable("Missions", (string)null);
                 });
 
             modelBuilder.Entity("GOKCafe.Domain.Entities.Offer", b =>
@@ -734,7 +754,7 @@ namespace GOKCafe.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Offers");
+                    b.ToTable("Offers", (string)null);
                 });
 
             modelBuilder.Entity("GOKCafe.Domain.Entities.Order", b =>
@@ -817,7 +837,7 @@ namespace GOKCafe.Infrastructure.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Orders");
+                    b.ToTable("Orders", (string)null);
                 });
 
             modelBuilder.Entity("GOKCafe.Domain.Entities.OrderItem", b =>
@@ -861,7 +881,7 @@ namespace GOKCafe.Infrastructure.Data.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("OrderItems");
+                    b.ToTable("OrderItems", (string)null);
                 });
 
             modelBuilder.Entity("GOKCafe.Domain.Entities.Partner", b =>
@@ -898,7 +918,7 @@ namespace GOKCafe.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Partners");
+                    b.ToTable("Partners", (string)null);
                 });
 
             modelBuilder.Entity("GOKCafe.Domain.Entities.Payment", b =>
@@ -963,7 +983,7 @@ namespace GOKCafe.Infrastructure.Data.Migrations
 
                     b.HasIndex("OrderId");
 
-                    b.ToTable("Payments");
+                    b.ToTable("Payments", (string)null);
                 });
 
             modelBuilder.Entity("GOKCafe.Domain.Entities.Product", b =>
@@ -1056,7 +1076,7 @@ namespace GOKCafe.Infrastructure.Data.Migrations
 
                     b.HasIndex("CategoryId", "IsActive", "DisplayOrder");
 
-                    b.ToTable("Products");
+                    b.ToTable("Products", (string)null);
                 });
 
             modelBuilder.Entity("GOKCafe.Domain.Entities.ProductEquipment", b =>
@@ -1073,7 +1093,7 @@ namespace GOKCafe.Infrastructure.Data.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductEquipments");
+                    b.ToTable("ProductEquipments", (string)null);
                 });
 
             modelBuilder.Entity("GOKCafe.Domain.Entities.ProductFlavourProfile", b =>
@@ -1090,7 +1110,7 @@ namespace GOKCafe.Infrastructure.Data.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductFlavourProfiles");
+                    b.ToTable("ProductFlavourProfiles", (string)null);
                 });
 
             modelBuilder.Entity("GOKCafe.Domain.Entities.ProductImage", b =>
@@ -1128,7 +1148,7 @@ namespace GOKCafe.Infrastructure.Data.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductImages");
+                    b.ToTable("ProductImages", (string)null);
                 });
 
             modelBuilder.Entity("GOKCafe.Domain.Entities.RevokedToken", b =>
@@ -1164,7 +1184,7 @@ namespace GOKCafe.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("RevokedTokens");
+                    b.ToTable("RevokedTokens", (string)null);
                 });
 
             modelBuilder.Entity("GOKCafe.Domain.Entities.ServiceFeature", b =>
@@ -1204,7 +1224,7 @@ namespace GOKCafe.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("ServiceFeatures");
+                    b.ToTable("ServiceFeatures", (string)null);
                 });
 
             modelBuilder.Entity("GOKCafe.Domain.Entities.TeaAttribute", b =>
@@ -1244,7 +1264,7 @@ namespace GOKCafe.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("TeaAttributes");
+                    b.ToTable("TeaAttributes", (string)null);
                 });
 
             modelBuilder.Entity("GOKCafe.Domain.Entities.User", b =>
@@ -1306,7 +1326,7 @@ namespace GOKCafe.Infrastructure.Data.Migrations
                     b.HasIndex("Email")
                         .IsUnique();
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("GOKCafe.Domain.Entities.Banner", b =>
@@ -1321,9 +1341,15 @@ namespace GOKCafe.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("GOKCafe.Domain.Entities.Cart", b =>
                 {
+                    b.HasOne("GOKCafe.Domain.Entities.Coupon", "AppliedCoupon")
+                        .WithMany()
+                        .HasForeignKey("AppliedCouponId");
+
                     b.HasOne("GOKCafe.Domain.Entities.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId");
+
+                    b.Navigation("AppliedCoupon");
 
                     b.Navigation("User");
                 });

@@ -35,8 +35,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="~/css/output.css" asp-append-version="true" />
 
-    <!-- Umbraco UI Library -->
-    <script type="module" src="https://cdn.jsdelivr.net/npm/@("@")umbraco-ui/uui@("@")1.8.0/dist/uui.js"></script>
+    <!-- Umbraco UI Library (disabled) -->
+    <!-- The Umbraco UI script was removed because the original comment contained malformed Razor/escape sequences that produced invalid client-side output. Re-enable with a plain HTML-safe path if needed. -->
 
     @await RenderSectionAsync("Styles", required: false)
 </head>
@@ -72,6 +72,9 @@
     <script src="~/js/cart.js" asp-append-version="true"></script>
     <script src="~/js/product.js" asp-append-version="true"></script>
     <script src="~/js/product-feed-integration.js" asp-append-version="true"></script>
+
+    <!-- Modal Scripts -->
+    <script src="~/js/modals/confirm-delete-modal.js" asp-append-version="true"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>
