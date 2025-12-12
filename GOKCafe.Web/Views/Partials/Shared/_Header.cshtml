@@ -1,0 +1,184 @@
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@{
+    var siteName = "GOK Cafe";
+    var logoUrl = "/media/kp3l0tpg/logo.png"; // Default header logo
+
+    // Try to get Header document from Home children
+    if (UmbracoContext?.Content != null)
+    {
+        // Get Home node first
+        var homeNode = UmbracoContext.Content.GetAtRoot().FirstOrDefault(x => x.ContentType.Alias == "home" || x.ContentType.Alias == "homepage");
+        if (homeNode != null)
+        {
+            // Get Header from Home's children
+            var headerNode = homeNode.Children.FirstOrDefault(x => x.ContentType.Alias == "header");
+            if (headerNode != null)
+            {
+                // Get logo from Header document type
+                var logoMedia = headerNode.Value<Umbraco.Cms.Core.Models.PublishedContent.IPublishedContent>("logo");
+                if (logoMedia != null)
+                {
+                    logoUrl = logoMedia.Url();
+                }
+            }
+        }
+    }
+}
+
+<!-- Header -->
+<header id="stickyHeader" class="sticky top-0 z-10 bg-gray-50 border-b border-gray-200 transition-shadow duration-300">
+    <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-20">
+            <!-- Mobile menu button -->
+            <button type="button" class="md:hidden text-gray-700 hover:text-primary focus:outline-none" onclick="toggleMobileMenu()">
+                <i class="fas fa-bars text-2xl"></i>
+            </button>
+            <!-- Left Navigation -->
+            <div class="hidden md:flex items-center md:gap-3 lg:gap-12">
+                <a href="/" class="text-gray-700 hover:text-primary font-medium transition-colors uppercase text-base">Home</a>
+                <a href="/visions" class="text-gray-700 hover:text-primary font-medium transition-colors uppercase  text-base">Visions</a>
+                <a href="/products" class="text-gray-700 hover:text-primary font-medium transition-colors uppercase  text-base">Products</a>
+            </div>
+
+            <!-- Center Logo -->
+            <a href="/" class="flex items-center">
+                <img src="@logoUrl" alt="@siteName" class="h-10" />
+            </a>
+
+            <!-- Right Navigation -->
+            <div class="md:flex items-center md:gap-3 lg:gap-12">
+            <div class="hidden md:flex items-center md:gap-3 lg:gap-12">
+                <a href="/partners" class="text-gray-700 hover:text-primary font-medium transition-colors uppercase  text-base">Partners</a>
+                <a href="/contact" class="text-gray-700 hover:text-primary font-medium transition-colors uppercase  text-base">Contact</a>
+                <a href="/blog" class="text-gray-700 hover:text-primary font-medium transition-colors uppercase  text-base">Blog</a>
+            </div>
+            <div class="flex items-center gap-4">
+                <!-- Search Icon -->
+                <button type="button" class="text-gray-700 hover:text-primary transition-colors" onclick="openSearchModal()">
+                    <i class="fas fa-search text-lg"></i>
+                </button>
+
+                <!-- Cart Icon with Badge -->
+                <button type="button" class="relative text-gray-700 hover:text-primary transition-colors" onclick="toggleCartSidebar()">
+                    <i class="fas fa-shopping-cart text-lg"></i>
+                    <!-- Cart Count Badge -->
+                    <span class="cart-count absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center" style="display: none;">0</span>
+                </button>
+            </div>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation -->
+        <div id="mobileMenu" class="hidden lg:hidden pb-4">
+            <div class="flex flex-col space-y-3">
+                <a href="/" class="text-gray-700 hover:text-primary font-medium transition-colors py-2 uppercase text-sm">Home</a>
+                <a href="/visions" class="text-gray-700 hover:text-primary font-medium transition-colors py-2 uppercase text-sm">Visions</a>
+                <a href="/products" class="text-gray-700 hover:text-primary font-medium transition-colors py-2 uppercase text-sm">Products</a>
+                <a href="/partners" class="text-gray-700 hover:text-primary font-medium transition-colors py-2 uppercase text-sm">Partners</a>
+                <a href="/contact" class="text-gray-700 hover:text-primary font-medium transition-colors py-2 uppercase text-sm">Contact</a>
+                <a href="/blog" class="text-gray-700 hover:text-primary font-medium transition-colors py-2 uppercase text-sm">Blog</a>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<script>
+    // Add shadow to sticky header when scrolling
+    window.addEventListener('scroll', function() {
+        const header = document.getElementById('stickyHeader');
+        if (window.scrollY > 0) {
+            header.classList.add('shadow-md');
+        } else {
+            header.classList.remove('shadow-md');
+        }
+    });
+
+    function toggleMobileMenu() {
+        const menu = document.getElementById('mobileMenu');
+        menu.classList.toggle('hidden');
+    }
+</script>
+
+
+<!-- Search Modal -->
+<div id="searchModalOverlay" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 transition-opacity duration-300" onclick="closeSearchModal()"></div>
+<div id="searchModal" class="fixed top-0 left-0 right-0 bg-white shadow-lg hidden z-50 transition-all duration-300" style="transform: translateY(-100%);">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <!-- Search Input -->
+        <div class="flex items-center gap-4 mb-6">
+            <div class="flex-1 relative">
+                <input
+                    type="text"
+                    id="searchInput"
+                    placeholder="Search for products..."
+                    class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-primary focus:outline-none text-lg"
+                    autocomplete="off"
+                />
+                <button type="button" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-primary" onclick="clearSearch()">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <button type="button" class="text-gray-700 hover:text-primary transition-colors" onclick="closeSearchModal()">
+                <i class="fas fa-times text-2xl"></i>
+            </button>
+        </div>
+
+        <!-- Search Results Title -->
+        <h3 id="searchResultsTitle" class="text-lg font-semibold mb-4 hidden">Search results</h3>
+
+        <!-- Search Results Grid -->
+        <div id="searchResultsGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-6 max-h-96 overflow-y-auto">
+            <!-- Results will be populated here by JavaScript -->
+        </div>
+
+        <!-- No Results Message -->
+        <div id="noResultsMessage" class="text-center text-gray-500 py-8 hidden">
+            <i class="fas fa-search text-5xl mb-4 text-gray-300"></i>
+            <p class="text-lg">No products found</p>
+        </div>
+
+        <!-- Loading State -->
+        <div id="searchLoading" class="text-center py-8 hidden">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <p class="mt-2 text-gray-600">Searching...</p>
+        </div>
+
+        <!-- View All Results Button -->
+        <div id="viewAllResultsContainer" class="text-center hidden">
+            <button
+                type="button"
+                class="bg-black text-white px-8 py-3 rounded-lg hover:bg-gray-800 transition-colors font-medium"
+                onclick="viewAllSearchResults()"
+            >
+                VIEW ALL
+            </button>
+        </div>
+    </div>
+</div>
+
+    <!-- Hide native scrollbars globally but preserve scroll functionality -->
+    <style>
+        /* IE and Edge */
+        html, body, * {
+            -ms-overflow-style: none !important;
+            scrollbar-width: none !important; /* Firefox */
+        }
+
+        /* WebKit browsers (Chrome, Safari, newer Edge) */
+        *::-webkit-scrollbar {
+            width: 0 !important;
+            height: 0 !important;
+        }
+
+        /* Search Modal Animations */
+        #searchModal.show {
+            display: block !important;
+            transform: translateY(0) !important;
+        }
+
+        #searchModalOverlay.show {
+            display: block !important;
+            opacity: 1 !important;
+        }
+    </style>
+

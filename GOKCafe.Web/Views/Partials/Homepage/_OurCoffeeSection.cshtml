@@ -1,0 +1,115 @@
+@using GOKCafe.Application.DTOs.Product
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@{
+    var sectionTitle = "TOP PICKS FOR YOU";
+    var sectionHeading = "OUR COFFEE";
+    var buttonText = "Shop All Coffee";
+    var buttonUrl = "/products";
+
+    // Get products from ViewData (direct from Application layer service - no HTTP API!)
+    var products = ViewData["FeaturedProducts"] as List<ProductDto> ?? new List<ProductDto>();
+
+    // Debug: Log product count to see if data is coming from database
+    var productCount = products?.Count ?? 0;
+    var debugInfo = ViewData["DebugInfo"]?.ToString() ?? "No debug info";
+    var errorInfo = ViewData["ErrorInfo"]?.ToString() ?? "No errors";
+}
+
+<script>
+    console.log('=== OUR COFFEE SECTION DEBUG ===');
+    console.log('Product Count:', @productCount);
+    console.log('Debug Info:', '@debugInfo');
+    console.log('Error Info:', '@errorInfo');
+    @if (products.Any())
+    {
+        <text>
+        console.log('Products:', @Html.Raw(System.Text.Json.JsonSerializer.Serialize(products.Select(p => new { p.Id, p.Name, p.Price, p.ImageUrl }))));
+        </text>
+    }
+    console.log('================================');
+</script>
+
+<!-- Our Coffee Section -->
+<section class="pb-12 bg-white">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Section Header -->
+        <div class="text-center mb-4">
+            <p class="text-2xl text-primary font-medium uppercase tracking-wide mb-2">@sectionTitle</p>
+            <h2 class="text-4xl md:text-5xl font-semibold text-gray-900">@sectionHeading</h2>
+           
+        </div>
+
+        <!-- Products Grid -->
+        @if (products.Any())
+        {
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-6">
+                @foreach (var product in products)
+                {
+                    <div class="group justify-center">
+                        <!-- Product Image -->
+                        <div class="overflow-hidden mb-4 flex items-center justify-center bg-gray-100 w-full h-[480px] cursor-pointer">
+                            @if (!string.IsNullOrEmpty(product.ImageUrl))
+                            {
+                                <img src="@product.ImageUrl" alt="@product.Name" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                            }
+                            else
+                            {
+                                <div class="w-full h-full bg-gray-200 flex items-center justify-center">
+                                    <i class="fas fa-coffee text-6xl text-gray-400"></i>
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Product Info -->
+                        <div class="text-center w-full">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">@product.Name</h3>
+                            <p class="text-gray-600">From <span class="font-semibold">@product.Price.ToString("N0") VNĐ</span></p>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <!-- Fallback products if no data from database -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-6">
+                <div class="group justify-center">
+                    <div class="overflow-hidden mb-4 flex items-center justify-center bg-gray-100 h-[420px]">
+                        <img src="/media/tkddexzl/colombiadarkroast.png" alt="Colombia Dark Roast" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                    </div>
+                    <div class="text-center w-full">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Colombia Dark Roast</h3>
+                        <p class="text-gray-600">From <span class="font-semibold">682,000 VNĐ</span></p>
+                    </div>
+                </div>
+
+                <div class="group justify-center">
+                    <div class="overflow-hidden mb-4 flex items-center justify-center bg-gray-100 h-[420px]">
+                        <img src="/media/zqdncqg0/swisswaterdecaf.png" alt="Swiss Water Decaf" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                    </div>
+                    <div class="text-center w-full">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Swiss Water Decaf</h3>
+                        <p class="text-gray-600">From <span class="font-semibold">682,000 VNĐ</span></p>
+                    </div>
+                </div>
+
+                <div class="group justify-center">
+                    <div class="overflow-hidden mb-4 flex items-center justify-center bg-gray-100 h-[420px]">
+                        <img src="/media/xiihorp0/holidayblend.png" alt="Holiday Blend" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                    </div>
+                    <div class="text-center w-full">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Holiday Blend</h3>
+                        <p class="text-gray-600">From <span class="font-semibold">682,000 VNĐ</span></p>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- Shop All Button -->
+        <div class="text-center">
+            <a href="@buttonUrl" class="inline-block px-8 py-3 border-2 border-primary text-primary font-semibold hover:bg-primary hover:text-white transition-all duration-300">
+                @buttonText
+            </a>
+        </div>
+    </div>
+</section>

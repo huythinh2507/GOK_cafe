@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rd /s /q bin obj)",
+      "Bash(dotnet build:*)",
+      "Bash(npm run build:css:*)",
+      "Bash(npm install)",
+      "Bash(npm install:*)",
+      "Bash(npx tailwindcss:*)",
+      "Bash(if exist node_modules rd /s /q node_modules)",
+      "Bash(npm cache clean:*)",
+      "Bash(node_modules/.bin/tailwindcss:*)",
+      "Bash(cat:*)",
+      "Bash(dir:*)",
+      "Bash(findstr:*)",
+      "Bash(dotnet add reference:*)",
+      "Bash(tasklist:*)",
+      "Bash(taskkill:*)",
+      "Bash(dotnet run:*)",
+      "Bash(timeout /t 5 /nobreak)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

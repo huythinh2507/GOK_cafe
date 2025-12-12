@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - GOK Cafe Admin</title>
+
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+    <!-- Custom Admin Styles -->
+    <style>
+        :root {
+            --primary: #0767B3;
+            --primary-dark: #054f82;
+        }
+
+        .sidebar {
+            width: 260px;
+            transition: all 0.3s;
+        }
+
+        .sidebar-collapsed {
+            width: 80px;
+        }
+
+        .sidebar-link {
+            transition: all 0.2s;
+        }
+
+        .sidebar-link:hover {
+            background-color: rgba(7, 103, 179, 0.1);
+        }
+
+        .sidebar-link.active {
+            background-color: rgba(7, 103, 179, 0.2);
+            border-left: 4px solid var(--primary);
+        }
+
+        .bg-primary {
+            background-color: var(--primary);
+        }
+
+        .bg-primary-dark {
+            background-color: var(--primary-dark);
+        }
+
+        .text-primary {
+            color: var(--primary);
+        }
+
+        .border-primary {
+            border-color: var(--primary);
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="flex h-screen overflow-hidden">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar bg-white shadow-lg flex flex-col">
+            <!-- Logo -->
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-coffee text-3xl text-primary"></i>
+                    <div id="logoText">
+                        <h1 class="text-xl font-bold text-gray-800">GOK Cafe</h1>
+                        <p class="text-xs text-gray-500">Admin Panel</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <nav class="flex-1 overflow-y-auto py-6">
+                <ul class="space-y-1 px-3">
+                    <li>
+                        <a href="/admin/dashboard" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg">
+                            <i class="fas fa-home w-5"></i>
+                            <span class="sidebar-text">Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/products" class="sidebar-link active flex items-center space-x-3 px-4 py-3 rounded-lg">
+                            <i class="fas fa-box w-5"></i>
+                            <span class="sidebar-text">Products</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/categories" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg">
+                            <i class="fas fa-tags w-5"></i>
+                            <span class="sidebar-text">Categories</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/orders" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg">
+                            <i class="fas fa-shopping-cart w-5"></i>
+                            <span class="sidebar-text">Orders</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/coupons" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg">
+                            <i class="fas fa-ticket-alt w-5"></i>
+                            <span class="sidebar-text">Coupons</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/admin/customers" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg">
+                            <i class="fas fa-users w-5"></i>
+                            <span class="sidebar-text">Customers</span>
+                        </a>
+                    </li>
+                    <li class="mt-6 pt-6 border-t border-gray-200">
+                        <a href="/admin/settings" class="sidebar-link flex items-center space-x-3 px-4 py-3 rounded-lg">
+                            <i class="fas fa-cog w-5"></i>
+                            <span class="sidebar-text">Settings</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- User Profile -->
+            <div class="p-4 border-t border-gray-200">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-primary rounded-full flex items-center justify-center text-white">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div id="userInfo" class="flex-1">
+                        <p class="text-sm font-semibold text-gray-800">Admin User</p>
+                        <p class="text-xs text-gray-500">admin@gokcafe.com</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Top Header -->
+            <header class="bg-white shadow-sm z-10">
+                <div class="flex items-center justify-between px-6 py-4">
+                    <div class="flex items-center space-x-4">
+                        <button onclick="toggleSidebar()" class="text-gray-600 hover:text-gray-800">
+                            <i class="fas fa-bars text-xl"></i>
+                        </button>
+                        <div>
+                            <h2 class="text-xl font-semibold text-gray-800">@ViewData["Title"]</h2>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-4">
+                        <!-- Notifications -->
+                        <button class="relative text-gray-600 hover:text-gray-800">
+                            <i class="fas fa-bell text-xl"></i>
+                            <span class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
+                        </button>
+
+                        <!-- View Website -->
+                        <a href="/" target="_blank" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition">
+                            <i class="fas fa-external-link-alt mr-2"></i>View Website
+                        </a>
+
+                        <!-- Logout -->
+                        <a href="/umbraco" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition">
+                            <i class="fas fa-sign-out-alt mr-2"></i>Umbraco
+                        </a>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Page Content -->
+            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100 p-6">
+                @RenderBody()
+            </main>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="~/js/api-service.js" asp-append-version="true"></script>
+
+    <script>
+        // Sidebar toggle
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const logoText = document.getElementById('logoText');
+            const userInfo = document.getElementById('userInfo');
+            const sidebarTexts = document.querySelectorAll('.sidebar-text');
+
+            sidebar.classList.toggle('sidebar-collapsed');
+
+            if (sidebar.classList.contains('sidebar-collapsed')) {
+                logoText.style.display = 'none';
+                userInfo.style.display = 'none';
+                sidebarTexts.forEach(text => text.style.display = 'none');
+            } else {
+                logoText.style.display = 'block';
+                userInfo.style.display = 'block';
+                sidebarTexts.forEach(text => text.style.display = 'inline');
+            }
+        }
+
+        // Set active link based on current URL
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentPath = window.location.pathname;
+            const links = document.querySelectorAll('.sidebar-link');
+
+            links.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === currentPath || currentPath.startsWith(link.getAttribute('href') + '/')) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,378 @@
+﻿@using Umbraco.Cms.Web.Common.PublishedModels;
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+
+
+<!-- Cart Sidebar Overlay -->
+<div id="cartOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden transition-opacity duration-300" onclick="closeCartSidebar()"></div>
+
+<!-- Cart Sidebar Panel -->
+<div id="cartSidebar" class="fixed top-0 right-0 h-full w-full z-50  md:w-[400px] bg-white shadow-2xl z-60 transform translate-x-full transition-transform duration-300 flex flex-col">
+
+    <!-- Cart Header -->
+    <div class="flex items-center justify-between px-5 py-4 border-b border-gray-200">
+        <h2 class="text-lg font-bold text-gray-900 uppercase tracking-wider">Cart</h2>
+        <button type="button" class="text-gray-400 hover:text-gray-700 transition-colors text-2xl leading-none w-8 h-8 flex items-center justify-center" onclick="closeCartSidebar()">
+            ×
+        </button>
+    </div>
+
+    <!-- Cart Items Container (Scrollable) -->
+    <div class="flex-1 overflow-y-auto px-5 py-4" id="cartItemsContainer">
+        <!-- Cart items will be dynamically rendered here -->
+        <div id="emptyCartMessage" class="hidden flex-col items-center justify-center text-center py-12">
+            <i class="fas fa-shopping-cart text-6xl text-gray-300 mb-4"></i>
+            <p class="text-gray-500 text-lg">Your cart is empty</p>
+            <p class="text-gray-400 text-sm mt-2">Add some products to get started!</p>
+        </div>
+
+        <!-- Example Cart Item (will be used as template) -->
+        <template id="cartItemTemplate">
+            <div class="cart-item mb-4 pb-4 border-b border-gray-200 relative" data-item-id="">
+                <!-- Remove Button -->
+                <button type="button" class="absolute top-0 right-0 text-gray-400 hover:text-red-500 transition-colors cart-remove-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+
+                <div class="flex gap-3 pr-6">
+                    <!-- Product Image -->
+                    <div class="w-16 h-20 bg-gray-100 rounded overflow-hidden flex-shrink-0">
+                        <img src="" alt="" class="w-full h-full object-cover cart-item-image" />
+                    </div>
+
+                    <!-- Product Info -->
+                    <div class="flex-1 flex flex-col justify-between">
+                        <div>
+                            <h3 class="font-semibold text-sm text-gray-900 cart-item-name mb-1">Product Name</h3>
+                            <div class="text-xs text-gray-600 space-y-0.5">
+                                <p class="cart-item-size"></p>
+                                <p class="cart-item-grind"></p>
+                            </div>
+                        </div>
+
+                        <!-- Quantity Controls & Price -->
+                        <div class="flex justify-between items-center">
+                            <!-- Quantity Controls -->
+                            <div class="flex items-center border border-gray-300 rounded text-xs">
+                                <button type="button" class="px-2 py-1 hover:bg-gray-100 transition-colors cart-decrease-btn">
+                                    -
+                                </button>
+                                <input type="number" value="1" min="1" readonly class="w-8 text-center border-x border-gray-300 py-1 font-medium cart-item-quantity" />
+                                <button type="button" class="px-2 py-1 hover:bg-gray-100 transition-colors cart-increase-btn">
+                                    +
+                                </button>
+                            </div>
+
+                            <!-- Price -->
+                            <p class="font-semibold text-sm text-gray-900 cart-item-price">32,000 VND</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </div>
+
+    <!-- Special Price Section - Hidden -->
+    <div id="specialPriceSection" class="px-5 py-4 bg-gray-50 border-y border-gray-200 hidden">
+        <h3 class="font-semibold text-xs text-gray-900 mb-3">Special price unlocked when added to cart today</h3>
+        <div class="grid grid-cols-3 gap-2" id="specialPriceProducts">
+            <!-- Special price products will be rendered here -->
+        </div>
+
+        <!-- Special Price Product Template -->
+        <template id="specialPriceTemplate">
+            <div class="special-price-item relative">
+                <div class="bg-white border border-gray-200 rounded overflow-hidden">
+                    <!-- Product Image -->
+                    <div class="aspect-square bg-gray-100 relative">
+                        <img src="" alt="" class="w-full h-full object-cover special-product-image" />
+                        <!-- Price overlays -->
+                        <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-2">
+                            <p class="text-white text-xs font-bold special-product-price">₹149</p>
+                        </div>
+                    </div>
+                    <!-- Product Name -->
+                    <div class="p-1.5 text-center">
+                        <p class="text-xs text-gray-800 truncate special-product-name">Product Name</p>
+                    </div>
+                </div>
+                <!-- Add Button -->
+                <button type="button" class="absolute top-1 right-1 bg-white rounded-full w-6 h-6 flex items-center justify-center shadow hover:bg-gray-100 transition-colors special-add-btn">
+                    <span class="text-lg leading-none">+</span>
+                </button>
+            </div>
+        </template>
+    </div>
+
+    <div class="flex-1 overflow-y-auto">
+        <!-- Special Instructions -->
+        <div class="px-5 py-3 border-b border-gray-200">
+            <label class="block text-xs font-medium text-gray-700 mb-2" for="specialInstructions">
+                Special Instructions For Seller
+            </label>
+            <textarea id="specialInstructions"
+                    rows="2"
+                    class="w-full border border-gray-300 rounded px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 resize-none"
+                    placeholder=""></textarea>
+        </div>
+
+        <!-- Cart Footer -->
+        <div class="px-5 py-4 bg-white">
+            @* <!-- Order for Someone Else (Moved to top) -->
+            <div class="mb-3 pb-3 border-b border-gray-200">
+                <button type="button" class="text-xs text-gray-700 hover:text-primary transition-colors flex items-center gap-2" onclick="toggleOrderForSomeoneElse()">
+                    <i class="fas fa-user-friends text-sm"></i>
+                    <span>ORDER FOR SOMEONE ELSE</span>
+                </button>
+
+                <!-- Order for Someone Else Form (Hidden by default) -->
+                <div id="orderForSomeoneElseForm" class="hidden mt-3 space-y-2">
+                    <div>
+                        <label for="recipientName" class="block text-xs font-medium text-gray-700 mb-1 uppercase">Name of the Recipient</label>
+                        <input type="text"
+                            id="recipientName"
+                            class="w-full border border-gray-300 rounded px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400"
+                            placeholder="" />
+                    </div>
+                    <div>
+                        <label for="recipientMessage" class="block text-xs font-medium text-gray-700 mb-1 uppercase">Message for Recipient</label>
+                        <textarea rows="2"
+                                id="recipientMessage"
+                                class="w-full border border-gray-300 rounded px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 resize-none"
+                                placeholder=""></textarea>
+                    </div>
+                </div>
+            </div> *@
+
+            <!-- Price Breakdown -->
+            <div class="space-y-3 mb-4">
+                <!-- Subtotal -->
+                <div class="flex justify-between items-center">
+                    <span class="text-sm text-gray-700">Subtotal</span>
+                    <span class="text-sm font-semibold text-gray-900" id="cartSubtotal">0đ</span>
+                </div>
+
+                <!-- Shipping Fee -->
+                <div class="flex justify-between items-center">
+                    <span class="text-sm text-gray-700">Shipping fee</span>
+                    <span class="text-sm text-gray-900" id="shippingFee">0đ</span>
+                </div>
+
+                <!-- Coupon Input -->
+                <div class="space-y-2">
+                    <label for="couponCode" class="block text-xs font-medium text-gray-700 uppercase">Enter coupon code</label>
+                    <div class="flex gap-2">
+                        <input type="text"
+                            id="couponCode"
+                            placeholder="Enter coupon code"
+                            class="flex-1 border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary" />
+                        <button type="button"
+                                onclick="applyCoupon()"
+                                class="bg-primary text-white px-4 py-2 rounded text-sm font-medium hover:bg-primary/90 transition-colors">
+                            Apply
+                        </button>
+                    </div>
+                    <p id="couponError" class="text-xs text-red-600 hidden"></p>
+                    <p id="couponSuccess" class="text-xs text-green-600 hidden"></p>
+                </div>
+
+                <!-- Coupon Discount (Applied) -->
+                <div id="couponDiscountContainer" class="hidden">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm text-gray-700">Coupon discount</span>
+                            <span class="text-xs text-gray-500" id="appliedCouponCode"></span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-semibold text-green-600" id="couponDiscount">-0đ</span>
+                            <button type="button"
+                                    onclick="removeCoupon()"
+                                    class="text-xs text-red-600 hover:text-red-800"
+                                    title="Remove coupon">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Voucher Selection -->
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <label class="block text-xs font-medium text-gray-700 uppercase">Enter Voucher</label>
+                        <button type="button" class="text-xs text-primary hover:underline" onclick="showAllVouchers()">
+                            View all
+                        </button>
+                    </div>
+
+                    <!-- Voucher Cards Container (Horizontal Scroll) -->
+                    <div class="relative">
+                        <div id="voucherContainer" class="flex gap-3 overflow-x-auto pb-2 scroll-smooth" style="scrollbar-width: thin;">
+                            <!-- Vouchers will be loaded dynamically -->
+                            <div class="text-center text-gray-400 text-sm py-4 w-full">
+                                Loading vouchers...
+                            </div>
+                        </div>
+
+                        <!-- Scroll Navigation Buttons (Optional) -->
+                        <button type="button"
+                                id="scrollLeftBtn"
+                                onclick="scrollVouchers('left')"
+                                class="hidden absolute left-0 top-1/2 -translate-y-1/2 bg-white/90 rounded-full w-6 h-6 shadow-md items-center justify-center hover:bg-white z-10">
+                            <i class="fas fa-chevron-left text-xs text-gray-600"></i>
+                        </button>
+                        <button type="button"
+                                id="scrollRightBtn"
+                                onclick="scrollVouchers('right')"
+                                class="hidden absolute right-0 top-1/2 -translate-y-1/2 bg-white/90 rounded-full w-6 h-6 shadow-md items-center justify-center hover:bg-white z-10">
+                            <i class="fas fa-chevron-right text-xs text-gray-600"></i>
+                        </button>
+                    </div>
+
+                    <!-- Voucher Card Template -->
+                    <template id="voucherCardTemplate">
+                        <div class="voucher-card flex-shrink-0 w-48 border rounded-lg p-3 cursor-pointer transition-all hover:shadow-md"
+                            data-voucher-id=""
+                            onclick="selectVoucher(this)">
+                            <!-- Voucher Header -->
+                            <div class="flex items-start justify-between mb-2">
+                                <div class="flex-1">
+                                    <h4 class="voucher-code text-sm font-bold text-gray-900 uppercase"></h4>
+                                    <p class="voucher-discount text-xs text-gray-600 mt-1"></p>
+                                </div>
+                                <input type="radio" name="selectedVoucher" class="voucher-radio mt-1" />
+                            </div>
+
+                            <!-- Voucher Details -->
+                            <div class="voucher-description text-xs text-gray-500 mb-2"></div>
+
+                            <!-- Expiry Date -->
+                            <div class="flex items-center justify-between">
+                                <span class="voucher-expiry text-xs text-gray-400"></span>
+                                <button type="button" class="text-xs text-primary hover:underline">
+                                    Terms
+                                </button>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Voucher Discount -->
+                <div id="voucherDiscountContainer" class="hidden">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-700">Voucher discount</span>
+                        <span class="text-sm font-semibold text-green-600" id="voucherDiscount">-0đ</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    <div class=" px-5">
+ <!-- Divider -->
+            <div class=" border-t border-gray-300 pt-3 mb-4">
+                <!-- Total -->
+                <div class="flex justify-between items-center">
+                    <span class="text-base font-bold text-gray-900 uppercase">Total</span>
+                    <span class="text-xl font-bold text-primary" id="cartTotal">0đ</span>
+                </div>
+            </div>
+
+            @* <!-- Pay via Gift Cards -->
+            <div class="mb-4">
+                <label class="flex items-center gap-2 text-xs text-gray-700 cursor-pointer border border-gray-300 rounded px-3 py-2">
+                    <input type="checkbox" id="payViaGiftCards" class="rounded border-gray-300 text-primary focus:ring-primary w-4 h-4" />
+                    <i class="fas fa-gift"></i>
+                    <span class="font-medium">THANH TOÁN BẰNG THẺ QUÀ TẶNG</span>
+                </label>
+            </div> *@
+
+            <!-- Checkout Button -->
+            <div>
+                <button type="button"
+                        class="w-full bg-primary text-white font-semibold py-3 text-sm hover:bg-primary/90 transition-colors uppercase tracking-wide rounded-lg"
+                        onclick="proceedToCheckout()">
+                    <i class="fas fa-shopping-bag mr-2"></i>
+                    Proceed to Checkout
+                </button>
+            </div>
+
+            <!-- All payment modes notice -->
+            <p class="text-xs text-center text-gray-500 mt-3">
+                All payment modes and COD available
+            </p>
+    </div>
+           
+</div>
+
+<style>
+/* Cart Sidebar Animations */
+#cartSidebar.open {
+    transform: translateX(0);
+}
+
+#cartOverlay.show {
+    display: block;
+    opacity: 1;
+}
+
+/* Smooth scrollbar for cart items */
+#cartItemsContainer::-webkit-scrollbar {
+    width: 6px;
+}
+
+#cartItemsContainer::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+#cartItemsContainer::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+}
+
+#cartItemsContainer::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Disable spinner on number input */
+.cart-item-quantity::-webkit-outer-spin-button,
+.cart-item-quantity::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.cart-item-quantity {
+    -moz-appearance: textfield;
+}
+
+/* Voucher Container Scrollbar */
+#voucherContainer::-webkit-scrollbar {
+    height: 6px;
+}
+
+#voucherContainer::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+}
+
+#voucherContainer::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 3px;
+}
+
+#voucherContainer::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Voucher Card Styles */
+.voucher-card {
+    border-color: #e5e7eb;
+}
+
+.voucher-card:hover {
+    border-color: #d1d5db;
+}
+
+.voucher-card.border-primary {
+    border-color: #3B82F6;
+    border-width: 2px;
+}
+</style>

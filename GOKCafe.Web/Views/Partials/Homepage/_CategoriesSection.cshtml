@@ -1,0 +1,50 @@
+@using GOKCafe.Web.Models.DTOs
+@model List<CategoryDto>
+@{
+    var categories = Model ?? new List<CategoryDto>();
+}
+
+@if (categories.Any())
+{
+    <!-- Categories Section -->
+    <section class="py-16 bg-gray-50">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold text-gray-900 mb-4 font-heading">Browse by Category</h2>
+                <p class="text-xl text-gray-600">Discover our wide range of products</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                @foreach (var category in categories)
+                {
+                    <a href="/products?category=@category.Id" class="block group">
+                        <div class="bg-white rounded-lg shadow-md overflow-hidden h-full text-center hover:shadow-xl transition-shadow duration-300">
+                            <div class="p-6">
+                                <div class="mb-4">
+                                    @if (!string.IsNullOrEmpty(category.ImageUrl))
+                                    {
+                                        <img src="@category.ImageUrl" alt="@category.Name" class="mx-auto max-h-40 rounded-lg" />
+                                    }
+                                    else
+                                    {
+                                        <div class="mx-auto w-40 h-40 bg-gray-100 rounded-lg flex items-center justify-center">
+                                            <i class="fas fa-th-large text-6xl text-gray-400"></i>
+                                        </div>
+                                    }
+                                </div>
+                                <h3 class="text-xl font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">@category.Name</h3>
+                                @if (!string.IsNullOrEmpty(category.Description))
+                                {
+                                    <p class="text-gray-600 text-sm mb-3">@category.Description</p>
+                                }
+                                <span class="inline-block bg-blue-600 text-white px-4 py-1 rounded-full text-sm font-semibold">
+                                    @category.ProductCount Products
+                                </span>
+                            </div>
+                        </div>
+                    </a>
+                }
+            </div>
+        </div>
+    </section>
+}

@@ -1,0 +1,274 @@
+@model GOKCafe.Web.Models.DTOs.ProductDto
+
+@{
+    // Format price with thousands separator and use period for thousands
+    var priceMin = Model.Price.ToString("#,0", new System.Globalization.CultureInfo("en-US")).Replace(",", ".");
+    var priceMax = Model.DiscountPrice.HasValue ? Model.DiscountPrice.Value.ToString("#,0", new System.Globalization.CultureInfo("en-US")).Replace(",", ".") : "";
+
+    // Get additional properties
+    var region = Model.Region;
+    var process = Model.Process;
+    var tastingNote = !string.IsNullOrEmpty(Model.TastingNote) ? Model.TastingNote : Model.ShortDescription;
+
+    // Stock status
+    var stockStatus = Model.StockQuantity > 0 ? "In stock" : "Out of stock";
+    var stockStatusClass = Model.StockQuantity > 0 ? "text-[#22C55E]" : "text-red-600";
+}
+
+<div class=" w-full bg-white">
+    <!-- Top Section: Image and Information -->
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:h-[640px]">
+        <div class="grid grid-cols-12 gap-8">
+            <!-- Left Column: Product Image (4/12) -->
+            <div class="col-span-12 sm:col-span-8 lg:col-span-6 xl:col-span-4">
+                <div class="flex items-center justify-center h-full lg:h-[640px] overflow-hidden">
+                    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                    {
+                        <img src="@Model.ImageUrl"
+                             alt="@Model.Name"
+                             class="w-full h-full object-cover " />
+                    }
+                    else
+                    {
+                        <div class="w-full bg-gray-200 flex items-center justify-center">
+                            <svg class="w-24 h-24 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Right Column: Product Information (8/12) -->
+            <div class="col-span-12 sm:col-span-4 lg:col-span-6 xl:col-span-8 ">
+                <div class="flex flex-col justify-between h-full">
+                    <!-- Top Section: Product Details -->
+                    <div class="flex flex-col space-y-4">
+                        <!-- Category Badge -->
+                        @if (!string.IsNullOrEmpty(Model.CategoryName))
+                        {
+                            <div>
+                                <span class="text-sm font-medium text-gray-500">
+                                    @Model.CategoryName
+                                </span>
+                            </div>
+                        }
+
+                        <!-- Product Name -->
+                        <h1 class="text-3xl font-semibold text-gray-900 leading-tight">
+                            @Model.Name
+                        </h1>
+
+                        <!-- Price -->
+                        <div class="flex items-baseline gap-2">
+                            @if (!string.IsNullOrEmpty(priceMax) && Model.DiscountPrice.HasValue)
+                            {
+                                <span class="text-2xl font-semibold text-primary">
+                                    @priceMin VND - @priceMax VND
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="text-2xl font-semibold text-primary">
+                                    @priceMin VND
+                                </span>
+                            }
+                        </div>
+
+                        <!-- Tasting Note -->
+                        @if (!string.IsNullOrEmpty(tastingNote))
+                        {
+                            <div>
+                                <span class="font-semibold text-gray-900">Tasting note:</span>
+                                <span class="text-gray-700"> @tastingNote</span>
+                            </div>
+                        }
+
+                        <!-- Region -->
+                        @if (!string.IsNullOrEmpty(region))
+                        {
+                            <div class="flex items-baseline">
+                                <span class="font-semibold text-gray-900 mr-2">Region:</span>
+                                <span class="text-gray-700">@region</span>
+                            </div>
+                        }
+
+                        <!-- Process -->
+                        @if (!string.IsNullOrEmpty(process))
+                        {
+                            <div class="flex items-baseline">
+                                <span class="font-semibold text-gray-900 mr-2">Process:</span>
+                                <span class="text-gray-700">@process</span>
+                            </div>
+                        }
+
+                        <!-- Description -->
+                        @if (!string.IsNullOrEmpty(Model.Description))
+                        {
+                            <div class="text-gray-700 leading-relaxed text-base">
+                                @Html.Raw(Model.Description)
+                            </div>
+                        }
+
+                        <!-- Stock Status -->
+                        <div class="flex items-center gap-2">
+                            @if (Model.StockQuantity > 0)
+                            {
+                                <svg class="w-5 h-5" fill="#22C55E" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                </svg>
+                                <span class="font-semibold text-[#22C55E]">@stockStatus</span>
+                            }
+                            else
+                            {
+                                <svg class="w-5 h-5" fill="#EF4444" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                </svg>
+                                <span class="font-semibold text-red-600">@stockStatus</span>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Bottom Section: Packaging and Actions -->
+                    <div class="flex flex-col ">
+                        <!-- Packaging Size Selection -->
+                        @if (Model.AvailableSizes != null && Model.AvailableSizes.Any())
+                        {
+                            <div class="space-y-3">
+                                <label class="block font-semibold text-gray-900 text-base">Select packaging size:</label>
+                                <div class="flex flex-wrap gap-3" id="sizeOptionsContainer">
+                                    @{
+                                        var isFirstSize = true;
+                                    }
+                                    @foreach (var size in Model.AvailableSizes)
+                                    {
+                                        <button type="button"
+                                                class="size-option px-6 py-2.5 @(isFirstSize ? "bg-primary text-white" : "bg-gray-200 text-gray-900") hover:bg-primary hover:text-white transition-colors font-medium focus:outline-none"
+                                                data-size="@size"
+                                                onclick="selectSize(this)">
+                                            @size
+                                        </button>
+                                        isFirstSize = false;
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Grind Options Selection -->
+                        @if (Model.AvailableGrinds != null && Model.AvailableGrinds.Any())
+                        {
+                            <div class="space-y-3 mt-4">
+                                <label class="block font-semibold text-gray-900 text-base">Select grind option:</label>
+                                <div class="flex flex-wrap gap-3" id="grindOptionsContainer">
+                                    @{
+                                        var isFirstGrind = true;
+                                    }
+                                    @foreach (var grind in Model.AvailableGrinds)
+                                    {
+                                        <button type="button"
+                                                class="grind-option px-6 py-2.5 @(isFirstGrind ? "bg-primary text-white" : "bg-gray-200 text-gray-900") hover:bg-primary hover:text-white transition-colors font-medium focus:outline-none"
+                                                data-grind="@grind"
+                                                onclick="selectGrind(this)">
+                                            @grind
+                                        </button>
+                                        isFirstGrind = false;
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Quantity and Actions -->
+                        <div class="flex flex-wrap items-center gap-3 pt-4">
+                            <!-- Quantity Input -->
+                            <input type="number"
+                                   id="productQuantity"
+                                   value="1"
+                                   min="1"
+                                   max="@Model.StockQuantity"
+                                   class="w-32 px-3 py-2.5 text-center border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary font-medium text-gray-900" />
+
+                            <!-- Add to Cart Button -->
+                            <button type="button"
+                                    id="addToCartBtn"
+                                    onclick="addProductToCart()"
+                                    class="flex items-center justify-center gap-2 px-6 py-2.5 bg-white border-2 border-primary text-primary hover:bg-blue-50 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                                    @(Model.StockQuantity <= 0 ? "disabled" : "")>
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                          d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg>
+                                Add to Cart
+                            </button>
+
+                            <!-- Buy Now Button -->
+                            <button type="button"
+                                    onclick="buyProductNow()"
+                                    class="px-8 py-2.5 bg-primary text-white hover:bg-primary/90 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                                    @(Model.StockQuantity <= 0 ? "disabled" : "")>
+                                Buy Now
+                            </button>
+                        </div>
+
+                        <script>
+                            // Product detail page cart integration
+                            const productId = '@Model.Id';
+                            let selectedSize = '@(Model.AvailableSizes?.FirstOrDefault())';
+                            let selectedGrind = '@(Model.AvailableGrinds?.FirstOrDefault())';
+
+                            function selectSize(button) {
+                                // Remove active class from all size buttons
+                                document.querySelectorAll('.size-option').forEach(btn => {
+                                    btn.classList.remove('bg-primary', 'text-white');
+                                    btn.classList.add('bg-gray-200', 'text-gray-900');
+                                });
+                                // Add active class to clicked button
+                                button.classList.remove('bg-gray-200', 'text-gray-900');
+                                button.classList.add('bg-primary', 'text-white');
+                                selectedSize = button.getAttribute('data-size');
+                            }
+
+                            function selectGrind(button) {
+                                // Remove active class from all grind buttons
+                                document.querySelectorAll('.grind-option').forEach(btn => {
+                                    btn.classList.remove('bg-primary', 'text-white');
+                                    btn.classList.add('bg-gray-200', 'text-gray-900');
+                                });
+                                // Add active class to clicked button
+                                button.classList.remove('bg-gray-200', 'text-gray-900');
+                                button.classList.add('bg-primary', 'text-white');
+                                selectedGrind = button.getAttribute('data-grind');
+                            }
+
+                            function addProductToCart() {
+                                const quantity = parseInt(document.getElementById('productQuantity').value) || 1;
+
+                                if (window.addToCart) {
+                                    window.addToCart(productId, quantity, selectedSize, selectedGrind);
+                                } else {
+                                    console.error('Cart function not available');
+                                }
+                            }
+
+                            function buyProductNow() {
+                                const quantity = parseInt(document.getElementById('productQuantity').value) || 1;
+
+                                if (window.addToCart) {
+                                    window.addToCart(productId, quantity, selectedSize, selectedGrind);
+                                    // Redirect to checkout after a short delay
+                                    setTimeout(() => {
+                                        window.location.href = '/checkout?buyNow=true';
+                                    }, 500);
+                                } else {
+                                    console.error('Cart function not available');
+                                }
+                            }
+                        </script>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

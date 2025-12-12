@@ -1,0 +1,434 @@
+@using GOKCafe.Web.Models.DTOs
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@{
+    // Get products from backend API (passed from controller via ViewData)
+    var paginatedProducts = ViewData["Products"] as PaginatedResponse<ProductDto>;
+    var products = paginatedProducts?.Items ?? new List<ProductDto>();
+    var totalPages = paginatedProducts?.TotalPages ?? 1;
+    var currentPage = paginatedProducts?.PageNumber ?? 1;
+
+    // Get categories and filters from ViewData
+    var categories = ViewData["Categories"] as List<CategoryDto> ?? new List<CategoryDto>();
+    var filters = ViewData["Filters"] as ProductFiltersDto;
+    var selectedCategoryIds = ViewData["SelectedCategoryIds"] as List<string> ?? new List<string>();
+    var searchTerm = ViewData["SearchTerm"] as string ?? string.Empty;
+    var selectedFlavourIds = ViewData["SelectedFlavourIds"] as List<string> ?? new List<string>();
+    var selectedEquipmentIds = ViewData["SelectedEquipmentIds"] as List<string> ?? new List<string>();
+    var selectedInStock = ViewData["SelectedInStock"] as bool?;
+
+    // Build category filter options from backend data
+    var categoryOptions = new List<(string Name, Guid? Id, bool IsChecked)>
+    {
+        ("All categories", null, !selectedCategoryIds.Any())
+    };
+
+    foreach (var category in categories)
+    {
+        categoryOptions.Add((category.Name, category.Id, selectedCategoryIds.Contains(category.Id.ToString())));
+    }
+
+    // Build flavour profile options from API
+    var flavourOptions = filters?.FlavourProfiles?.Select(fp => new
+    {
+        Id = fp.Id.ToString(),
+        Name = fp.Name,
+        IsChecked = selectedFlavourIds.Contains(fp.Id.ToString())
+    }).ToList();
+
+    // Build equipment options from API
+    var equipmentOptions = filters?.Equipments?.Select(eq => new
+    {
+        Id = eq.Id.ToString(),
+        Name = eq.Name,
+        IsChecked = selectedEquipmentIds.Contains(eq.Id.ToString())
+    }).ToList();
+
+    // Build availability options from API
+    var inStockCount = filters?.Availability?.InStockCount ?? 0;
+    var outOfStockCount = filters?.Availability?.OutOfStockCount ?? 0;
+
+    // Helper function to build pagination URL with all filters
+    string BuildPaginationUrl(int page)
+    {
+        var queryParams = new List<string> { $"page={page}" };
+
+        foreach (var catId in selectedCategoryIds)
+        {
+            queryParams.Add($"category={catId}");
+        }
+
+        if (!string.IsNullOrEmpty(searchTerm))
+        {
+            queryParams.Add($"search={System.Web.HttpUtility.UrlEncode(searchTerm)}");
+        }
+
+        return "?" + string.Join("&", queryParams);
+    }
+}
+
+<!-- Products Grid Section -->
+<section class="py-12 bg-white">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Page Title -->
+        <h1 class="text-3xl font-semibold text-gray-900 mb-8">PRODUCTS LIST</h1>
+
+        <div class="flex flex-col justify-between lg:flex-row gap-8">
+            <!-- Filters Sidebar -->
+            <aside class="w-full lg:w-48 flex-shrink-0">
+                <div class="space-y-6">
+                    <!-- Category Filter (Dynamic from Backend) -->
+                    <div class="border-b border-gray-200 pb-4">
+                        <button
+                            class="flex items-center justify-between w-full text-left font-semibold text-gray-900 mb-4"
+                            onclick="toggleFilter('category')">
+                            <span>Product Category</span>
+                            <i class="fas fa-chevron-up" id="category-icon"></i>
+                        </button>
+                        <div id="category-filter" class="space-y-3">
+                            @foreach (var option in categoryOptions)
+                            {
+                                <label
+                                    class="flex items-center cursor-pointer hover:bg-primary/10 p-2 -m-2 rounded transition-colors">
+                                    <input type="checkbox"
+                                        class="category-checkbox w-5 h-5 accent-primary border-gray-300 rounded focus:ring-primary"
+                                        data-category-id="@option.Id" @(option.IsChecked ? "checked" : "")
+                                        onchange="filterByCategory('@option.Id')">
+                                    <span class="ml-3 text-sm text-gray-700">@option.Name</span>
+                                </label>
+                            }
+                        </div>
+                    </div>
+
+                    <!-- Flavour Profile Filter (Dynamic from API) -->
+                    @if (flavourOptions != null && flavourOptions.Any())
+                    {
+                        <div class="border-b border-gray-200 pb-4">
+                            <button
+                                class="flex items-center justify-between w-full text-left font-semibold text-gray-900 mb-4"
+                                onclick="toggleFilter('flavour')">
+                                <span>Flavour Profile</span>
+                                <i class="fas fa-chevron-up" id="flavour-icon"></i>
+                            </button>
+                            <div id="flavour-filter" class="space-y-3">
+                                @foreach (var option in flavourOptions)
+                                {
+                                    <label
+                                        class="flex items-center cursor-pointer hover:bg-primary/10 p-2 -m-2 rounded transition-colors">
+                                        <input type="checkbox"
+                                            class="flavour-checkbox w-5 h-5 accent-primary border-gray-300 rounded focus:ring-primary"
+                                            data-flavour-id="@option.Id" @(option.IsChecked ? "checked" : "")
+                                            onchange="filterByFlavour()">
+                                        <span class="ml-3 text-sm text-gray-700">@option.Name</span>
+                                    </label>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Equipment Filter (Dynamic from API) -->
+                    @if (equipmentOptions != null && equipmentOptions.Any())
+                    {
+                        <div class="border-b border-gray-200 pb-4">
+                            <button
+                                class="flex items-center justify-between w-full text-left font-semibold text-gray-900 mb-4"
+                                onclick="toggleFilter('equipment')">
+                                <span>Equipment</span>
+                                <i class="fas fa-chevron-up" id="equipment-icon"></i>
+                            </button>
+                            <div id="equipment-filter" class="space-y-3">
+                                @foreach (var option in equipmentOptions)
+                                {
+                                    <label
+                                        class="flex items-center cursor-pointer hover:bg-primary/10 p-2 -m-2 rounded transition-colors">
+                                        <input type="checkbox"
+                                            class="equipment-checkbox w-5 h-5 accent-primary border-gray-300 rounded focus:ring-primary"
+                                            data-equipment-id="@option.Id" @(option.IsChecked ? "checked" : "")
+                                            onchange="filterByEquipment()">
+                                        <span class="ml-3 text-sm text-gray-700">@option.Name</span>
+                                    </label>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Availability Filter -->
+                    <div class="border-b border-gray-200 pb-4">
+                        <button
+                            class="flex items-center justify-between w-full text-left font-semibold text-gray-900 mb-4"
+                            onclick="toggleFilter('availability')">
+                            <span>Availability</span>
+                            <i class="fas fa-chevron-up" id="availability-icon"></i>
+                        </button>
+                        <div id="availability-filter" class="space-y-3">
+                            <label
+                                class="flex items-center cursor-pointer hover:bg-primary/10 p-2 -m-2 rounded transition-colors">
+                                <input type="radio"
+                                    name="availability"
+                                    class="w-5 h-5 accent-primary border-gray-300 focus:ring-primary"
+                                    @(selectedInStock == null ? "checked" : "")
+                                    onchange="filterByAvailability(null)">
+                                <span class="ml-3 text-sm text-gray-700">All Products</span>
+                            </label>
+                            <label
+                                class="flex items-center cursor-pointer hover:bg-primary/10 p-2 -m-2 rounded transition-colors">
+                                <input type="radio"
+                                    name="availability"
+                                    class="w-5 h-5 accent-primary border-gray-300 focus:ring-primary"
+                                    @(selectedInStock == true ? "checked" : "")
+                                    onchange="filterByAvailability(true)">
+                                <span class="ml-3 text-sm text-gray-700">In Stock (@inStockCount)</span>
+                            </label>
+                            <label
+                                class="flex items-center cursor-pointer hover:bg-primary/10 p-2 -m-2 rounded transition-colors">
+                                <input type="radio"
+                                    name="availability"
+                                    class="w-5 h-5 accent-primary border-gray-300 focus:ring-primary"
+                                    @(selectedInStock == false ? "checked" : "")
+                                    onchange="filterByAvailability(false)">
+                                <span class="ml-3 text-sm text-gray-700">Out of Stock (@outOfStockCount)</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Products Grid -->
+            <div class="lg:min-w-80">
+                @if (products.Any())
+                {
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-8 mb-12">
+                        @foreach (var product in products)
+                        {
+                            var productUrl = $"/product-details?id={product.Id}";
+
+                            <!-- Product Card -->
+                            <div class="group">
+                                <!-- Product Image -->
+                                <a href="@productUrl" class="block overflow-hidden mb-4 flex items-center justify-center bg-[#E8DCC4] w-full h-[420px] relative cursor-pointer">
+                                    @if (!string.IsNullOrEmpty(product.ImageUrl))
+                                    {
+                                        <img src="@product.ImageUrl" alt="@product.Name"
+                                            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                                    }
+                                    else
+                                    {
+                                        <div class="w-full h-full bg-[#E8DCC4] flex items-center justify-center">
+                                            <i class="fas fa-coffee text-6xl text-gray-400"></i>
+                                        </div>
+                                    }
+                                </a>
+
+                                <!-- Product Info -->
+                                <div class="text-center w-full mb-4">
+                                    <!-- Category -->
+                                    <p class="text-sm font-medium text-gray-500 uppercase mb-1">@product.CategoryName</p>
+
+                                    <!-- Title -->
+                                    <h3 class="text-lg font-bold text-gray-900 mb-2 uppercase">
+                                        <a href="@productUrl" class="hover:text-primary transition-colors">@product.Name</a>
+                                    </h3>
+
+                                    <!-- Price -->
+                                    <div class="text-gray-600 mb-4">
+                                        @if (product.DiscountPrice.HasValue && product.DiscountPrice > 0)
+                                        {
+                                            <span class="text-gray-400 line-through mr-2">@product.Price.ToString("N0") VNĐ</span>
+                                            <span class="font-semibold text-primary">@product.DiscountPrice.Value.ToString("N0") VNĐ</span>
+                                        }
+                                        else
+                                        {
+                                            <span>From <span class="font-semibold">@product.Price.ToString("N0") VNĐ</span></span>
+                                        }
+                                    </div>
+                                </div>
+
+                                <!-- Buy Now Button -->
+                                <button onclick="openProductModal('@product.Id')"
+                                    class="block w-full px-4 py-3 border-2 border-primary text-primary font-semibold hover:bg-primary hover:text-white transition-all duration-300 cursor-pointer flex items-center justify-center gap-2">
+                                    <i class="fas fa-shopping-cart"></i>
+                                    <span>Buy Now</span>
+                                </button>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-12">
+                        <i class="fas fa-coffee text-6xl text-gray-300 mb-4"></i>
+                        <p class="text-gray-500 text-lg">No products found.</p>
+                    </div>
+                }
+
+                <!-- Pagination -->
+                @if (totalPages > 1)
+                {
+                    <div class="flex justify-center items-center gap-2 mt-8">
+                        <!-- Previous Button -->
+                        @if (currentPage > 1)
+                        {
+                            <a href="@BuildPaginationUrl(currentPage - 1)"
+                                class="w-12 h-12 flex items-center justify-center border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors rounded cursor-pointer">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        }
+                        else
+                        {
+                            <span
+                                class="w-12 h-12 flex items-center justify-center border border-gray-300 text-gray-300 rounded cursor-not-allowed">
+                                <i class="fas fa-chevron-left"></i>
+                            </span>
+                        }
+
+                        @* Show first few pages *@
+                            @for (int i = 1; i <= Math.Min(3, totalPages); i++)
+                        {
+                            if (i == currentPage)
+                            {
+                                <span
+                                    class="w-12 h-12 flex items-center justify-center border-2 border-primary bg-primary text-white font-medium transition-colors rounded">
+                                    @i
+                                </span>
+                            }
+                            else
+                            {
+                                <a href="@BuildPaginationUrl(i)"
+                                    class="w-12 h-12 flex items-center justify-center border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors rounded cursor-pointer">
+                                    @i
+                                </a>
+                            }
+                        }
+
+                        @* Show dots if there are more pages *@
+                            @if (totalPages > 4)
+                        {
+                            <span class="px-2 text-gray-500">...</span>
+
+                            @* Show last page *@
+                                    if (currentPage == totalPages)
+                            {
+                                <span
+                                    class="w-12 h-12 flex items-center justify-center border-2 border-primary bg-primary text-white font-medium transition-colors rounded">
+                                    @totalPages
+                                </span>
+                            }
+                            else
+                            {
+                                <a href="@BuildPaginationUrl(totalPages)"
+                                    class="w-12 h-12 flex items-center justify-center border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors rounded cursor-pointer">
+                                    @totalPages
+                                </a>
+                            }
+                        }
+
+                        <!-- Next Button -->
+                        @if (currentPage < totalPages)
+                        {
+                            <a href="@BuildPaginationUrl(currentPage + 1)"
+                                class="w-12 h-12 flex items-center justify-center border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors rounded cursor-pointer">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        }
+                        else
+                        {
+                            <span
+                                class="w-12 h-12 flex items-center justify-center border border-gray-300 text-gray-300 rounded cursor-not-allowed">
+                                <i class="fas fa-chevron-right"></i>
+                            </span>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    function toggleFilter(filterId) {
+        const filterDiv = document.getElementById(filterId + '-filter');
+        const icon = document.getElementById(filterId + '-icon');
+
+        if (filterDiv.style.display === 'none') {
+            filterDiv.style.display = 'block';
+            icon.classList.remove('fa-chevron-down');
+            icon.classList.add('fa-chevron-up');
+        } else {
+            filterDiv.style.display = 'none';
+            icon.classList.remove('fa-chevron-up');
+            icon.classList.add('fa-chevron-down');
+        }
+    }
+
+    function filterByCategory(categoryId) {
+        const url = new URL(window.location.href);
+
+        // Get all checked category checkboxes
+        const checkedCategories = Array.from(document.querySelectorAll('.category-checkbox:checked'))
+            .map(cb => cb.getAttribute('data-category-id'))
+            .filter(id => id && id !== 'null' && id !== '');
+
+        // Remove existing category parameters
+        url.searchParams.delete('category');
+
+        // Add new category parameters (multiple categories support)
+        checkedCategories.forEach(id => {
+            url.searchParams.append('category', id);
+        });
+
+        url.searchParams.set('page', '1'); // Reset to first page when filtering
+
+        // Navigate to filtered URL
+        window.location.href = url.toString();
+    }
+
+    function filterByFlavour() {
+        const url = new URL(window.location.href);
+
+        // Get all checked flavour checkboxes
+        const checkedFlavours = Array.from(document.querySelectorAll('.flavour-checkbox:checked'))
+            .map(cb => cb.getAttribute('data-flavour-id'));
+
+        // Remove existing flavour parameters
+        url.searchParams.delete('flavour');
+
+        // Add new flavour parameters
+        checkedFlavours.forEach(id => {
+            url.searchParams.append('flavour', id);
+        });
+
+        url.searchParams.set('page', '1'); // Reset to first page when filtering
+        window.location.href = url.toString();
+    }
+
+    function filterByEquipment() {
+        const url = new URL(window.location.href);
+
+        // Get all checked equipment checkboxes
+        const checkedEquipment = Array.from(document.querySelectorAll('.equipment-checkbox:checked'))
+            .map(cb => cb.getAttribute('data-equipment-id'));
+
+        // Remove existing equipment parameters
+        url.searchParams.delete('equipment');
+
+        // Add new equipment parameters
+        checkedEquipment.forEach(id => {
+            url.searchParams.append('equipment', id);
+        });
+
+        url.searchParams.set('page', '1'); // Reset to first page when filtering
+        window.location.href = url.toString();
+    }
+
+    function filterByAvailability(inStock) {
+        const url = new URL(window.location.href);
+
+        if (inStock === null) {
+            url.searchParams.delete('inStock');
+        } else {
+            url.searchParams.set('inStock', inStock);
+        }
+
+        url.searchParams.set('page', '1'); // Reset to first page when filtering
+        window.location.href = url.toString();
+    }
+</script>

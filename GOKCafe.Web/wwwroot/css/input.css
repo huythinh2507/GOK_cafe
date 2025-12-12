@@ -1,0 +1,92 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles for GOK Cafe */
+@layer base {
+  body {
+    font-family: 'Poppins', system-ui, sans-serif;
+    color: rgb(17 24 39);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Poppins', system-ui, sans-serif;
+  }
+}
+
+@layer components {
+  /* Button styles */
+  .btn-primary {
+    @apply bg-[#0767B3] text-white font-semibold px-6 py-2 rounded-lg transition-colors;
+  }
+
+  .btn-primary:hover {
+    @apply bg-[#054f82];
+  }
+
+  .btn-secondary {
+    @apply bg-[#0a8ed9] text-white font-semibold px-6 py-2 rounded-lg transition-colors;
+  }
+
+  .btn-secondary:hover {
+    @apply bg-[#3ba6e6];
+  }
+
+  .btn-outline {
+    @apply border-2 border-[#0767B3] text-[#0767B3] font-semibold px-6 py-2 rounded-lg transition-all;
+  }
+
+  .btn-outline:hover {
+    @apply bg-[#0767B3] text-white;
+  }
+
+  /* Card styles */
+  .card {
+    @apply bg-white rounded-lg shadow overflow-hidden transition-shadow;
+  }
+
+  .card:hover {
+    @apply shadow-xl;
+  }
+
+  .product-card {
+    @apply bg-white rounded-lg shadow overflow-hidden transition-shadow;
+  }
+
+  /* Container */
+  .container-custom {
+    @apply max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Input styles */
+  .input-field {
+    @apply w-full px-4 py-2 border border-gray-300 rounded-lg;
+  }
+
+  .input-field:focus {
+    @apply outline-2 outline-[#0767B3] outline-offset-2 border-transparent;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Opacity utilities for overlays */
+  .bg-black\/20 {
+    background-color: rgba(0, 0, 0, 0.2);
+  }
+
+  .bg-black\/30 {
+    background-color: rgba(0, 0, 0, 0.3);
+  }
+
+  .bg-black\/40 {
+    background-color: rgba(0, 0, 0, 0.4);
+  }
+
+  .group:hover .group-hover\:bg-black\/40 {
+    background-color: rgba(0, 0, 0, 0.4);
+  }
+}
