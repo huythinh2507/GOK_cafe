@@ -1,9 +1,10 @@
 name: Build & Release
 
 env:
-  AZURE_WEBAPP_NAME: gotik-gok-cafe    # set this to the name of your Azure Web App
-  AZURE_WEBAPP_PACKAGE_PATH: './gokcafe.zip'      # set this to the path to your web app project, defaults to the repository root
-  DOTNET_VERSION: '9'                 # set this to the .NET Core version to use
+  AZURE_WEBAPP_NAME: gotik-gok-cafe
+  AZURE_WEBAPP_PACKAGE_PATH: './gokcafe.zip'
+  DOTNET_VERSION: '9'
+
 on:
   push:
     branches: [ "main" ]
@@ -18,14 +19,15 @@ jobs:
     environment:
       name: 'PROD'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+    
     steps:
       - uses: actions/checkout@v4
-
+      
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
-
+      
       - name: Set up dependency caching for faster builds
         uses: actions/cache@v3
         with:
@@ -33,17 +35,45 @@ jobs:
           key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
           restore-keys: |
             ${{ runner.os }}-nuget-
+      
       - name: Build with dotnet
         run: dotnet build --configuration Release
-
+      
       - name: dotnet publish
         run: dotnet publish GOKCafe.Web/GOKCafe.Web.csproj -c Release -o ./gokcafe-app
-        
+      
+      - name: Copy media files to publish output
+        run: |
+          echo "Checking for local media files..."
+          if [ -d "GOKCafe.Web/wwwroot/media" ]; then
+            echo "✅ Media folder found, copying to publish directory..."
+            mkdir -p ./gokcafe-app/wwwroot/media
+            cp -r GOKCafe.Web/wwwroot/media/* ./gokcafe-app/wwwroot/media/ || echo "No media files to copy"
+            echo "Media files copied:"
+            ls -lah ./gokcafe-app/wwwroot/media/
+          else
+            echo "⚠️  No local media folder found at GOKCafe.Web/wwwroot/media"
+            echo "Creating empty media folder..."
+            mkdir -p ./gokcafe-app/wwwroot/media
+          fi
+      
+      - name: Verify media in publish output
+        run: |
+          echo "Checking published media folder..."
+          if [ -d "./gokcafe-app/wwwroot/media" ]; then
+            echo "✅ Media folder exists in publish output"
+            echo "Contents:"
+            find ./gokcafe-app/wwwroot/media -type f | head -n 20
+          else
+            echo "❌ Media folder missing from publish output"
+          fi
+      
       - name: Zip the publish output
         run: |
           cd ./gokcafe-app
           zip -r ../gokcafe.zip .
           cd ..
+      
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v2
