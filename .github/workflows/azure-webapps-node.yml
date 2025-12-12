@@ -38,7 +38,7 @@ jobs:
         run: dotnet build --configuration Release
 
       - name: dotnet publish
-        run: dotnet publish -c Release -o ./gokcafe-app
+        run: dotnet publish GOKCafe.Web/GOKCafe.Web.csproj -c Release -o ./gokcafe-app
         
       - name: Zip the publish output
         run: |
