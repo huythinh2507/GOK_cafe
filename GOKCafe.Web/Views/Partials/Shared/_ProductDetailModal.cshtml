@@ -9,7 +9,7 @@
 
         <!-- Close Button -->
         <button type="button"
-                class="absolute top-4 right-4 z-10 text-gray-400 hover:text-gray-700 transition-colors bg-white rounded-full w-8 h-8 flex items-center justify-center shadow"
+                class="absolute top-4 right-4 z-10 text-gray-400 hover:text-gray-700 transition-colors text-3xl font-light leading-none"
                 onclick="closeProductModal()">
             ×
         </button>
@@ -21,7 +21,7 @@
                 <img id="modalMainImage"
                      src=""
                      alt=""
-                     class="max-w-full max-h-[500px] object-contain" />
+                     class="w-[340px] h-[500px] object-cover" />
             </div>
 
             <!-- Thumbnail Images -->
@@ -40,8 +40,8 @@
 
             <!-- Price -->
             <div class="mb-6">
-                <p class="text-gray-600 text-sm mb-1">VNĐ <span id="modalProductPrice" class="text-2xl font-bold text-gray-900">700</span></p>
-                <p class="text-xs text-gray-500" id="modalProductPriceNote">MRP (Inclusive of all taxes)</p>
+                <p class="text-gray-600 text-sm mb-1">VND <span id="modalProductPrice" class="text-2xl font-bold text-gray-900">700</span></p>
+                @* <p class="text-xs text-gray-500" id="modalProductPriceNote">MRP (Inclusive of all taxes)</p> *@
             </div>
 
             <!-- Short Description -->
@@ -123,7 +123,7 @@
             <!-- Subscribe & Save Button -->
             <button type="button"
                     class="w-full bg-blue-100 text-primary font-semibold py-3 px-6 mb-4 hover:bg-blue-200 transition-colors uppercase tracking-wide">
-                Subscribe & Save upto 20%
+                Subscribe & Save up to 20%
             </button>
 
             <!-- Buy Now Button -->
@@ -134,7 +134,7 @@
                 Buy Now
             </button>
 
-            <!-- Payment Info -->
+            @* <!-- Payment Info -->
             <p class="text-xs text-center text-gray-600 mb-4">
                 All payment modes and COD available
             </p>
@@ -151,7 +151,7 @@
                         Check
                     </button>
                 </div>
-            </div>
+            </div> *@
         </div>
     </div>
 </div>

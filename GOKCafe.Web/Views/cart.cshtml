@@ -10,14 +10,27 @@
 
     <!-- Cart Header -->
     <div class="flex items-center justify-between px-5 py-4 border-b border-gray-200">
-        <h2 class="text-lg font-bold text-gray-900 uppercase tracking-wider">Cart</h2>
-        <button type="button" class="text-gray-400 hover:text-gray-700 transition-colors text-2xl leading-none w-8 h-8 flex items-center justify-center" onclick="closeCartSidebar()">
-            ×
-        </button>
+        <div class="flex items-center gap-3">
+            <h2 class="text-lg font-bold text-gray-900 uppercase tracking-wider">Cart</h2>
+        </div>
+        <div class="flex items-center gap-3">
+           
+            <button type="button" class="text-gray-400 hover:text-gray-700 transition-colors text-2xl leading-none w-8 h-8 flex items-center justify-center" onclick="closeCartSidebar()">
+                ×
+            </button>
+        </div>
     </div>
-
     <!-- Cart Items Container (Scrollable) -->
     <div class="flex-1 overflow-y-auto px-5 py-4" id="cartItemsContainer">
+        <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center justify-between">
+                <input type="checkbox" id="selectAllCheckbox" onclick="toggleSelectAll()" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer">
+                <p class="text-gray-500 text-base ml-4">Select All item</p>
+            </div>
+            <button type="button" id="deleteSelectedBtn" onclick="deleteSelectedItems()" class="text-gray-500 hover:text-gray-700 hidden transition-colors" title="Delete selected items">
+                <i class="fas fa-trash text-lg"></i>
+            </button>
+        </div>
         <!-- Cart items will be dynamically rendered here -->
         <div id="emptyCartMessage" class="hidden flex-col items-center justify-center text-center py-12">
             <i class="fas fa-shopping-cart text-6xl text-gray-300 mb-4"></i>
@@ -34,6 +47,11 @@
                 </button>
 
                 <div class="flex gap-3 pr-6">
+                    <!-- Checkbox -->
+                    <div class="flex items-start pt-1">
+                        <input type="checkbox" class="cart-item-checkbox w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 cursor-pointer" onchange="updateCartSelection()">
+                    </div>
+
                     <!-- Product Image -->
                     <div class="w-16 h-20 bg-gray-100 rounded overflow-hidden flex-shrink-0">
                         <img src="" alt="" class="w-full h-full object-cover cart-item-image" />

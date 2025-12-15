@@ -1,9 +1,11 @@
 @model GOKCafe.Web.Models.DTOs.ProductDto
 
 @{
-    // Format price with thousands separator and use period for thousands
-    var priceMin = Model.Price.ToString("#,0", new System.Globalization.CultureInfo("en-US")).Replace(",", ".");
-    var priceMax = Model.DiscountPrice.HasValue ? Model.DiscountPrice.Value.ToString("#,0", new System.Globalization.CultureInfo("en-US")).Replace(",", ".") : "";
+    // Format price - show as integer if no decimal, otherwise show full price
+    var priceMin = Model.Price % 1 == 0 ? ((int)Model.Price).ToString() : Model.Price.ToString();
+    var priceMax = Model.DiscountPrice.HasValue
+        ? (Model.DiscountPrice.Value % 1 == 0 ? ((int)Model.DiscountPrice.Value).ToString() : Model.DiscountPrice.Value.ToString())
+        : "";
 
     // Get additional properties
     var region = Model.Region;
@@ -61,11 +63,19 @@
                         </h1>
 
                         <!-- Price -->
-                        <div class="flex items-baseline gap-2">
-                            @if (!string.IsNullOrEmpty(priceMax) && Model.DiscountPrice.HasValue)
+                        <div class="flex items-center gap-3 flex-wrap">
+                            @if (Model.DiscountPrice.HasValue && Model.DiscountPrice > 0 && Model.DiscountPrice < Model.Price)
                             {
+                                var discountPercent = Math.Round(((Model.Price - Model.DiscountPrice.Value) / Model.Price) * 100);
+
+                                <span class="text-xl text-gray-400 line-through">
+                                    @priceMin VND
+                                </span>
                                 <span class="text-2xl font-semibold text-primary">
-                                    @priceMin VND - @priceMax VND
+                                    @priceMax VND
+                                </span>
+                                <span class="bg-primary text-white px-3 py-1 rounded-full text-sm font-bold">
+                                    -@discountPercent%
                                 </span>
                             }
                             else
@@ -213,8 +223,8 @@
                         <script>
                             // Product detail page cart integration
                             const productId = '@Model.Id';
-                            let selectedSize = '@(Model.AvailableSizes?.FirstOrDefault())';
-                            let selectedGrind = '@(Model.AvailableGrinds?.FirstOrDefault())';
+                            let productDetailSelectedSize = '@(Model.AvailableSizes?.FirstOrDefault())';
+                            let productDetailSelectedGrind = '@(Model.AvailableGrinds?.FirstOrDefault())';
 
                             function selectSize(button) {
                                 // Remove active class from all size buttons
@@ -225,7 +235,7 @@
                                 // Add active class to clicked button
                                 button.classList.remove('bg-gray-200', 'text-gray-900');
                                 button.classList.add('bg-primary', 'text-white');
-                                selectedSize = button.getAttribute('data-size');
+                                productDetailSelectedSize = button.getAttribute('data-size');
                             }
 
                             function selectGrind(button) {
@@ -237,31 +247,49 @@
                                 // Add active class to clicked button
                                 button.classList.remove('bg-gray-200', 'text-gray-900');
                                 button.classList.add('bg-primary', 'text-white');
-                                selectedGrind = button.getAttribute('data-grind');
+                                productDetailSelectedGrind = button.getAttribute('data-grind');
                             }
 
                             function addProductToCart() {
                                 const quantity = parseInt(document.getElementById('productQuantity').value) || 1;
 
-                                if (window.addToCart) {
-                                    window.addToCart(productId, quantity, selectedSize, selectedGrind);
+                                // Create cart item object directly (same as modal)
+                                const cartItem = {
+                                    productId: productId,
+                                    name: '@Model.Name',
+                                    imageUrl: '@Model.ImageUrl',
+                                    price: @(Model.DiscountPrice.HasValue && Model.DiscountPrice > 0 && Model.DiscountPrice < Model.Price ? Model.DiscountPrice.Value : Model.Price),
+                                    originalPrice: @Model.Price,
+                                    discountPrice: @(Model.DiscountPrice?.ToString() ?? "null"),
+                                    quantity: quantity,
+                                    size: productDetailSelectedSize,
+                                    grind: productDetailSelectedGrind,
+                                    addedAt: new Date().toISOString()
+                                };
+
+                                // Add to cart directly (cart is global variable)
+                                if (typeof cart !== 'undefined') {
+                                    cart.addItem(cartItem);
+
+                                    // Open cart sidebar after adding
+                                    setTimeout(() => {
+                                        if (typeof openCartSidebar !== 'undefined') {
+                                            openCartSidebar();
+                                        }
+                                    }, 300);
                                 } else {
-                                    console.error('Cart function not available');
+                                    console.error('Cart not available');
                                 }
                             }
 
                             function buyProductNow() {
-                                const quantity = parseInt(document.getElementById('productQuantity').value) || 1;
+                                // Add to cart first
+                                addProductToCart();
 
-                                if (window.addToCart) {
-                                    window.addToCart(productId, quantity, selectedSize, selectedGrind);
-                                    // Redirect to checkout after a short delay
-                                    setTimeout(() => {
-                                        window.location.href = '/checkout?buyNow=true';
-                                    }, 500);
-                                } else {
-                                    console.error('Cart function not available');
-                                }
+                                // Redirect to checkout after cart opens
+                                setTimeout(() => {
+                                    window.location.href = '/checkout?buyNow=true';
+                                }, 500);
                             }
                         </script>
                     </div>
