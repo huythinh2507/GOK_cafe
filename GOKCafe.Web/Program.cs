@@ -29,6 +29,9 @@ builder.CreateUmbracoBuilder()
     })
     .Build();
 
+// Add API Controllers support (for Web API endpoints like ProductApiController)
+builder.Services.AddControllers();
+
 WebApplication app = builder.Build();
 
 await app.BootUmbracoAsync();
@@ -45,6 +48,9 @@ app.UseUmbraco()
         u.UseBackOfficeEndpoints();
         u.UseWebsiteEndpoints();
     });
+
+// Map API controllers
+app.MapControllers();
 
 // Display mobile access URLs
 app.Lifetime.ApplicationStarted.Register(MobileAccessHelper.DisplayMobileAccessInfo);

@@ -138,8 +138,17 @@ namespace GOKCafe.Infrastructure.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("AppliedCouponCode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("AppliedCouponId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<decimal>("DiscountAmount")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime?>("ExpiresAt")
                         .HasColumnType("datetime2");
@@ -150,6 +159,9 @@ namespace GOKCafe.Infrastructure.Data.Migrations
                     b.Property<string>("SessionId")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<decimal>("ShippingFee")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -157,6 +169,8 @@ namespace GOKCafe.Infrastructure.Data.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AppliedCouponId");
 
                     b.HasIndex("UserId");
 
@@ -186,6 +200,12 @@ namespace GOKCafe.Infrastructure.Data.Migrations
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
+
+                    b.Property<string>("SelectedGrind")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SelectedSize")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("UnitPrice")
                         .HasColumnType("decimal(18,2)");
@@ -1321,9 +1341,15 @@ namespace GOKCafe.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("GOKCafe.Domain.Entities.Cart", b =>
                 {
+                    b.HasOne("GOKCafe.Domain.Entities.Coupon", "AppliedCoupon")
+                        .WithMany()
+                        .HasForeignKey("AppliedCouponId");
+
                     b.HasOne("GOKCafe.Domain.Entities.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId");
+
+                    b.Navigation("AppliedCoupon");
 
                     b.Navigation("User");
                 });

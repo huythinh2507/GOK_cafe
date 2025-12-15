@@ -224,11 +224,12 @@ async function placeOrder() {
     const orderNotes = document.getElementById('orderNotes').value.trim();
 
     // Get selected payment method
-    const paymentMethod = parseInt(document.querySelector('input[name="paymentMethod"]:checked').value);
+    const paymentMethodValue = document.querySelector('input[name="paymentMethod"]:checked').value;
+    const paymentMethod = paymentMethodValue === '0' ? 'Cash' : 'BankTransfer';
 
     // Get bank code if bank transfer is selected
     let bankCode = null;
-    if (paymentMethod === 4) {
+    if (paymentMethodValue === '4') {
         bankCode = document.getElementById('bankSelect').value;
         if (!bankCode) {
             alert('Please select a bank for bank transfer');
@@ -280,16 +281,7 @@ async function placeOrder() {
         shippingAddress: shippingAddress,
         notes: orderNotes,
         paymentMethod: paymentMethod,
-        couponCode: couponCode,
-        voucherId: voucherId,
-        items: cartItems.map(item => ({
-            productId: item.productId,
-            quantity: item.quantity,
-            selectedOptions: {
-                packaging: item.packaging,
-                grind: item.grind
-            }
-        }))
+        shippingFee: shipping
     };
 
     // Show loading state
@@ -298,8 +290,24 @@ async function placeOrder() {
     placeOrderBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
 
     try {
-        // Call checkout API
+        // First, sync cart items to backend
         const sessionId = window.apiService.sessionId;
+
+        // Add each cart item to backend cart
+        for (const item of cartItems) {
+            try {
+                await window.apiService.addToCart({
+                    productId: item.productId,
+                    quantity: item.quantity,
+                    selectedSize: item.packaging,
+                    selectedGrind: item.grind
+                });
+            } catch (error) {
+                console.error('Error adding item to backend cart:', error);
+            }
+        }
+
+        // Call checkout API
         const response = await window.apiService.checkout(checkoutData);
 
         if (response.success && response.data) {
@@ -310,7 +318,7 @@ async function placeOrder() {
             localStorage.removeItem('gok_cart_discount');
 
             // If payment method is bank transfer, initiate payment
-            if (paymentMethod === 4) {
+            if (paymentMethod === 'BankTransfer') {
                 await initiatePayment(order.id, paymentMethod, bankCode);
             } else {
                 // For COD, redirect to order confirmation

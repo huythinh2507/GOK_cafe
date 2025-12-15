@@ -44,7 +44,7 @@ namespace GOKCafe.Web.Composers
             builder.Services.AddScoped<ICartService, CartService>();
             builder.Services.AddScoped<IOrderService, OrderService>();
             builder.Services.AddScoped<IHomeService, HomeService>();
-            // Skip IOdooService registration - not needed for Umbraco Web
+            builder.Services.AddScoped<IOdooService, OdooService>();
 
             // Register HttpClient with base URL for API
             var apiBaseUrl = builder.Config.GetSection("ApiSettings:BaseUrl").Value ?? "https://localhost:7045";
