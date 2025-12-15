@@ -1,0 +1,72 @@
+### Test Loyalty Platform Integration
+### Make sure both apps are running:
+### - Loyalty Platform: http://localhost:3000
+### - GOK Cafe API: http://localhost:5000 (or your port)
+
+### 1. Test Loyalty Platform - Get All Vouchers
+GET http://localhost:3000/api/vouchers
+Content-Type: application/json
+
+###
+
+### 2. Test Loyalty Platform - Get User Vouchers
+GET http://localhost:3000/api/vouchers/user/test-user-guid
+Content-Type: application/json
+
+###
+
+### 3. GOK Cafe - Fetch Vouchers from Loyalty Platform (Preview)
+### Replace {admin-token} with your actual admin JWT token
+GET http://localhost:5000/api/v1/loyaltyplatform/vouchers/fetch
+Authorization: Bearer {admin-token}
+Content-Type: application/json
+
+###
+
+### 4. GOK Cafe - Sync Vouchers from Loyalty Platform
+### Replace {admin-token} with your actual admin JWT token
+POST http://localhost:5000/api/v1/loyaltyplatform/vouchers/sync
+Authorization: Bearer {admin-token}
+Content-Type: application/json
+
+###
+
+### 5. GOK Cafe - Verify Synced Coupons
+### Replace {admin-token} with your actual admin JWT token
+GET http://localhost:5000/api/v1/coupons?pageNumber=1&pageSize=20
+Authorization: Bearer {admin-token}
+Content-Type: application/json
+
+###
+
+### 6. GOK Cafe - Get Specific Coupon by Code
+### Replace the code with an actual voucher code from loyalty platform
+GET http://localhost:5000/api/v1/coupons/code/WELCOME10
+Content-Type: application/json
+
+###
+
+### 7. GOK Cafe - Validate Coupon (Before Applying)
+POST http://localhost:5000/api/v1/coupons/validate
+Content-Type: application/json
+
+{
+  "couponCode": "WELCOME10",
+  "orderAmount": 200,
+  "userId": "your-user-guid-here"
+}
+
+###
+
+### 8. GOK Cafe - Apply Coupon to Order
+POST http://localhost:5000/api/v1/coupons/apply
+Content-Type: application/json
+
+{
+  "couponCode": "WELCOME10",
+  "orderAmount": 200,
+  "userId": "your-user-guid-here",
+  "sessionId": "session-123"
+}
+
+###

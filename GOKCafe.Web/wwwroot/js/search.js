@@ -61,11 +61,14 @@ window.clearSearch = function() {
 // View all search results - redirect to search page
 window.viewAllSearchResults = function() {
     const searchInput = document.getElementById('searchInput');
-    const searchTerm = searchInput?.value.trim();
+    const searchTerm = searchInput?.value.trim() || '';
 
+    console.log('[Search] Redirecting to search page with term:', searchTerm);
     if (searchTerm) {
-        console.log('[Search] Redirecting to search page with term:', searchTerm);
         window.location.href = `/search?content=${encodeURIComponent(searchTerm)}`;
+    } else {
+        // Empty search - go to search page without query (shows all products)
+        window.location.href = `/search`;
     }
 };
 
@@ -100,7 +103,7 @@ window.performModalSearch = async function(searchTerm) {
 
     try {
         // Call API to search products
-        const response = await fetch(`/api/v1/products?searchTerm=${encodeURIComponent(currentSearchTerm)}&pageNumber=1&pageSize=8`);
+        const response = await fetch(`/api/v1/products?search=${encodeURIComponent(currentSearchTerm)}&pageNumber=1&pageSize=8`);
 
         if (!response.ok) {
             throw new Error('Search request failed');

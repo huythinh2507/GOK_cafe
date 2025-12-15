@@ -41,6 +41,7 @@ builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IOdooService, OdooService>();
 builder.Services.AddScoped<ICouponService, CouponService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<ILoyaltyPlatformService, LoyaltyPlatformService>();
 
 // Register HttpClient for external API calls
 builder.Services.AddHttpClient();
@@ -129,4 +130,4 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.Run();
+await app.RunAsync();
