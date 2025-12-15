@@ -200,6 +200,7 @@
                         @foreach (var product in products)
                         {
                             var productUrl = $"/product-details?id={product.Id}";
+               
 
                             <!-- Product Card -->
                             <div class="group">
@@ -216,6 +217,8 @@
                                             <i class="fas fa-coffee text-6xl text-gray-400"></i>
                                         </div>
                                     }
+
+                                  
                                 </a>
 
                                 <!-- Product Info -->
@@ -229,15 +232,22 @@
                                     </h3>
 
                                     <!-- Price -->
-                                    <div class="text-gray-600 mb-4">
-                                        @if (product.DiscountPrice.HasValue && product.DiscountPrice > 0)
+                                    <div class="text-gray-600 mb-2 flex items-center justify-center gap-2">
+                                        @if (product.DiscountPrice.HasValue && product.DiscountPrice > 0 && product.DiscountPrice < product.Price)
                                         {
-                                            <span class="text-gray-400 line-through mr-2">@product.Price.ToString("N0") VNĐ</span>
-                                            <span class="font-semibold text-primary">@product.DiscountPrice.Value.ToString("N0") VNĐ</span>
+                                            var discountPercent = Math.Round(((product.Price - product.DiscountPrice.Value) / product.Price) * 100);
+                                            // Format prices - show as integer if no decimal, otherwise show full price
+                                            var priceDisplay = product.Price % 1 == 0 ? ((int)product.Price).ToString() : product.Price.ToString();
+                                            var discountPriceDisplay = product.DiscountPrice.Value % 1 == 0 ? ((int)product.DiscountPrice.Value).ToString() : product.DiscountPrice.Value.ToString();
+                                            <div>From</div>
+                                            <span class="text-gray-400 line-through text-base">@priceDisplay</span>
+                                            <span class="font-semibold text-primary text-lg">@discountPriceDisplay</span>
+                                            <span class="bg-primary text-white px-3 py-1  rounded-xl text-sm font-bold">-@discountPercent%</span>
                                         }
                                         else
                                         {
-                                            <span>From <span class="font-semibold">@product.Price.ToString("N0") VNĐ</span></span>
+                                            var priceDisplay = product.Price % 1 == 0 ? ((int)product.Price).ToString() : product.Price.ToString();
+                                            <span>From <span class="font-semibold text-lg">@priceDisplay</span></span>
                                         }
                                     </div>
                                 </div>
