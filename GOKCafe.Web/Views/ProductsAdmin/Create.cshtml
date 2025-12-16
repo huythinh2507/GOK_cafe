@@ -110,8 +110,13 @@
                 <div class="bg-white rounded-lg shadow-sm p-6">
                     <h2 class="text-xl font-semibold text-gray-800 mb-4">Product Options</h2>
 
-                    <!-- Coffee Options (default hidden) -->
-                    <div id="coffeeOptions" class="product-options hidden">
+                    <!-- Dynamic Product Options Container -->
+                    <div id="dynamicProductOptions">
+                        <p class="text-gray-500 text-sm">Please select a product type to see available options.</p>
+                    </div>
+
+                    <!-- Coffee Options (DEPRECATED - Keeping for reference, will be replaced by dynamic rendering) -->
+                    <div id="coffeeOptions" class="product-options hidden" style="display: none !important;">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <!-- Available Sizes - Multi-select Dropdown -->
                             <div>
@@ -320,8 +325,8 @@
                         </div>
                     </div>
 
-                    <!-- Clothes Options (default hidden) -->
-                    <div id="clothesOptions" class="product-options hidden">
+                    <!-- Clothes Options (DEPRECATED - Keeping for reference, will be replaced by dynamic rendering) -->
+                    <div id="clothesOptions" class="product-options hidden" style="display: none !important;">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <!-- Available Sizes for Clothes -->
                             <div>
@@ -378,8 +383,8 @@
                         </div>
                     </div>
 
-                    <!-- Placeholder message when no type selected -->
-                    <div id="optionsPlaceholder" class="text-center py-8 text-gray-500">
+                    <!-- Placeholder message (DEPRECATED - Replaced by dynamic container message) -->
+                    <div id="optionsPlaceholder" class="text-center py-8 text-gray-500" style="display: none !important;">
                         <i class="fas fa-box-open text-4xl mb-2"></i>
                         <p>Please select a product type to see available options</p>
                     </div>
@@ -398,14 +403,26 @@
                             <label for="productType" class="block text-sm font-medium text-gray-700 mb-2">
                                 Product Type <span class="text-red-500">*</span>
                             </label>
-                            <select id="productType"
-                                    name="productType"
-                                    required
-                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
-                                <option value="">Select product type</option>
-                                <option value="coffee">Coffee</option>
-                                <option value="clothes">Clothes</option>
-                            </select>
+                            <div class="flex gap-2">
+                                <select id="productType"
+                                        name="productType"
+                                        required
+                                        class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                                    <option value="">Select product type</option>
+                                    @if (ViewBag.ProductTypes != null)
+                                    {
+                                        @foreach (dynamic productType in ViewBag.ProductTypes)
+                                        {
+                                            <option value="@productType.Id">@productType.Name</option>
+                                        }
+                                    }
+                                </select>
+                                <button type="button"
+                                        onclick="openAddProductTypeModal()"
+                                        class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:ring-2 focus:ring-green-500 whitespace-nowrap">
+                                    + Add New
+                                </button>
+                            </div>
                         </div>
 
                         <!-- Categories -->
@@ -413,16 +430,23 @@
                             <label for="categoryId" class="block text-sm font-medium text-gray-700 mb-2">
                                 Category <span class="text-red-500">*</span>
                             </label>
-                            <select id="categoryId"
-                                    name="categoryId"
-                                    required
-                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
-                                <option value="">Select a category</option>
-                                @foreach (dynamic category in ViewBag.Categories)
-                                {
-                                    <option value="@category.Id">@category.Name</option>
-                                }
-                            </select>
+                            <div class="flex gap-2">
+                                <select id="categoryId"
+                                        name="categoryId"
+                                        required
+                                        class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                                    <option value="">Select a category</option>
+                                    @foreach (dynamic category in ViewBag.Categories)
+                                    {
+                                        <option value="@category.Id">@category.Name</option>
+                                    }
+                                </select>
+                                <button type="button"
+                                        onclick="openAddCategoryModal()"
+                                        class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:ring-2 focus:ring-green-500 whitespace-nowrap">
+                                    + Add New
+                                </button>
+                            </div>
                         </div>
 
                         <!-- Is Featured -->
@@ -511,7 +535,405 @@
     </form>
 </div>
 
+<!-- Add Product Type Modal -->
+<div id="addProductTypeModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+        <h3 class="text-xl font-semibold text-gray-800 mb-4">Add New Product Type</h3>
+        <form id="addProductTypeForm" class="space-y-4">
+            <div>
+                <label for="newProductTypeName" class="block text-sm font-medium text-gray-700 mb-2">
+                    Name <span class="text-red-500">*</span>
+                </label>
+                <input type="text"
+                       id="newProductTypeName"
+                       required
+                       placeholder="e.g., Table, Electronics, Books"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+            </div>
+            <div>
+                <label for="newProductTypeDescription" class="block text-sm font-medium text-gray-700 mb-2">
+                    Description
+                </label>
+                <textarea id="newProductTypeDescription"
+                          rows="3"
+                          placeholder="Brief description of this product type"
+                          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"></textarea>
+            </div>
+            <div class="flex gap-3 pt-4">
+                <button type="submit"
+                        class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:ring-2 focus:ring-green-500">
+                    <i class="fas fa-plus mr-2"></i>Create
+                </button>
+                <button type="button"
+                        onclick="closeAddProductTypeModal()"
+                        class="flex-1 px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">
+                    Cancel
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Manage Attributes Modal -->
+<div id="manageAttributesModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-y-auto">
+    <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl m-4">
+        <h3 class="text-xl font-semibold text-gray-800 mb-4">Manage Product Attributes</h3>
+
+        <!-- Add Attribute Form -->
+        <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+            <h4 class="text-sm font-semibold text-gray-700 mb-3">Add New Attribute</h4>
+            <form id="addAttributeForm" class="space-y-3">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Attribute Name *</label>
+                        <input type="text" id="attributeName" required placeholder="e.g., Material, Size, Color"
+                               class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Display Name</label>
+                        <input type="text" id="attributeDisplayName" placeholder="e.g., Material Type"
+                               class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Values (comma-separated)</label>
+                    <input type="text" id="attributeValues" placeholder="e.g., Wood, Glass, Metal, Plastic"
+                           class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <p class="text-xs text-gray-500 mt-1">Leave empty to allow custom text input</p>
+                </div>
+                <div class="flex gap-3">
+                    <label class="flex items-center text-xs">
+                        <input type="checkbox" id="attributeRequired" class="mr-2">
+                        Required
+                    </label>
+                    <label class="flex items-center text-xs">
+                        <input type="checkbox" id="attributeMultiple" class="mr-2">
+                        Allow Multiple Selection
+                    </label>
+                </div>
+                <button type="submit" class="w-full px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">
+                    <i class="fas fa-plus mr-2"></i>Add Attribute
+                </button>
+            </form>
+        </div>
+
+        <!-- Existing Attributes List -->
+        <div id="attributesList" class="mb-4">
+            <h4 class="text-sm font-semibold text-gray-700 mb-2">Current Attributes</h4>
+            <div id="attributesListContent" class="space-y-2 max-h-60 overflow-y-auto">
+                <p class="text-xs text-gray-500">Loading...</p>
+            </div>
+        </div>
+
+        <div class="flex gap-3 pt-4 border-t">
+            <button type="button" onclick="closeManageAttributesModal()"
+                    class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                Done
+            </button>
+            <button type="button" onclick="closeManageAttributesModal()"
+                    class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">
+                Cancel
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Add Category Modal -->
+<div id="addCategoryModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+        <h3 class="text-xl font-semibold text-gray-800 mb-4">Add New Category</h3>
+        <form id="addCategoryForm" class="space-y-4">
+            <div>
+                <label for="newCategoryName" class="block text-sm font-medium text-gray-700 mb-2">
+                    Name <span class="text-red-500">*</span>
+                </label>
+                <input type="text"
+                       id="newCategoryName"
+                       required
+                       placeholder="e.g., Beverages, Snacks, Merchandise"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+            </div>
+            <div>
+                <label for="newCategoryDescription" class="block text-sm font-medium text-gray-700 mb-2">
+                    Description
+                </label>
+                <textarea id="newCategoryDescription"
+                          rows="3"
+                          placeholder="Brief description of this category"
+                          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"></textarea>
+            </div>
+            <div class="flex gap-3 pt-4">
+                <button type="submit"
+                        class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:ring-2 focus:ring-green-500">
+                    <i class="fas fa-plus mr-2"></i>Create
+                </button>
+                <button type="button"
+                        onclick="closeAddCategoryModal()"
+                        class="flex-1 px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">
+                    Cancel
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 @section Scripts {
+    <script>
+        // Configure API base URL for product-form.js
+        window.API_BASE_URL = 'https://localhost:7045';
+
+        // ========================================
+        // Add Product Type Modal Functions
+        // ========================================
+        function openAddProductTypeModal() {
+            document.getElementById('addProductTypeModal').classList.remove('hidden');
+        }
+
+        function closeAddProductTypeModal() {
+            document.getElementById('addProductTypeModal').classList.add('hidden');
+            document.getElementById('addProductTypeForm').reset();
+        }
+
+        // ========================================
+        // Manage Attributes Modal Functions
+        // ========================================
+        let currentManagingProductTypeId = null;
+
+        async function openManageAttributesModal(productTypeId) {
+            currentManagingProductTypeId = productTypeId;
+            document.getElementById('manageAttributesModal').classList.remove('hidden');
+            await loadExistingAttributes(productTypeId);
+        }
+
+        function closeManageAttributesModal() {
+            document.getElementById('manageAttributesModal').classList.add('hidden');
+            document.getElementById('addAttributeForm').reset();
+            currentManagingProductTypeId = null;
+
+            // Refresh the product type dropdown to reload attributes
+            const productTypeSelect = document.getElementById('productType');
+            if (productTypeSelect && productTypeSelect.value) {
+                productTypeSelect.dispatchEvent(new Event('change'));
+            }
+        }
+
+        async function loadExistingAttributes(productTypeId) {
+            const listContent = document.getElementById('attributesListContent');
+            listContent.innerHTML = '<p class="text-xs text-gray-500">Loading...</p>';
+
+            try {
+                const response = await fetch(`${window.API_BASE_URL}/api/v1/producttypes/${productTypeId}/attributes-with-values`);
+                const result = await response.json();
+
+                if (result.success && result.data.attributes && result.data.attributes.length > 0) {
+                    let html = '';
+                    result.data.attributes.forEach(attr => {
+                        const valueCount = attr.values ? attr.values.length : 0;
+                        html += `
+                            <div class="p-3 bg-white border rounded-lg">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <p class="font-medium text-sm">${attr.name}</p>
+                                        <p class="text-xs text-gray-500">${valueCount} values | ${attr.allowMultipleSelection ? 'Multi-select' : 'Single-select'} ${attr.isRequired ? '| Required' : ''}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    listContent.innerHTML = html;
+                } else {
+                    listContent.innerHTML = '<p class="text-xs text-gray-500">No attributes yet. Add one above!</p>';
+                }
+            } catch (error) {
+                console.error('Error loading attributes:', error);
+                listContent.innerHTML = '<p class="text-xs text-red-500">Error loading attributes</p>';
+            }
+        }
+
+        // Handle Add Attribute Form
+        document.addEventListener('DOMContentLoaded', function() {
+            const attributeForm = document.getElementById('addAttributeForm');
+            if (attributeForm) {
+                attributeForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+
+                    if (!currentManagingProductTypeId) {
+                        alert('No product type selected');
+                        return;
+                    }
+
+                    const name = document.getElementById('attributeName').value;
+                    const displayName = document.getElementById('attributeDisplayName').value || name;
+                    const valuesInput = document.getElementById('attributeValues').value;
+                    const isRequired = document.getElementById('attributeRequired').checked;
+                    const allowMultiple = document.getElementById('attributeMultiple').checked;
+
+                    try {
+                        // Create attribute
+                        const attrResponse = await fetch(`${window.API_BASE_URL}/api/v1/productattributes`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                name: name,
+                                displayName: displayName,
+                                productTypeId: currentManagingProductTypeId,
+                                isRequired: isRequired,
+                                allowMultipleSelection: allowMultiple,
+                                displayOrder: 1
+                            })
+                        });
+
+                        const attrResult = await attrResponse.json();
+
+                        if (!attrResult.success) {
+                            alert('Failed to create attribute: ' + (attrResult.message || 'Unknown error'));
+                            return;
+                        }
+
+                        // Add values if provided
+                        if (valuesInput.trim()) {
+                            const values = valuesInput.split(',').map(v => v.trim()).filter(v => v);
+                            let displayOrder = 1;
+
+                            for (const value of values) {
+                                await fetch(`${window.API_BASE_URL}/api/v1/productattributevalues`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                        productAttributeId: attrResult.data.id,
+                                        value: value,
+                                        displayOrder: displayOrder++
+                                    })
+                                });
+                            }
+                        }
+
+                        // Reset form and reload
+                        document.getElementById('addAttributeForm').reset();
+                        await loadExistingAttributes(currentManagingProductTypeId);
+                        alert(`Attribute "${name}" added successfully!`);
+
+                    } catch (error) {
+                        console.error('Error creating attribute:', error);
+                        alert('Error creating attribute. Please try again.');
+                    }
+                });
+            }
+        });
+
+        // ========================================
+        // Add Category Modal Functions
+        // ========================================
+        function openAddCategoryModal() {
+            document.getElementById('addCategoryModal').classList.remove('hidden');
+        }
+
+        function closeAddCategoryModal() {
+            document.getElementById('addCategoryModal').classList.add('hidden');
+            document.getElementById('addCategoryForm').reset();
+        }
+
+        // Handle Add Category Form Submission
+        document.addEventListener('DOMContentLoaded', function() {
+            const categoryForm = document.getElementById('addCategoryForm');
+            if (categoryForm) {
+                categoryForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+
+                    const name = document.getElementById('newCategoryName').value;
+                    const description = document.getElementById('newCategoryDescription').value;
+
+                    try {
+                        const response = await fetch(`${window.API_BASE_URL}/api/v1/categories`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                name: name,
+                                description: description,
+                                displayOrder: 999
+                            })
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+                            // Add new option to dropdown
+                            const select = document.getElementById('categoryId');
+                            const option = new Option(result.data.name, result.data.id);
+                            select.add(option);
+
+                            // Select the newly created category
+                            select.value = result.data.id;
+
+                            // Close modal
+                            closeAddCategoryModal();
+
+                            // Show success message
+                            alert(`Category "${result.data.name}" created successfully!`);
+                        } else {
+                            alert('Failed to create category: ' + (result.message || 'Unknown error'));
+                        }
+                    } catch (error) {
+                        console.error('Error creating category:', error);
+                        alert('Error creating category. Please try again.');
+                    }
+                });
+            }
+        });
+
+        // Handle Add Product Type Form Submission
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('addProductTypeForm');
+            if (form) {
+                form.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+
+                    const name = document.getElementById('newProductTypeName').value;
+                    const description = document.getElementById('newProductTypeDescription').value;
+
+                    try {
+                        const response = await fetch(`${window.API_BASE_URL}/api/v1/producttypes`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                name: name,
+                                description: description,
+                                displayOrder: 999
+                            })
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+                            // Add new option to dropdown
+                            const select = document.getElementById('productType');
+                            const option = new Option(result.data.name, result.data.id);
+                            select.add(option);
+
+                            // Select the newly created product type
+                            select.value = result.data.id;
+                            select.dispatchEvent(new Event('change'));
+
+                            // Close modal
+                            closeAddProductTypeModal();
+
+                            // Show success message
+                            alert(`Product type "${result.data.name}" created successfully!`);
+                        } else {
+                            alert('Failed to create product type: ' + (result.message || 'Unknown error'));
+                        }
+                    } catch (error) {
+                        console.error('Error creating product type:', error);
+                        alert('Error creating product type. Please try again.');
+                    }
+                });
+            }
+        });
+    </script>
     <script src="~/js/admin/product-form.js?v=@DateTime.Now.Ticks"></script>
     <script>
         // ========================================
