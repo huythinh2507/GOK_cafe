@@ -9,6 +9,6 @@ public class DashboardController : Controller
     [Route("/admin/dashboard")]
     public IActionResult Index()
     {
-        return View();
+        return View("~/Views/Admin/Dashboard/Index.cshtml");
     }
 }
