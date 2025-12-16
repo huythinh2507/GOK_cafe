@@ -511,7 +511,18 @@
     </form>
 </div>
 
+<!-- Include Crop Image Modal -->
+@await Html.PartialAsync("~/Views/Partials/Modals/_ModalCropImage.cshtml")
+
 @section Scripts {
+    <!-- Cropper.js Library -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" integrity="sha512-hvNR0F/e2J7zPPfLC9auFe3/SE0yG4aJCOd/qxew74NN7eyiSKjr7xJJMu1Jy2wf7FXITpWS1E/RY8yzuXN7VA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js" integrity="sha512-9KkIqdfN7ipEW6B6k+Aq20PV31bjODg4AA52W+tYtAE0jE0kMx49bjJ3FgvS56wzmyfMUHbQ4Km2b7l9+Y/+Eg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <!-- Modal Crop Image Script -->
+    <script src="~/js/modals/modal-crop-image.js?v=@DateTime.Now.Ticks"></script>
+
+    <!-- Product Form Script -->
     <script src="~/js/admin/product-form.js?v=@DateTime.Now.Ticks"></script>
     <script>
         // ========================================
@@ -681,8 +692,31 @@
         function handleFileSelect(event) {
             const files = event.target.files;
             if (files.length > 0) {
-                Array.from(files).forEach(file => processFile(file));
+                Array.from(files).forEach(file => openCropModalForFile(file));
             }
+        }
+
+        // Open crop modal for each file
+        function openCropModalForFile(file) {
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                alert('Please upload an image file');
+                return;
+            }
+
+            // Validate file size (15MB max)
+            const maxSize = 15 * 1024 * 1024;
+            if (file.size > maxSize) {
+                alert('File size must be less than 15MB');
+                return;
+            }
+
+            // Read file and open crop modal
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                openCropModal(file, e.target.result);
+            };
+            reader.readAsDataURL(file);
         }
 
         function handleDragOver(event) {
@@ -704,45 +738,46 @@
 
             const files = event.dataTransfer.files;
             if (files.length > 0) {
-                Array.from(files).forEach(file => processFile(file));
+                Array.from(files).forEach(file => openCropModalForFile(file));
             }
         }
 
+        // Process file after cropping (called from modal-crop-image.js)
         function processFile(file) {
-            // Validate file type
-            if (!file.type.startsWith('image/')) {
-                alert('Please upload an image file');
-                return;
-            }
+            // Check if file has attached dataUrl (from crop modal)
+            let dataUrl = file.dataUrl;
 
-            // Validate file size (15MB max)
-            const maxSize = 15 * 1024 * 1024; // 15MB in bytes
-            if (file.size > maxSize) {
-                alert('File size must be less than 15MB');
-                return;
-            }
-
-            // Read file and add to uploaded images
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const imageData = {
-                    id: Date.now() + Math.random(), // Unique ID
-                    name: file.name,
-                    size: file.size,
-                    dataUrl: e.target.result,
-                    isDefault: uploadedImages.length === 0 // First image is default
+            if (!dataUrl) {
+                // If no dataUrl attached, read the file (fallback for direct upload)
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    addImageToUploadList(file, e.target.result);
                 };
+                reader.readAsDataURL(file);
+            } else {
+                // Use the provided dataUrl (from crop modal)
+                addImageToUploadList(file, dataUrl);
+            }
+        }
 
-                uploadedImages.push(imageData);
-                addImageToList(imageData);
-
-                // Set first image as main image and update hidden input
-                if (imageData.isDefault) {
-                    showMainPreview(imageData);
-                    document.getElementById('imageUrl').value = imageData.dataUrl;
-                }
+        // Add image to upload list
+        function addImageToUploadList(file, dataUrl) {
+            const imageData = {
+                id: Date.now() + Math.random(), // Unique ID
+                name: file.name,
+                size: file.size,
+                dataUrl: dataUrl,
+                isDefault: uploadedImages.length === 0 // First image is default
             };
-            reader.readAsDataURL(file);
+
+            uploadedImages.push(imageData);
+            addImageToList(imageData);
+
+            // Set first image as main image and update hidden input
+            if (imageData.isDefault) {
+                showMainPreview(imageData);
+                document.getElementById('imageUrl').value = imageData.dataUrl;
+            }
         }
 
         function addImageToList(imageData) {
