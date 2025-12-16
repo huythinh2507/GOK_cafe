@@ -37,6 +37,10 @@ public class UnitOfWork : IUnitOfWork
         CouponUsages = new Repository<CouponUsage>(_context);
         Payments = new Repository<Payment>(_context);
         BankTransferConfigs = new Repository<BankTransferConfig>(_context);
+        ProductTypes = new Repository<ProductType>(_context);
+        ProductAttributes = new Repository<ProductAttribute>(_context);
+        ProductAttributeValues = new Repository<ProductAttributeValue>(_context);
+        ProductAttributeSelections = new Repository<ProductAttributeSelection>(_context);
     }
 
     public IRepository<User> Users { get; }
@@ -63,6 +67,10 @@ public class UnitOfWork : IUnitOfWork
     public IRepository<CouponUsage> CouponUsages { get; }
     public IRepository<Payment> Payments { get; }
     public IRepository<BankTransferConfig> BankTransferConfigs { get; }
+    public IRepository<ProductType> ProductTypes { get; }
+    public IRepository<ProductAttribute> ProductAttributes { get; }
+    public IRepository<ProductAttributeValue> ProductAttributeValues { get; }
+    public IRepository<ProductAttributeSelection> ProductAttributeSelections { get; }
 
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
