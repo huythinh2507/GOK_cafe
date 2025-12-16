@@ -14,6 +14,7 @@ public class Product : BaseEntity
     public bool IsActive { get; set; } = true;
     public bool IsFeatured { get; set; }
     public Guid CategoryId { get; set; }
+    public Guid? ProductTypeId { get; set; } // Nullable initially for migration, will be required later
     public int DisplayOrder { get; set; }
     public string? ShortDescription { get; set; }
     public string? TastingNote { get; set; }
@@ -38,8 +39,10 @@ public class Product : BaseEntity
 
     // Navigation properties
     public virtual Category Category { get; set; } = null!;
+    public virtual ProductType? ProductType { get; set; }
     public virtual ICollection<ProductImage> ProductImages { get; set; } = new List<ProductImage>();
     public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
     public virtual ICollection<ProductFlavourProfile> ProductFlavourProfiles { get; set; } = new List<ProductFlavourProfile>();
     public virtual ICollection<ProductEquipment> ProductEquipments { get; set; } = new List<ProductEquipment>();
+    public virtual ICollection<ProductAttributeSelection> ProductAttributeSelections { get; set; } = new List<ProductAttributeSelection>();
 }

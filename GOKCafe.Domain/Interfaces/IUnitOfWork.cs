@@ -28,6 +28,10 @@ public interface IUnitOfWork : IDisposable
     IRepository<CouponUsage> CouponUsages { get; }
     IRepository<Payment> Payments { get; }
     IRepository<BankTransferConfig> BankTransferConfigs { get; }
+    IRepository<ProductType> ProductTypes { get; }
+    IRepository<ProductAttribute> ProductAttributes { get; }
+    IRepository<ProductAttributeValue> ProductAttributeValues { get; }
+    IRepository<ProductAttributeSelection> ProductAttributeSelections { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     Task BeginTransactionAsync();
