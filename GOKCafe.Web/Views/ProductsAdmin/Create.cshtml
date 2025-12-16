@@ -3,6 +3,11 @@
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
+@section Styles {
+    <!-- Cropper.js CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" />
+}
+
 <div class="admin-create-product-page">
     <!-- Header -->
     <div class="admin-header mb-6">
@@ -500,6 +505,9 @@
     </form>
 </div>
 
+<!-- Crop Image Modal -->
+@await Html.PartialAsync("~/Views/Partials/Modals/_ModalCropImage.cshtml")
+
 <!-- Add Product Type Modal -->
 <div id="addProductTypeModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
     <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
@@ -633,6 +641,12 @@
 </div>
 
 @section Scripts {
+    <!-- Cropper.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+
+    <!-- Crop Image Modal Script -->
+    <script src="~/js/modals/modal-crop-image.js"></script>
+
     <script>
         // Configure API base URL for product-form.js
         window.API_BASE_URL = 'https://localhost:7045';
