@@ -3,6 +3,11 @@
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
 }
 
+@section Styles {
+    <!-- Cropper.js CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" />
+}
+
 <div class="admin-create-product-page">
     <!-- Header -->
     <div class="admin-header mb-6">
@@ -11,7 +16,8 @@
                 <h1 class="text-3xl font-bold text-gray-800">Create New Product</h1>
                 <p class="text-gray-600 mt-1">Add a new product (coffee, clothes) to your catalog</p>
             </div>
-            <a href="/admin/products" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition">
+            <a href="/admin/products"
+                class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition">
                 <i class="fas fa-arrow-left mr-2"></i>Back to Products
             </a>
         </div>
@@ -25,47 +31,37 @@
                 <!-- Basic Info Card -->
                 <div class="bg-white rounded-lg shadow-sm p-6">
                     <h2 class="text-xl font-semibold text-gray-800 mb-4">Basic Information</h2>
-                    
 
-                    <div class="space-y-4">                 
+
+                    <div class="space-y-4">
                         <!-- SKU -->
                         <div>
                             <label for="sku" class="block text-sm font-medium text-gray-700 mb-2">
                                 SKU
                             </label>
-                            <input type="text"
-                                    id="sku"
-                                    name="sku"
-                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                    placeholder="COFFEE-001">
+                            <input type="text" id="sku" name="sku"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                placeholder="COFFEE-001">
                         </div>
                         <!-- Product Name -->
                         <div>
                             <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
                                 Product Name <span class="text-red-500">*</span>
                             </label>
-                            <input type="text"
-                                   id="name"
-                                   name="name"
-                                   required
-                                   maxlength="100"
-                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                   placeholder="e.g., Ethiopian Yirgacheffe">
+                            <input type="text" id="name" name="name" required maxlength="100"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                placeholder="e.g., Ethiopian Yirgacheffe">
                         </div>
-                    
+
 
                         <!-- Description -->
                         <div>
                             <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
                                 Description <span class="text-red-500">*</span>
                             </label>
-                            <textarea id="description"
-                                      name="description"
-                                      rows="3"
-                                      required
-                                      maxlength="500"
-                                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                      placeholder="Describe the product's characteristics, flavor notes, origin..."></textarea>
+                            <textarea id="description" name="description" rows="3" required maxlength="500"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                placeholder="Describe the product's characteristics, flavor notes, origin..."></textarea>
                         </div>
 
                         <!-- Short Description -->
@@ -92,17 +88,12 @@
                             <label for="price" class="block text-sm font-medium text-gray-700 mb-2">
                                 Price (VND) <span class="text-red-500">*</span>
                             </label>
-                            <input type="number"
-                                   id="price"
-                                   name="price"
-                                   required
-                                   min="0"
-                                   step="1000"
-                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                   placeholder="150000">
+                            <input type="number" id="price" name="price" required min="0" step="1000"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                placeholder="150000">
                         </div>
 
-            
+
                     </div>
                 </div>
 
@@ -110,8 +101,13 @@
                 <div class="bg-white rounded-lg shadow-sm p-6">
                     <h2 class="text-xl font-semibold text-gray-800 mb-4">Product Options</h2>
 
-                    <!-- Coffee Options (default hidden) -->
-                    <div id="coffeeOptions" class="product-options hidden">
+                    <!-- Dynamic Product Options Container -->
+                    <div id="dynamicProductOptions">
+                        <p class="text-gray-500 text-sm">Please select a product type to see available options.</p>
+                    </div>
+
+                    <!-- Coffee Options (DEPRECATED - Keeping for reference, will be replaced by dynamic rendering) -->
+                    <div id="coffeeOptions" class="product-options hidden" style="display: none !important;">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <!-- Available Sizes - Multi-select Dropdown -->
                             <div>
@@ -120,10 +116,8 @@
                                 </label>
                                 <div class="relative">
                                     <!-- Dropdown Button -->
-                                    <button type="button"
-                                            id="sizesDropdownButton"
-                                            onclick="toggleSizesDropdown()"
-                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white text-left flex items-center justify-between min-h-[42px]">
+                                    <button type="button" id="sizesDropdownButton" onclick="toggleSizesDropdown()"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white text-left flex items-center justify-between min-h-[42px]">
                                         <div id="sizesSelectedContent" class="flex-1 flex items-center gap-2 flex-wrap">
                                             <span id="sizesSelectedText" class="text-gray-500">Select sizes</span>
                                         </div>
@@ -132,47 +126,38 @@
 
                                     <!-- Dropdown Menu -->
                                     <div id="sizesDropdownMenu"
-                                         class="hidden absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                                        class="hidden absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                                         <!-- Search Box -->
                                         <div class="p-2 border-b border-gray-200">
                                             <div class="relative">
-                                                <input type="text"
-                                                       id="sizesSearchInput"
-                                                       placeholder="Search sizes..."
-                                                       onkeyup="filterSizes()"
-                                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent">
-                                                <i class="fas fa-search absolute right-3 top-3 text-gray-400 text-sm"></i>
+                                                <input type="text" id="sizesSearchInput" placeholder="Search sizes..."
+                                                    onkeyup="filterSizes()"
+                                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent">
+                                                <i
+                                                    class="fas fa-search absolute right-3 top-3 text-gray-400 text-sm"></i>
                                             </div>
                                         </div>
 
                                         <!-- Options List -->
                                         <div id="sizesOptionsList" class="py-1">
                                             <label class="flex items-center px-4 py-2 hover:bg-gray-50 cursor-pointer">
-                                                <input type="checkbox"
-                                                       value="200g"
-                                                       onchange="updateSizesSelection()"
-                                                       class="size-checkbox w-4 h-4 accent-primary border-gray-300 rounded focus:ring-primary">
+                                                <input type="checkbox" value="200g" onchange="updateSizesSelection()"
+                                                    class="size-checkbox w-4 h-4 accent-primary border-gray-300 rounded focus:ring-primary">
                                                 <span class="ml-3 text-sm text-gray-700">200g</span>
                                             </label>
                                             <label class="flex items-center px-4 py-2 hover:bg-gray-50 cursor-pointer">
-                                                <input type="checkbox"
-                                                       value="340g"
-                                                       onchange="updateSizesSelection()"
-                                                       class="size-checkbox w-4 h-4 accent-primary border-gray-300 rounded focus:ring-primary">
+                                                <input type="checkbox" value="340g" onchange="updateSizesSelection()"
+                                                    class="size-checkbox w-4 h-4 accent-primary border-gray-300 rounded focus:ring-primary">
                                                 <span class="ml-3 text-sm text-gray-700">340g</span>
                                             </label>
                                             <label class="flex items-center px-4 py-2 hover:bg-gray-50 cursor-pointer">
-                                                <input type="checkbox"
-                                                       value="500g"
-                                                       onchange="updateSizesSelection()"
-                                                       class="size-checkbox w-4 h-4 accent-primary border-gray-300 rounded focus:ring-primary">
+                                                <input type="checkbox" value="500g" onchange="updateSizesSelection()"
+                                                    class="size-checkbox w-4 h-4 accent-primary border-gray-300 rounded focus:ring-primary">
                                                 <span class="ml-3 text-sm text-gray-700">500g</span>
                                             </label>
                                             <label class="flex items-center px-4 py-2 hover:bg-gray-50 cursor-pointer">
-                                                <input type="checkbox"
-                                                       value="1kg"
-                                                       onchange="updateSizesSelection()"
-                                                       class="size-checkbox w-4 h-4 accent-primary border-gray-300 rounded focus:ring-primary">
+                                                <input type="checkbox" value="1kg" onchange="updateSizesSelection()"
+                                                    class="size-checkbox w-4 h-4 accent-primary border-gray-300 rounded focus:ring-primary">
                                                 <span class="ml-3 text-sm text-gray-700">1kg</span>
                                             </label>
                                         </div>
@@ -189,44 +174,49 @@
                                     Available Grinds
                                 </label>
                                 <div class="relative">
-                                    <button type="button"
-                                            id="grindsDropdownButton"
-                                            onclick="toggleGrindsDropdown()"
-                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white text-left flex items-center justify-between min-h-[42px]">
-                                        <div id="grindsSelectedContent" class="flex-1 flex items-center gap-2 flex-wrap">
+                                    <button type="button" id="grindsDropdownButton" onclick="toggleGrindsDropdown()"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white text-left flex items-center justify-between min-h-[42px]">
+                                        <div id="grindsSelectedContent"
+                                            class="flex-1 flex items-center gap-2 flex-wrap">
                                             <span class="text-gray-500">Select grinds</span>
                                         </div>
                                         <i class="fas fa-chevron-down text-gray-400 ml-2"></i>
                                     </button>
 
                                     <div id="grindsDropdownMenu"
-                                         class="hidden absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                                        class="hidden absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                                         <div class="p-2 border-b border-gray-200">
                                             <div class="relative">
-                                                <input type="text"
-                                                       id="grindsSearchInput"
-                                                       placeholder="Search grinds..."
-                                                       onkeyup="filterGrinds()"
-                                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent">
-                                                <i class="fas fa-search absolute right-3 top-3 text-gray-400 text-sm"></i>
+                                                <input type="text" id="grindsSearchInput" placeholder="Search grinds..."
+                                                    onkeyup="filterGrinds()"
+                                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent">
+                                                <i
+                                                    class="fas fa-search absolute right-3 top-3 text-gray-400 text-sm"></i>
                                             </div>
                                         </div>
 
                                         <div id="grindsOptionsList" class="py-1">
                                             <label class="flex items-center px-4 py-2 hover:bg-gray-50 cursor-pointer">
-                                                <input type="checkbox" value="Whole Bean" onchange="updateGrindsSelection()" class="grind-checkbox w-4 h-4 accent-primary border-gray-300 rounded focus:ring-primary">
+                                                <input type="checkbox" value="Whole Bean"
+                                                    onchange="updateGrindsSelection()"
+                                                    class="grind-checkbox w-4 h-4 accent-primary border-gray-300 rounded focus:ring-primary">
                                                 <span class="ml-3 text-sm text-gray-700">Whole Bean</span>
                                             </label>
                                             <label class="flex items-center px-4 py-2 hover:bg-gray-50 cursor-pointer">
-                                                <input type="checkbox" value="Espresso" onchange="updateGrindsSelection()" class="grind-checkbox w-4 h-4 accent-primary border-gray-300 rounded focus:ring-primary">
+                                                <input type="checkbox" value="Espresso"
+                                                    onchange="updateGrindsSelection()"
+                                                    class="grind-checkbox w-4 h-4 accent-primary border-gray-300 rounded focus:ring-primary">
                                                 <span class="ml-3 text-sm text-gray-700">Espresso</span>
                                             </label>
                                             <label class="flex items-center px-4 py-2 hover:bg-gray-50 cursor-pointer">
-                                                <input type="checkbox" value="Filter" onchange="updateGrindsSelection()" class="grind-checkbox w-4 h-4 accent-primary border-gray-300 rounded focus:ring-primary">
+                                                <input type="checkbox" value="Filter" onchange="updateGrindsSelection()"
+                                                    class="grind-checkbox w-4 h-4 accent-primary border-gray-300 rounded focus:ring-primary">
                                                 <span class="ml-3 text-sm text-gray-700">Filter</span>
                                             </label>
                                             <label class="flex items-center px-4 py-2 hover:bg-gray-50 cursor-pointer">
-                                                <input type="checkbox" value="French Press" onchange="updateGrindsSelection()" class="grind-checkbox w-4 h-4 accent-primary border-gray-300 rounded focus:ring-primary">
+                                                <input type="checkbox" value="French Press"
+                                                    onchange="updateGrindsSelection()"
+                                                    class="grind-checkbox w-4 h-4 accent-primary border-gray-300 rounded focus:ring-primary">
                                                 <span class="ml-3 text-sm text-gray-700">French Press</span>
                                             </label>
                                         </div>
@@ -245,46 +235,53 @@
                                     Region/Origin
                                 </label>
                                 <div class="relative">
-                                    <button type="button"
-                                            id="regionDropdownButton"
-                                            onclick="toggleRegionDropdown()"
-                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white text-left flex items-center justify-between">
+                                    <button type="button" id="regionDropdownButton" onclick="toggleRegionDropdown()"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent bg-white text-left flex items-center justify-between">
                                         <span id="regionSelectedText" class="text-gray-500">Select region</span>
                                         <i class="fas fa-chevron-down text-gray-400 ml-2"></i>
                                     </button>
 
                                     <div id="regionDropdownMenu"
-                                         class="hidden absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                                        class="hidden absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
                                         <div class="p-2 border-b border-gray-200">
                                             <div class="relative">
-                                                <input type="text"
-                                                       id="regionSearchInput"
-                                                       placeholder="Search regions..."
-                                                       onkeyup="filterRegions()"
-                                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent">
-                                                <i class="fas fa-search absolute right-3 top-3 text-gray-400 text-sm"></i>
+                                                <input type="text" id="regionSearchInput"
+                                                    placeholder="Search regions..." onkeyup="filterRegions()"
+                                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent">
+                                                <i
+                                                    class="fas fa-search absolute right-3 top-3 text-gray-400 text-sm"></i>
                                             </div>
                                         </div>
 
                                         <div id="regionOptionsList" class="py-1">
                                             <label class="flex items-center px-4 py-2 hover:bg-gray-50 cursor-pointer">
-                                                <input type="radio" name="regionRadio" value="Ethiopia" onchange="updateRegionSelection()" class="region-radio w-4 h-4 accent-primary border-gray-300 focus:ring-primary">
+                                                <input type="radio" name="regionRadio" value="Ethiopia"
+                                                    onchange="updateRegionSelection()"
+                                                    class="region-radio w-4 h-4 accent-primary border-gray-300 focus:ring-primary">
                                                 <span class="ml-3 text-sm text-gray-700">Ethiopia</span>
                                             </label>
                                             <label class="flex items-center px-4 py-2 hover:bg-gray-50 cursor-pointer">
-                                                <input type="radio" name="regionRadio" value="Colombia" onchange="updateRegionSelection()" class="region-radio w-4 h-4 accent-primary border-gray-300 focus:ring-primary">
+                                                <input type="radio" name="regionRadio" value="Colombia"
+                                                    onchange="updateRegionSelection()"
+                                                    class="region-radio w-4 h-4 accent-primary border-gray-300 focus:ring-primary">
                                                 <span class="ml-3 text-sm text-gray-700">Colombia</span>
                                             </label>
                                             <label class="flex items-center px-4 py-2 hover:bg-gray-50 cursor-pointer">
-                                                <input type="radio" name="regionRadio" value="Brazil" onchange="updateRegionSelection()" class="region-radio w-4 h-4 accent-primary border-gray-300 focus:ring-primary">
+                                                <input type="radio" name="regionRadio" value="Brazil"
+                                                    onchange="updateRegionSelection()"
+                                                    class="region-radio w-4 h-4 accent-primary border-gray-300 focus:ring-primary">
                                                 <span class="ml-3 text-sm text-gray-700">Brazil</span>
                                             </label>
                                             <label class="flex items-center px-4 py-2 hover:bg-gray-50 cursor-pointer">
-                                                <input type="radio" name="regionRadio" value="Kenya" onchange="updateRegionSelection()" class="region-radio w-4 h-4 accent-primary border-gray-300 focus:ring-primary">
+                                                <input type="radio" name="regionRadio" value="Kenya"
+                                                    onchange="updateRegionSelection()"
+                                                    class="region-radio w-4 h-4 accent-primary border-gray-300 focus:ring-primary">
                                                 <span class="ml-3 text-sm text-gray-700">Kenya</span>
                                             </label>
                                             <label class="flex items-center px-4 py-2 hover:bg-gray-50 cursor-pointer">
-                                                <input type="radio" name="regionRadio" value="Vietnam" onchange="updateRegionSelection()" class="region-radio w-4 h-4 accent-primary border-gray-300 focus:ring-primary">
+                                                <input type="radio" name="regionRadio" value="Vietnam"
+                                                    onchange="updateRegionSelection()"
+                                                    class="region-radio w-4 h-4 accent-primary border-gray-300 focus:ring-primary">
                                                 <span class="ml-3 text-sm text-gray-700">Vietnam</span>
                                             </label>
                                         </div>
@@ -299,11 +296,9 @@
                                 <label for="process" class="block text-sm font-medium text-gray-700 mb-2">
                                     Process Method
                                 </label>
-                                <input type="text"
-                                       id="process"
-                                       name="process"
-                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                       placeholder="e.g., Washed, Natural, Honey">
+                                <input type="text" id="process" name="process"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                    placeholder="e.g., Washed, Natural, Honey">
                             </div>
                         </div>
 
@@ -312,27 +307,23 @@
                             <label for="tastingNote" class="block text-sm font-medium text-gray-700 mb-2">
                                 Tasting Notes
                             </label>
-                            <input type="text"
-                                   id="tastingNote"
-                                   name="tastingNote"
-                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                   placeholder="e.g., Citrus, Chocolate, Floral">
+                            <input type="text" id="tastingNote" name="tastingNote"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                placeholder="e.g., Citrus, Chocolate, Floral">
                         </div>
                     </div>
 
-                    <!-- Clothes Options (default hidden) -->
-                    <div id="clothesOptions" class="product-options hidden">
+                    <!-- Clothes Options (DEPRECATED - Keeping for reference, will be replaced by dynamic rendering) -->
+                    <div id="clothesOptions" class="product-options hidden" style="display: none !important;">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <!-- Available Sizes for Clothes -->
                             <div>
                                 <label for="clothesSizes" class="block text-sm font-medium text-gray-700 mb-2">
                                     Available Sizes (comma-separated)
                                 </label>
-                                <input type="text"
-                                       id="clothesSizes"
-                                       name="clothesSizes"
-                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                       placeholder="S, M, L, XL, XXL">
+                                <input type="text" id="clothesSizes" name="clothesSizes"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                    placeholder="S, M, L, XL, XXL">
                                 <p class="text-xs text-gray-500 mt-1">Separate multiple sizes with commas</p>
                             </div>
 
@@ -341,11 +332,9 @@
                                 <label for="availableColors" class="block text-sm font-medium text-gray-700 mb-2">
                                     Available Colors (comma-separated)
                                 </label>
-                                <input type="text"
-                                       id="availableColors"
-                                       name="availableColors"
-                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                       placeholder="Black, White, Navy, Grey">
+                                <input type="text" id="availableColors" name="availableColors"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                    placeholder="Black, White, Navy, Grey">
                                 <p class="text-xs text-gray-500 mt-1">Separate multiple colors with commas</p>
                             </div>
                         </div>
@@ -357,11 +346,9 @@
                                 <label for="material" class="block text-sm font-medium text-gray-700 mb-2">
                                     Material
                                 </label>
-                                <input type="text"
-                                       id="material"
-                                       name="material"
-                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                       placeholder="e.g., 100% Cotton, Polyester">
+                                <input type="text" id="material" name="material"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                    placeholder="e.g., 100% Cotton, Polyester">
                             </div>
 
                             <!-- Style -->
@@ -369,17 +356,16 @@
                                 <label for="style" class="block text-sm font-medium text-gray-700 mb-2">
                                     Style/Fit
                                 </label>
-                                <input type="text"
-                                       id="style"
-                                       name="style"
-                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
-                                       placeholder="e.g., Regular Fit, Slim Fit">
+                                <input type="text" id="style" name="style"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                                    placeholder="e.g., Regular Fit, Slim Fit">
                             </div>
                         </div>
                     </div>
 
-                    <!-- Placeholder message when no type selected -->
-                    <div id="optionsPlaceholder" class="text-center py-8 text-gray-500">
+                    <!-- Placeholder message (DEPRECATED - Replaced by dynamic container message) -->
+                    <div id="optionsPlaceholder" class="text-center py-8 text-gray-500"
+                        style="display: none !important;">
                         <i class="fas fa-box-open text-4xl mb-2"></i>
                         <p>Please select a product type to see available options</p>
                     </div>
@@ -398,14 +384,23 @@
                             <label for="productType" class="block text-sm font-medium text-gray-700 mb-2">
                                 Product Type <span class="text-red-500">*</span>
                             </label>
-                            <select id="productType"
-                                    name="productType"
-                                    required
-                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
-                                <option value="">Select product type</option>
-                                <option value="coffee">Coffee</option>
-                                <option value="clothes">Clothes</option>
-                            </select>
+                            <div class="flex gap-2">
+                                <select id="productType" name="productType" required
+                                    class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                                    <option value="">Select product type</option>
+                                    @if (ViewBag.ProductTypes != null)
+                                    {
+                                        @foreach (dynamic productType in ViewBag.ProductTypes)
+                                        {
+                                            <option value="@productType.Id">@productType.Name</option>
+                                        }
+                                    }
+                                </select>
+                                <button type="button" onclick="openAddProductTypeModal()"
+                                    class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:ring-2 focus:ring-green-500 whitespace-nowrap">
+                                    + Add New
+                                </button>
+                            </div>
                         </div>
 
                         <!-- Categories -->
@@ -413,16 +408,20 @@
                             <label for="categoryId" class="block text-sm font-medium text-gray-700 mb-2">
                                 Category <span class="text-red-500">*</span>
                             </label>
-                            <select id="categoryId"
-                                    name="categoryId"
-                                    required
-                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
-                                <option value="">Select a category</option>
-                                @foreach (dynamic category in ViewBag.Categories)
-                                {
-                                    <option value="@category.Id">@category.Name</option>
-                                }
-                            </select>
+                            <div class="flex gap-2">
+                                <select id="categoryId" name="categoryId" required
+                                    class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                                    <option value="">Select a category</option>
+                                    @foreach (dynamic category in ViewBag.Categories)
+                                    {
+                                        <option value="@category.Id">@category.Name</option>
+                                    }
+                                </select>
+                                <button type="button" onclick="openAddCategoryModal()"
+                                    class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:ring-2 focus:ring-green-500 whitespace-nowrap">
+                                    + Add New
+                                </button>
+                            </div>
                         </div>
 
                         <!-- Is Featured -->
@@ -451,11 +450,10 @@
 
                         <!-- Upload Area -->
                         <div id="uploadArea"
-                             class="border-2 border-dashed border-primary rounded-lg p-6 text-center cursor-pointer hover:bg-gray-50 transition"
-                             ondrop="handleDrop(event)"
-                             ondragover="handleDragOver(event)"
-                             ondragleave="handleDragLeave(event)"
-                             onclick="document.getElementById('imageFileInput').click()">
+                            class="border-2 border-dashed border-primary rounded-lg p-6 text-center cursor-pointer hover:bg-gray-50 transition"
+                            ondrop="handleDrop(event)" ondragover="handleDragOver(event)"
+                            ondragleave="handleDragLeave(event)"
+                            onclick="document.getElementById('imageFileInput').click()">
                             <div class="flex flex-col items-center">
                                 <div class="w-12 h-12 bg-primary rounded-full flex items-center justify-center mb-3">
                                     <i class="fas fa-cloud-upload-alt text-xl text-white"></i>
@@ -469,13 +467,8 @@
                         </div>
 
                         <!-- Hidden File Input - Allow multiple files -->
-                        <input type="file"
-                               id="imageFileInput"
-                               name="imageFiles"
-                               accept="image/*"
-                               multiple
-                               class="hidden"
-                               onchange="handleFileSelect(event)">
+                        <input type="file" id="imageFileInput" name="imageFiles" accept="image/*" multiple
+                            class="hidden" onchange="handleFileSelect(event)">
 
                         <!-- Hidden URL Input (will store the main image URL) -->
                         <input type="hidden" id="imageUrl" name="imageUrl">
@@ -489,7 +482,8 @@
                         <div id="mainImagePreview" class="hidden mt-4">
                             <p class="text-sm font-medium text-gray-700 mb-2">Preview</p>
                             <div class="flex justify-center">
-                                <img id="mainPreviewImg" src="" alt="Preview" class="w-80 h-96 object-cover rounded-lg border border-gray-300">
+                                <img id="mainPreviewImg" src="" alt="Preview"
+                                    class="w-80 h-96 object-cover rounded-lg border border-gray-300">
                             </div>
                         </div>
                     </div>
@@ -498,11 +492,11 @@
                 <!-- Action Buttons -->
                 <div class="bg-white rounded-lg shadow-sm p-6">
                     <button type="submit"
-                            class="w-full px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition font-semibold">
+                        class="w-full px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition font-semibold">
                         <i class="fas fa-save mr-2"></i>Create Product
                     </button>
                     <a href="/admin/products"
-                       class="block w-full text-center px-6 py-3 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition mt-3">
+                        class="block w-full text-center px-6 py-3 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition mt-3">
                         Cancel
                     </a>
                 </div>
@@ -511,18 +505,404 @@
     </form>
 </div>
 
-<!-- Include Crop Image Modal -->
+<!-- Crop Image Modal -->
 @await Html.PartialAsync("~/Views/Partials/Modals/_ModalCropImage.cshtml")
+
+<!-- Add Product Type Modal -->
+<div id="addProductTypeModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+        <h3 class="text-xl font-semibold text-gray-800 mb-4">Add New Product Type</h3>
+        <form id="addProductTypeForm" class="space-y-4">
+            <div>
+                <label for="newProductTypeName" class="block text-sm font-medium text-gray-700 mb-2">
+                    Name <span class="text-red-500">*</span>
+                </label>
+                <input type="text" id="newProductTypeName" required placeholder="e.g., Table, Electronics, Books"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+            </div>
+            <div>
+                <label for="newProductTypeDescription" class="block text-sm font-medium text-gray-700 mb-2">
+                    Description
+                </label>
+                <textarea id="newProductTypeDescription" rows="3" placeholder="Brief description of this product type"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"></textarea>
+            </div>
+            <div class="flex gap-3 pt-4">
+                <button type="submit"
+                    class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:ring-2 focus:ring-green-500">
+                    <i class="fas fa-plus mr-2"></i>Create
+                </button>
+                <button type="button" onclick="closeAddProductTypeModal()"
+                    class="flex-1 px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">
+                    Cancel
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Manage Attributes Modal -->
+<div id="manageAttributesModal"
+    class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-y-auto">
+    <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl m-4">
+        <h3 class="text-xl font-semibold text-gray-800 mb-4">Manage Product Attributes</h3>
+
+        <!-- Add Attribute Form -->
+        <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+            <h4 class="text-sm font-semibold text-gray-700 mb-3">Add New Attribute</h4>
+            <form id="addAttributeForm" class="space-y-3">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Attribute Name *</label>
+                        <input type="text" id="attributeName" required placeholder="e.g., Material, Size, Color"
+                            class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Display Name</label>
+                        <input type="text" id="attributeDisplayName" placeholder="e.g., Material Type"
+                            class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 mb-1">Values (comma-separated)</label>
+                    <input type="text" id="attributeValues" placeholder="e.g., Wood, Glass, Metal, Plastic"
+                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <p class="text-xs text-gray-500 mt-1">Leave empty to allow custom text input</p>
+                </div>
+                <div class="flex gap-3">
+                    <label class="flex items-center text-xs">
+                        <input type="checkbox" id="attributeRequired" class="mr-2">
+                        Required
+                    </label>
+                    <label class="flex items-center text-xs">
+                        <input type="checkbox" id="attributeMultiple" class="mr-2">
+                        Allow Multiple Selection
+                    </label>
+                </div>
+                <button type="submit"
+                    class="w-full px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700">
+                    <i class="fas fa-plus mr-2"></i>Add Attribute
+                </button>
+            </form>
+        </div>
+
+        <!-- Existing Attributes List -->
+        <div id="attributesList" class="mb-4">
+            <h4 class="text-sm font-semibold text-gray-700 mb-2">Current Attributes</h4>
+            <div id="attributesListContent" class="space-y-2 max-h-60 overflow-y-auto">
+                <p class="text-xs text-gray-500">Loading...</p>
+            </div>
+        </div>
+
+        <div class="flex gap-3 pt-4 border-t">
+            <button type="button" onclick="closeManageAttributesModal()"
+                class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                Done
+            </button>
+            <button type="button" onclick="closeManageAttributesModal()"
+                class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">
+                Cancel
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Add Category Modal -->
+<div id="addCategoryModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+        <h3 class="text-xl font-semibold text-gray-800 mb-4">Add New Category</h3>
+        <form id="addCategoryForm" class="space-y-4">
+            <div>
+                <label for="newCategoryName" class="block text-sm font-medium text-gray-700 mb-2">
+                    Name <span class="text-red-500">*</span>
+                </label>
+                <input type="text" id="newCategoryName" required placeholder="e.g., Beverages, Snacks, Merchandise"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+            </div>
+            <div>
+                <label for="newCategoryDescription" class="block text-sm font-medium text-gray-700 mb-2">
+                    Description
+                </label>
+                <textarea id="newCategoryDescription" rows="3" placeholder="Brief description of this category"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"></textarea>
+            </div>
+            <div class="flex gap-3 pt-4">
+                <button type="submit"
+                    class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:ring-2 focus:ring-green-500">
+                    <i class="fas fa-plus mr-2"></i>Create
+                </button>
+                <button type="button" onclick="closeAddCategoryModal()"
+                    class="flex-1 px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">
+                    Cancel
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 
 @section Scripts {
     <!-- Cropper.js Library -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" integrity="sha512-hvNR0F/e2J7zPPfLC9auFe3/SE0yG4aJCOd/qxew74NN7eyiSKjr7xJJMu1Jy2wf7FXITpWS1E/RY8yzuXN7VA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js" integrity="sha512-9KkIqdfN7ipEW6B6k+Aq20PV31bjODg4AA52W+tYtAE0jE0kMx49bjJ3FgvS56wzmyfMUHbQ4Km2b7l9+Y/+Eg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
 
-    <!-- Modal Crop Image Script -->
-    <script src="~/js/modals/modal-crop-image.js?v=@DateTime.Now.Ticks"></script>
+    <!-- Crop Image Modal Script -->
+    <script src="~/js/modals/modal-crop-image.js"></script>
 
-    <!-- Product Form Script -->
+    <script>
+        // Configure API base URL for product-form.js
+        window.API_BASE_URL = 'https://localhost:7045';
+
+        // ========================================
+        // Add Product Type Modal Functions
+        // ========================================
+        function openAddProductTypeModal() {
+            document.getElementById('addProductTypeModal').classList.remove('hidden');
+        }
+
+        function closeAddProductTypeModal() {
+            document.getElementById('addProductTypeModal').classList.add('hidden');
+            document.getElementById('addProductTypeForm').reset();
+        }
+
+        // ========================================
+        // Manage Attributes Modal Functions
+        // ========================================
+        let currentManagingProductTypeId = null;
+
+        async function openManageAttributesModal(productTypeId) {
+            currentManagingProductTypeId = productTypeId;
+            document.getElementById('manageAttributesModal').classList.remove('hidden');
+            await loadExistingAttributes(productTypeId);
+        }
+
+        function closeManageAttributesModal() {
+            document.getElementById('manageAttributesModal').classList.add('hidden');
+            document.getElementById('addAttributeForm').reset();
+            currentManagingProductTypeId = null;
+
+            // Refresh the product type dropdown to reload attributes
+            const productTypeSelect = document.getElementById('productType');
+            if (productTypeSelect && productTypeSelect.value) {
+                productTypeSelect.dispatchEvent(new Event('change'));
+            }
+        }
+
+        async function loadExistingAttributes(productTypeId) {
+            const listContent = document.getElementById('attributesListContent');
+            listContent.innerHTML = '<p class="text-xs text-gray-500">Loading...</p>';
+
+            try {
+                const response = await fetch(`${window.API_BASE_URL}/api/v1/producttypes/${productTypeId}/attributes-with-values`);
+                const result = await response.json();
+
+                if (result.success && result.data.attributes && result.data.attributes.length > 0) {
+                    let html = '';
+                    result.data.attributes.forEach(attr => {
+                        const valueCount = attr.values ? attr.values.length : 0;
+                        html += `
+                                <div class="p-3 bg-white border rounded-lg">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <p class="font-medium text-sm">${attr.name}</p>
+                                            <p class="text-xs text-gray-500">${valueCount} values | ${attr.allowMultipleSelection ? 'Multi-select' : 'Single-select'} ${attr.isRequired ? '| Required' : ''}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                    });
+                    listContent.innerHTML = html;
+                } else {
+                    listContent.innerHTML = '<p class="text-xs text-gray-500">No attributes yet. Add one above!</p>';
+                }
+            } catch (error) {
+                console.error('Error loading attributes:', error);
+                listContent.innerHTML = '<p class="text-xs text-red-500">Error loading attributes</p>';
+            }
+        }
+
+        // Handle Add Attribute Form
+        document.addEventListener('DOMContentLoaded', function () {
+            const attributeForm = document.getElementById('addAttributeForm');
+            if (attributeForm) {
+                attributeForm.addEventListener('submit', async function (e) {
+                    e.preventDefault();
+
+                    if (!currentManagingProductTypeId) {
+                        alert('No product type selected');
+                        return;
+                    }
+
+                    const name = document.getElementById('attributeName').value;
+                    const displayName = document.getElementById('attributeDisplayName').value || name;
+                    const valuesInput = document.getElementById('attributeValues').value;
+                    const isRequired = document.getElementById('attributeRequired').checked;
+                    const allowMultiple = document.getElementById('attributeMultiple').checked;
+
+                    try {
+                        // Create attribute
+                        const attrResponse = await fetch(`${window.API_BASE_URL}/api/v1/productattributes`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                name: name,
+                                displayName: displayName,
+                                productTypeId: currentManagingProductTypeId,
+                                isRequired: isRequired,
+                                allowMultipleSelection: allowMultiple,
+                                displayOrder: 1
+                            })
+                        });
+
+                        const attrResult = await attrResponse.json();
+
+                        if (!attrResult.success) {
+                            alert('Failed to create attribute: ' + (attrResult.message || 'Unknown error'));
+                            return;
+                        }
+
+                        // Add values if provided
+                        if (valuesInput.trim()) {
+                            const values = valuesInput.split(',').map(v => v.trim()).filter(v => v);
+                            let displayOrder = 1;
+
+                            for (const value of values) {
+                                await fetch(`${window.API_BASE_URL}/api/v1/productattributevalues`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                        productAttributeId: attrResult.data.id,
+                                        value: value,
+                                        displayOrder: displayOrder++
+                                    })
+                                });
+                            }
+                        }
+
+                        // Reset form and reload
+                        document.getElementById('addAttributeForm').reset();
+                        await loadExistingAttributes(currentManagingProductTypeId);
+                        alert(`Attribute "${name}" added successfully!`);
+
+                    } catch (error) {
+                        console.error('Error creating attribute:', error);
+                        alert('Error creating attribute. Please try again.');
+                    }
+                });
+            }
+        });
+
+        // ========================================
+        // Add Category Modal Functions
+        // ========================================
+        function openAddCategoryModal() {
+            document.getElementById('addCategoryModal').classList.remove('hidden');
+        }
+
+        function closeAddCategoryModal() {
+            document.getElementById('addCategoryModal').classList.add('hidden');
+            document.getElementById('addCategoryForm').reset();
+        }
+
+        // Handle Add Category Form Submission
+        document.addEventListener('DOMContentLoaded', function () {
+            const categoryForm = document.getElementById('addCategoryForm');
+            if (categoryForm) {
+                categoryForm.addEventListener('submit', async function (e) {
+                    e.preventDefault();
+
+                    const name = document.getElementById('newCategoryName').value;
+                    const description = document.getElementById('newCategoryDescription').value;
+
+                    try {
+                        const response = await fetch(`${window.API_BASE_URL}/api/v1/categories`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                name: name,
+                                description: description,
+                                displayOrder: 999
+                            })
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+                            // Add new option to dropdown
+                            const select = document.getElementById('categoryId');
+                            const option = new Option(result.data.name, result.data.id);
+                            select.add(option);
+
+                            // Select the newly created category
+                            select.value = result.data.id;
+
+                            // Close modal
+                            closeAddCategoryModal();
+
+                            // Show success message
+                            alert(`Category "${result.data.name}" created successfully!`);
+                        } else {
+                            alert('Failed to create category: ' + (result.message || 'Unknown error'));
+                        }
+                    } catch (error) {
+                        console.error('Error creating category:', error);
+                        alert('Error creating category. Please try again.');
+                    }
+                });
+            }
+        });
+
+        // Handle Add Product Type Form Submission
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('addProductTypeForm');
+            if (form) {
+                form.addEventListener('submit', async function (e) {
+                    e.preventDefault();
+
+                    const name = document.getElementById('newProductTypeName').value;
+                    const description = document.getElementById('newProductTypeDescription').value;
+
+                    try {
+                        const response = await fetch(`${window.API_BASE_URL}/api/v1/producttypes`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                name: name,
+                                description: description,
+                                displayOrder: 999
+                            })
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+                            // Add new option to dropdown
+                            const select = document.getElementById('productType');
+                            const option = new Option(result.data.name, result.data.id);
+                            select.add(option);
+
+                            // Select the newly created product type
+                            select.value = result.data.id;
+                            select.dispatchEvent(new Event('change'));
+
+                            // Close modal
+                            closeAddProductTypeModal();
+
+                            // Show success message
+                            alert(`Product type "${result.data.name}" created successfully!`);
+                        } else {
+                            alert('Failed to create product type: ' + (result.message || 'Unknown error'));
+                        }
+                    } catch (error) {
+                        console.error('Error creating product type:', error);
+                        alert('Error creating product type. Please try again.');
+                    }
+                });
+            }
+        });
+    </script>
     <script src="~/js/admin/product-form.js?v=@DateTime.Now.Ticks"></script>
     <script>
         // ========================================
@@ -548,15 +928,15 @@
                 selectedContent.innerHTML = '<span class="text-gray-500">Select sizes</span>';
             } else {
                 selectedContent.innerHTML = selectedValues.map(value => `
-                    <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-200 text-gray-700 text-sm rounded">
-                        ${value}
-                        <button type="button"
-                                onclick="removeSizeTag('${value}'); event.stopPropagation();"
-                                class="hover:bg-gray-300 rounded-full p-0.5">
-                            <i class="fas fa-times text-xs"></i>
-                        </button>
-                    </span>
-                `).join('');
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-200 text-gray-700 text-sm rounded">
+                            ${value}
+                            <button type="button"
+                                    onclick="removeSizeTag('${value}'); event.stopPropagation();"
+                                    class="hover:bg-gray-300 rounded-full p-0.5">
+                                <i class="fas fa-times text-xs"></i>
+                            </button>
+                        </span>
+                    `).join('');
             }
         }
 
@@ -603,13 +983,13 @@
                 selectedContent.innerHTML = '<span class="text-gray-500">Select grinds</span>';
             } else {
                 selectedContent.innerHTML = selectedValues.map(value => `
-                    <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-200 text-gray-700 text-sm rounded">
-                        ${value}
-                        <button type="button" onclick="removeGrindTag('${value}'); event.stopPropagation();" class="hover:bg-gray-300 rounded-full p-0.5">
-                            <i class="fas fa-times text-xs"></i>
-                        </button>
-                    </span>
-                `).join('');
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-gray-200 text-gray-700 text-sm rounded">
+                            ${value}
+                            <button type="button" onclick="removeGrindTag('${value}'); event.stopPropagation();" class="hover:bg-gray-300 rounded-full p-0.5">
+                                <i class="fas fa-times text-xs"></i>
+                            </button>
+                        </span>
+                    `).join('');
             }
         }
 
@@ -664,7 +1044,7 @@
         }
 
         // Close dropdowns when clicking outside
-        document.addEventListener('click', function(event) {
+        document.addEventListener('click', function (event) {
             const sizesDropdown = document.getElementById('sizesDropdownMenu');
             const sizesButton = document.getElementById('sizesDropdownButton');
             const grindsDropdown = document.getElementById('grindsDropdownMenu');
@@ -713,7 +1093,7 @@
 
             // Read file and open crop modal
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = function (e) {
                 openCropModal(file, e.target.result);
             };
             reader.readAsDataURL(file);
@@ -750,7 +1130,7 @@
             if (!dataUrl) {
                 // If no dataUrl attached, read the file (fallback for direct upload)
                 const reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = function (e) {
                     addImageToUploadList(file, e.target.result);
                 };
                 reader.readAsDataURL(file);
@@ -798,37 +1178,37 @@
             imageItem.onclick = () => setDefaultImage(imageData.id);
 
             imageItem.innerHTML = `
-                <div class="w-10 h-10 flex-shrink-0">
-                    <img src="${imageData.dataUrl}" alt="${imageData.name}" class="w-full h-full object-cover rounded">
-                </div>
-                <div class="flex-1 min-w-0">
-                    <div class="flex items-center gap-2 mb-1">
-                        <p class="text-sm font-medium text-gray-700 truncate">${imageData.name}</p>
-                        ${imageData.isDefault ? '<span class="px-2 py-0.5 bg-primary text-white text-xs rounded-full">Default</span>' : ''}
+                    <div class="w-10 h-10 flex-shrink-0">
+                        <img src="${imageData.dataUrl}" alt="${imageData.name}" class="w-full h-full object-cover rounded">
                     </div>
-                    <p class="text-xs text-gray-500">${formatFileSize(imageData.size)}</p>
-                </div>
-                <div class="flex items-center gap-1">
-                    <button type="button"
-                            onclick="showMainPreview(${JSON.stringify(imageData).replace(/"/g, '&quot;')}); event.stopPropagation();"
-                            class="p-2 text-gray-500 hover:text-primary transition"
-                            title="Preview image">
-                        <i class="fas fa-eye text-sm"></i>
-                    </button>
-                    <button type="button"
-                            onclick="downloadImage('${imageData.dataUrl}', '${imageData.name}'); event.stopPropagation();"
-                            class="p-2 text-gray-500 hover:text-primary transition"
-                            title="Download image">
-                        <i class="fas fa-download text-sm"></i>
-                    </button>
-                    <button type="button"
-                            onclick="removeImageFromList(${imageData.id}); event.stopPropagation();"
-                            class="p-2 text-gray-500 hover:text-red-500 transition"
-                            title="Remove image">
-                        <i class="fas fa-times text-sm"></i>
-                    </button>
-                </div>
-            `;
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2 mb-1">
+                            <p class="text-sm font-medium text-gray-700 truncate">${imageData.name}</p>
+                            ${imageData.isDefault ? '<span class="px-2 py-0.5 bg-primary text-white text-xs rounded-full">Default</span>' : ''}
+                        </div>
+                        <p class="text-xs text-gray-500">${formatFileSize(imageData.size)}</p>
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <button type="button"
+                                onclick="showMainPreview(${JSON.stringify(imageData).replace(/"/g, '&quot;')}); event.stopPropagation();"
+                                class="p-2 text-gray-500 hover:text-primary transition"
+                                title="Preview image">
+                            <i class="fas fa-eye text-sm"></i>
+                        </button>
+                        <button type="button"
+                                onclick="downloadImage('${imageData.dataUrl}', '${imageData.name}'); event.stopPropagation();"
+                                class="p-2 text-gray-500 hover:text-primary transition"
+                                title="Download image">
+                            <i class="fas fa-download text-sm"></i>
+                        </button>
+                        <button type="button"
+                                onclick="removeImageFromList(${imageData.id}); event.stopPropagation();"
+                                class="p-2 text-gray-500 hover:text-red-500 transition"
+                                title="Remove image">
+                            <i class="fas fa-times text-sm"></i>
+                        </button>
+                    </div>
+                `;
 
             listContainer.appendChild(imageItem);
         }
@@ -917,7 +1297,7 @@
         console.log('Inline script loaded');
 
         // Wait a bit to ensure DOM is ready
-        setTimeout(function() {
+        setTimeout(function () {
             console.log('Checking for product type selector...');
             const selector = document.getElementById('productType');
             console.log('Product type selector:', selector);
