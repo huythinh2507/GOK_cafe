@@ -45,6 +45,7 @@ namespace GOKCafe.Web.Composers
             builder.Services.AddScoped<IOrderService, OrderService>();
             builder.Services.AddScoped<IHomeService, HomeService>();
             builder.Services.AddScoped<IOdooService, OdooService>();
+            builder.Services.AddScoped<IProductTypeService, ProductTypeService>();
 
             // Register HttpClient with base URL for API
             var apiBaseUrl = builder.Config.GetSection("ApiSettings:BaseUrl").Value ?? "https://localhost:7045";
