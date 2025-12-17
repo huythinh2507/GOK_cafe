@@ -11,15 +11,18 @@ public class ProductsAdminController : Controller
 {
     private readonly IProductService _productService;
     private readonly ICategoryService _categoryService;
+    private readonly IProductTypeService _productTypeService;
     private readonly ILogger<ProductsAdminController> _logger;
 
     public ProductsAdminController(
         IProductService productService,
         ICategoryService categoryService,
+        IProductTypeService productTypeService,
         ILogger<ProductsAdminController> logger)
     {
         _productService = productService;
         _categoryService = categoryService;
+        _productTypeService = productTypeService;
         _logger = logger;
     }
 
@@ -38,7 +41,10 @@ public class ProductsAdminController : Controller
         try
         {
             var categoriesResult = await _categoryService.GetAllCategoriesAsync();
+            var productTypesResult = await _productTypeService.GetAllProductTypesAsync();
+
             ViewBag.Categories = categoriesResult.Data;
+            ViewBag.ProductTypes = productTypesResult.Data;
             ViewBag.CurrentSearch = search;
             ViewBag.CurrentCategoryId = categoryId;
             ViewBag.CurrentInStock = inStock;
@@ -62,7 +68,10 @@ public class ProductsAdminController : Controller
         try
         {
             var categoriesResult = await _categoryService.GetAllCategoriesAsync();
+            var productTypesResult = await _productTypeService.GetAllProductTypesAsync();
+
             ViewBag.Categories = categoriesResult.Data;
+            ViewBag.ProductTypes = productTypesResult.Data;
 
             return View();
         }
@@ -90,7 +99,10 @@ public class ProductsAdminController : Controller
             }
 
             var categoriesResult = await _categoryService.GetAllCategoriesAsync();
+            var productTypesResult = await _productTypeService.GetAllProductTypesAsync();
+
             ViewBag.Categories = categoriesResult.Data;
+            ViewBag.ProductTypes = productTypesResult.Data;
 
             return View(productResult.Data);
         }
