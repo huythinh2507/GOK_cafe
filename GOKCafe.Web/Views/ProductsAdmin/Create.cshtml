@@ -1123,7 +1123,7 @@
         }
 
         // Process file after cropping (called from modal-crop-image.js)
-        function processFile(file) {
+        async function processFile(file) {
             // Check if file has attached dataUrl (from crop modal)
             let dataUrl = file.dataUrl;
 
@@ -1131,12 +1131,98 @@
                 // If no dataUrl attached, read the file (fallback for direct upload)
                 const reader = new FileReader();
                 reader.onload = function (e) {
-                    addImageToUploadList(file, e.target.result);
+                    uploadImageToAPI(file, e.target.result);
                 };
                 reader.readAsDataURL(file);
             } else {
                 // Use the provided dataUrl (from crop modal)
-                addImageToUploadList(file, dataUrl);
+                uploadImageToAPI(file, dataUrl);
+            }
+        }
+
+        // Upload image to external API
+        async function uploadImageToAPI(file, dataUrl) {
+            // Show uploading status
+            const tempId = Date.now() + Math.random();
+            const tempImageData = {
+                id: tempId,
+                name: file.name,
+                size: file.size,
+                dataUrl: dataUrl,
+                isDefault: uploadedImages.length === 0,
+                uploading: true,
+                uploadProgress: 0
+            };
+
+            uploadedImages.push(tempImageData);
+            addImageToList(tempImageData);
+
+            try {
+                // Create FormData and append the file
+                const formData = new FormData();
+                formData.append('file', file);
+
+                // Upload to GOKCafe API
+                const response = await fetch(`${window.API_BASE_URL}/api/v1/media/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Upload failed with status ${response.status}`);
+                }
+
+                const result = await response.json();
+
+                // Check if upload was successful
+                if (!result.success) {
+                    throw new Error(result.message || 'Upload failed');
+                }
+
+                // Update the image data with the API response
+                const imageIndex = uploadedImages.findIndex(img => img.id === tempId);
+                if (imageIndex !== -1) {
+                    uploadedImages[imageIndex] = {
+                        id: tempId,
+                        name: result.data.fileName || file.name,
+                        size: file.size,
+                        dataUrl: dataUrl,
+                        uploadedUrl: result.data.fileUrl, // Store the uploaded URL from API
+                        fileType: result.data.fileType,
+                        fileSize: result.data.fileSize,
+                        isDefault: uploadedImages[imageIndex].isDefault,
+                        uploading: false,
+                        uploadSuccess: true
+                    };
+
+                    // Re-render the image item to show success status
+                    const listContainer = document.getElementById('uploadedImagesList');
+                    listContainer.innerHTML = '';
+                    uploadedImages.forEach(img => addImageToList(img));
+
+                    // Update hidden input with uploaded URL if this is the default image
+                    if (uploadedImages[imageIndex].isDefault) {
+                        document.getElementById('imageUrl').value = result.data.fileUrl;
+                        showMainPreview(uploadedImages[imageIndex]);
+                    }
+                }
+
+            } catch (error) {
+                console.error('Error uploading image:', error);
+
+                // Update image status to show error
+                const imageIndex = uploadedImages.findIndex(img => img.id === tempId);
+                if (imageIndex !== -1) {
+                    uploadedImages[imageIndex].uploading = false;
+                    uploadedImages[imageIndex].uploadError = true;
+
+                    // Re-render to show error status
+                    const listContainer = document.getElementById('uploadedImagesList');
+                    listContainer.innerHTML = '';
+                    uploadedImages.forEach(img => addImageToList(img));
+                }
+
+                alert('Failed to upload image: ' + error.message);
             }
         }
 
@@ -1170,41 +1256,60 @@
             // Set border color based on whether it's default
             if (imageData.isDefault) {
                 imageItem.classList.add('border-primary', 'bg-blue-50');
+            } else if (imageData.uploadError) {
+                imageItem.classList.add('border-red-300', 'bg-red-50');
             } else {
                 imageItem.classList.add('border-gray-200');
             }
 
-            // Click on the container sets as default
-            imageItem.onclick = () => setDefaultImage(imageData.id);
+            // Click on the container sets as default (only if not uploading or error)
+            if (!imageData.uploading && !imageData.uploadError) {
+                imageItem.onclick = () => setDefaultImage(imageData.id);
+            }
+
+            // Status badge
+            let statusBadge = '';
+            if (imageData.uploading) {
+                statusBadge = '<span class="px-2 py-0.5 bg-yellow-500 text-white text-xs rounded-full"><i class="fas fa-spinner fa-spin mr-1"></i>Uploading...</span>';
+            } else if (imageData.uploadSuccess) {
+                statusBadge = '<span class="px-2 py-0.5 bg-green-500 text-white text-xs rounded-full"><i class="fas fa-check mr-1"></i>Uploaded</span>';
+            } else if (imageData.uploadError) {
+                statusBadge = '<span class="px-2 py-0.5 bg-red-500 text-white text-xs rounded-full"><i class="fas fa-exclamation-triangle mr-1"></i>Failed</span>';
+            }
 
             imageItem.innerHTML = `
                     <div class="w-10 h-10 flex-shrink-0">
-                        <img src="${imageData.dataUrl}" alt="${imageData.name}" class="w-full h-full object-cover rounded">
+                        <img src="${imageData.dataUrl}" alt="${imageData.name}" class="w-full h-full object-cover rounded ${imageData.uploading ? 'opacity-50' : ''}">
                     </div>
                     <div class="flex-1 min-w-0">
                         <div class="flex items-center gap-2 mb-1">
                             <p class="text-sm font-medium text-gray-700 truncate">${imageData.name}</p>
                             ${imageData.isDefault ? '<span class="px-2 py-0.5 bg-primary text-white text-xs rounded-full">Default</span>' : ''}
+                            ${statusBadge}
                         </div>
                         <p class="text-xs text-gray-500">${formatFileSize(imageData.size)}</p>
+                        ${imageData.uploadedUrl ? `<p class="text-xs text-green-600 truncate" title="${imageData.uploadedUrl}"><i class="fas fa-link mr-1"></i>Uploaded to cloud</p>` : ''}
                     </div>
                     <div class="flex items-center gap-1">
                         <button type="button"
                                 onclick="showMainPreview(${JSON.stringify(imageData).replace(/"/g, '&quot;')}); event.stopPropagation();"
                                 class="p-2 text-gray-500 hover:text-primary transition"
-                                title="Preview image">
+                                title="Preview image"
+                                ${imageData.uploading ? 'disabled' : ''}>
                             <i class="fas fa-eye text-sm"></i>
                         </button>
                         <button type="button"
                                 onclick="downloadImage('${imageData.dataUrl}', '${imageData.name}'); event.stopPropagation();"
                                 class="p-2 text-gray-500 hover:text-primary transition"
-                                title="Download image">
+                                title="Download image"
+                                ${imageData.uploading ? 'disabled' : ''}>
                             <i class="fas fa-download text-sm"></i>
                         </button>
                         <button type="button"
                                 onclick="removeImageFromList(${imageData.id}); event.stopPropagation();"
                                 class="p-2 text-gray-500 hover:text-red-500 transition"
-                                title="Remove image">
+                                title="Remove image"
+                                ${imageData.uploading ? 'disabled' : ''}>
                             <i class="fas fa-times text-sm"></i>
                         </button>
                     </div>
@@ -1228,7 +1333,8 @@
             const defaultImage = uploadedImages.find(img => img.isDefault);
             if (defaultImage) {
                 showMainPreview(defaultImage);
-                document.getElementById('imageUrl').value = defaultImage.dataUrl;
+                // Use uploaded URL if available, otherwise use dataUrl
+                document.getElementById('imageUrl').value = defaultImage.uploadedUrl || defaultImage.dataUrl;
             }
         }
 
@@ -1239,8 +1345,8 @@
             mainPreview.classList.remove('hidden');
             mainPreviewImg.src = imageData.dataUrl;
 
-            // Update hidden input with main image URL
-            document.getElementById('imageUrl').value = imageData.dataUrl;
+            // Update hidden input with main image URL (prefer uploaded URL)
+            document.getElementById('imageUrl').value = imageData.uploadedUrl || imageData.dataUrl;
         }
 
         function removeImageFromList(imageId) {
