@@ -17,9 +17,14 @@ public class ProductAttributeSelection : BaseEntity
     public Guid ProductAttributeId { get; set; }
 
     /// <summary>
-    /// The value being selected
+    /// The value being selected (null if using CustomValue instead)
     /// </summary>
-    public Guid ProductAttributeValueId { get; set; }
+    public Guid? ProductAttributeValueId { get; set; }
+
+    /// <summary>
+    /// Custom/free-form value (used when ProductAttributeValueId is null)
+    /// </summary>
+    public string? CustomValue { get; set; }
 
     // Navigation properties
 
@@ -34,7 +39,7 @@ public class ProductAttributeSelection : BaseEntity
     public virtual ProductAttribute ProductAttribute { get; set; } = null!;
 
     /// <summary>
-    /// The value being selected
+    /// The value being selected (null if using CustomValue)
     /// </summary>
-    public virtual ProductAttributeValue ProductAttributeValue { get; set; } = null!;
+    public virtual ProductAttributeValue? ProductAttributeValue { get; set; }
 }
