@@ -5,6 +5,7 @@ using GOKCafe.Domain.Interfaces;
 using GOKCafe.Infrastructure.Data;
 using GOKCafe.Infrastructure.Repositories;
 using GOKCafe.Infrastructure.Services;
+using GOKCafe.Infrastructure.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -30,11 +31,13 @@ builder.Services.AddSingleton<ICacheService, CacheService>();
 // Register infrastructure services
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IQRCodeService, QRCodeService>();
+builder.Services.AddScoped<IAzureBlobService, AzureBlobService>();
 
 // Register application services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<IProductTypeService, ProductTypeService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IHomeService, HomeService>();
 builder.Services.AddScoped<ICartService, CartService>();
