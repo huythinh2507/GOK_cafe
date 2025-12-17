@@ -151,22 +151,26 @@ public class ProductService : IProductService
                         DisplayOrder = pi.DisplayOrder,
                         IsPrimary = pi.IsPrimary
                     }).ToList(),
-                    FlavourProfiles = p.ProductFlavourProfiles.Select(pfp => new FlavourProfileDto
-                    {
-                        Id = pfp.FlavourProfile.Id,
-                        Name = pfp.FlavourProfile.Name,
-                        Description = pfp.FlavourProfile.Description,
-                        DisplayOrder = pfp.FlavourProfile.DisplayOrder,
-                        IsActive = pfp.FlavourProfile.IsActive
-                    }).ToList(),
-                    Equipments = p.ProductEquipments.Select(pe => new EquipmentDto
-                    {
-                        Id = pe.Equipment.Id,
-                        Name = pe.Equipment.Name,
-                        Description = pe.Equipment.Description,
-                        DisplayOrder = pe.Equipment.DisplayOrder,
-                        IsActive = pe.Equipment.IsActive
-                    }).ToList()
+                    FlavourProfiles = p.ProductFlavourProfiles
+                        .Where(pfp => pfp.FlavourProfile != null)
+                        .Select(pfp => new FlavourProfileDto
+                        {
+                            Id = pfp.FlavourProfile.Id,
+                            Name = pfp.FlavourProfile.Name,
+                            Description = pfp.FlavourProfile.Description,
+                            DisplayOrder = pfp.FlavourProfile.DisplayOrder,
+                            IsActive = pfp.FlavourProfile.IsActive
+                        }).ToList(),
+                    Equipments = p.ProductEquipments
+                        .Where(pe => pe.Equipment != null)
+                        .Select(pe => new EquipmentDto
+                        {
+                            Id = pe.Equipment.Id,
+                            Name = pe.Equipment.Name,
+                            Description = pe.Equipment.Description,
+                            DisplayOrder = pe.Equipment.DisplayOrder,
+                            IsActive = pe.Equipment.IsActive
+                        }).ToList()
                 }).ToList();
 
             var response = new PaginatedResponse<ProductDto>

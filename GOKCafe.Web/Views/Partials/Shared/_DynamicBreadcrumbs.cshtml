@@ -1,0 +1,38 @@
+@using GOKCafe.Web.Models.ViewModels
+@model List<BreadcrumbItem>
+
+@* Dynamic Breadcrumbs Component - Used for non-Umbraco pages like Product Detail *@
+<section class="bg-white pt-8">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <nav aria-label="Breadcrumb">
+            <ol class="flex items-center gap-2 text-base">
+                @if (Model != null && Model.Any())
+                {
+                    for (int i = 0; i < Model.Count; i++)
+                    {
+                        var item = Model[i];
+                        var isFirst = i == 0;
+
+                        <li class="flex items-center gap-2">
+                            @if (!isFirst)
+                            {
+                                <i class="fas fa-chevron-right text-gray-400 text-xs"></i>
+                            }
+
+                            @if (item.IsActive)
+                            {
+                                <span class="text-gray-900 font-medium">@item.Name</span>
+                            }
+                            else
+                            {
+                                <a href="@item.Url" class="text-gray-600 hover:text-primary transition-colors duration-200 flex items-center gap-1">
+                                    @item.Name
+                                </a>
+                            }
+                        </li>
+                    }
+                }
+            </ol>
+        </nav>
+    </div>
+</section>

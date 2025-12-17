@@ -74,6 +74,7 @@ namespace GOKCafe.Web.Composers
             // Register Web layer services (Umbraco-specific)
             builder.Services.AddScoped<WebProductService, GOKCafe.Web.Services.Implementations.ProductService>();
             builder.Services.AddScoped<WebCategoryService, GOKCafe.Web.Services.Implementations.CategoryService>();
+            builder.Services.AddScoped<GOKCafe.Web.Services.Interfaces.IBreadcrumbService, BreadcrumbService>();
 
             // Register HttpClient for external API calls (Odoo, etc.)
             builder.Services.AddHttpClient();
