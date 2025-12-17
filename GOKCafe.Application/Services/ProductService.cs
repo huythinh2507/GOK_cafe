@@ -255,8 +255,9 @@ public class ProductService : IProductService
                 StockQuantity = dto.StockQuantity,
                 IsFeatured = dto.IsFeatured,
                 CategoryId = dto.CategoryId,
+                ProductTypeId = dto.ProductTypeId,
                 IsActive = true,
-                // Coffee-specific fields
+                // Legacy fields (for backward compatibility)
                 TastingNote = dto.TastingNote,
                 Region = dto.Region,
                 Process = dto.Process,
@@ -266,7 +267,6 @@ public class ProductService : IProductService
                 AvailableGrinds = dto.AvailableGrinds != null && dto.AvailableGrinds.Any()
                     ? System.Text.Json.JsonSerializer.Serialize(dto.AvailableGrinds)
                     : null,
-                // Clothes-specific fields
                 AvailableColors = dto.AvailableColors != null && dto.AvailableColors.Any()
                     ? System.Text.Json.JsonSerializer.Serialize(dto.AvailableColors)
                     : null,
@@ -297,6 +297,45 @@ public class ProductService : IProductService
                         ProductId = product.Id,
                         EquipmentId = equipmentId
                     });
+                }
+            }
+
+            // Add dynamic product attribute selections
+            if (dto.ProductAttributeSelections != null && dto.ProductAttributeSelections.Any())
+            {
+                foreach (var selection in dto.ProductAttributeSelections)
+                {
+                    product.ProductAttributeSelections.Add(new ProductAttributeSelection
+                    {
+                        ProductId = product.Id,
+                        ProductAttributeId = selection.ProductAttributeId,
+                        ProductAttributeValueId = selection.ProductAttributeValueId,
+                        CustomValue = selection.CustomValue
+                    });
+                }
+            }
+
+            // Add product images
+            if (dto.Images != null && dto.Images.Any())
+            {
+                int displayOrder = 0;
+                foreach (var imageDto in dto.Images)
+                {
+                    product.ProductImages.Add(new ProductImage
+                    {
+                        ProductId = product.Id,
+                        ImageUrl = imageDto.ImageUrl,
+                        AltText = imageDto.AltText ?? dto.Name,
+                        DisplayOrder = imageDto.DisplayOrder > 0 ? imageDto.DisplayOrder : displayOrder++,
+                        IsPrimary = imageDto.IsPrimary
+                    });
+                }
+
+                // Ensure the primary image URL is set in the product
+                var primaryImage = dto.Images.FirstOrDefault(i => i.IsPrimary);
+                if (primaryImage != null)
+                {
+                    product.ImageUrl = primaryImage.ImageUrl;
                 }
             }
 
@@ -334,6 +373,7 @@ public class ProductService : IProductService
             var product = await _unitOfWork.Products.GetQueryable()
                 .Include(p => p.ProductFlavourProfiles)
                 .Include(p => p.ProductEquipments)
+                .Include(p => p.ProductAttributeSelections)
                 .FirstOrDefaultAsync(p => p.Id == id);
 
             if (product == null)
@@ -351,6 +391,7 @@ public class ProductService : IProductService
             product.IsActive = dto.IsActive;
             product.IsFeatured = dto.IsFeatured;
             product.CategoryId = dto.CategoryId;
+            product.ProductTypeId = dto.ProductTypeId;
 
             // Update coffee-specific fields
             product.TastingNote = dto.TastingNote;
@@ -394,6 +435,22 @@ public class ProductService : IProductService
                     {
                         ProductId = product.Id,
                         EquipmentId = equipmentId
+                    });
+                }
+            }
+
+            // Update dynamic product attribute selections
+            product.ProductAttributeSelections.Clear();
+            if (dto.ProductAttributeSelections != null && dto.ProductAttributeSelections.Any())
+            {
+                foreach (var selection in dto.ProductAttributeSelections)
+                {
+                    product.ProductAttributeSelections.Add(new ProductAttributeSelection
+                    {
+                        ProductId = product.Id,
+                        ProductAttributeId = selection.ProductAttributeId,
+                        ProductAttributeValueId = selection.ProductAttributeValueId,
+                        CustomValue = selection.CustomValue
                     });
                 }
             }

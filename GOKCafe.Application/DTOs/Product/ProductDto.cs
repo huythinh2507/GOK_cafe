@@ -107,20 +107,48 @@ public class CreateProductDto
     public Guid CategoryId { get; set; }
     public string? Sku { get; set; }
 
-    // Coffee-specific fields
+    // Product Type (for dynamic attributes)
+    public Guid? ProductTypeId { get; set; }
+
+    // Dynamic product attribute selections
+    public List<ProductAttributeSelectionDto>? ProductAttributeSelections { get; set; }
+
+    // Product images (multiple images support)
+    public List<CreateProductImageDto>? Images { get; set; }
+
+    // Legacy fields (for backward compatibility - can be removed later)
     public string? TastingNote { get; set; }
     public string? Region { get; set; }
     public string? Process { get; set; }
     public List<string>? AvailableSizes { get; set; }
     public List<string>? AvailableGrinds { get; set; }
-
-    // Clothes-specific fields
     public List<string>? AvailableColors { get; set; }
     public string? Material { get; set; }
     public string? Style { get; set; }
 
     public List<Guid> FlavourProfileIds { get; set; } = new();
     public List<Guid> EquipmentIds { get; set; } = new();
+}
+
+/// <summary>
+/// DTO for creating a product image
+/// </summary>
+public class CreateProductImageDto
+{
+    public string ImageUrl { get; set; } = string.Empty;
+    public string? AltText { get; set; }
+    public int DisplayOrder { get; set; }
+    public bool IsPrimary { get; set; }
+}
+
+/// <summary>
+/// DTO for product attribute selection (used when creating/updating products)
+/// </summary>
+public class ProductAttributeSelectionDto
+{
+    public Guid ProductAttributeId { get; set; }
+    public Guid? ProductAttributeValueId { get; set; }
+    public string? CustomValue { get; set; }
 }
 
 public class UpdateProductDto
@@ -137,14 +165,18 @@ public class UpdateProductDto
     public Guid CategoryId { get; set; }
     public string? Sku { get; set; }
 
-    // Coffee-specific fields
+    // Product Type (for dynamic attributes)
+    public Guid? ProductTypeId { get; set; }
+
+    // Dynamic product attribute selections
+    public List<ProductAttributeSelectionDto>? ProductAttributeSelections { get; set; }
+
+    // Legacy fields (for backward compatibility - can be removed later)
     public string? TastingNote { get; set; }
     public string? Region { get; set; }
     public string? Process { get; set; }
     public List<string>? AvailableSizes { get; set; }
     public List<string>? AvailableGrinds { get; set; }
-
-    // Clothes-specific fields
     public List<string>? AvailableColors { get; set; }
     public string? Material { get; set; }
     public string? Style { get; set; }
