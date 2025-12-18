@@ -32,6 +32,7 @@ public interface IUnitOfWork : IDisposable
     IRepository<ProductAttribute> ProductAttributes { get; }
     IRepository<ProductAttributeValue> ProductAttributeValues { get; }
     IRepository<ProductAttributeSelection> ProductAttributeSelections { get; }
+    IRepository<ProductComment> ProductComments { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     Task BeginTransactionAsync();

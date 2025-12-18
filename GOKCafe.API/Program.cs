@@ -45,6 +45,7 @@ builder.Services.AddScoped<IOdooService, OdooService>();
 builder.Services.AddScoped<ICouponService, CouponService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<ILoyaltyPlatformService, LoyaltyPlatformService>();
+builder.Services.AddScoped<IProductCommentService, ProductCommentService>();
 
 // Register HttpClient for external API calls
 builder.Services.AddHttpClient();

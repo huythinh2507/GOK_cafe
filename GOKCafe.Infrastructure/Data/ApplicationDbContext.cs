@@ -40,6 +40,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<ProductAttribute> ProductAttributes { get; set; }
     public DbSet<ProductAttributeValue> ProductAttributeValues { get; set; }
     public DbSet<ProductAttributeSelection> ProductAttributeSelections { get; set; }
+    public DbSet<ProductComment> ProductComments { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -75,6 +76,7 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<ProductAttribute>().HasQueryFilter(e => !e.IsDeleted);
         modelBuilder.Entity<ProductAttributeValue>().HasQueryFilter(e => !e.IsDeleted);
         modelBuilder.Entity<ProductAttributeSelection>().HasQueryFilter(e => !e.IsDeleted);
+        modelBuilder.Entity<ProductComment>().HasQueryFilter(e => !e.IsDeleted);
     }
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

@@ -41,6 +41,7 @@ public class UnitOfWork : IUnitOfWork
         ProductAttributes = new Repository<ProductAttribute>(_context);
         ProductAttributeValues = new Repository<ProductAttributeValue>(_context);
         ProductAttributeSelections = new Repository<ProductAttributeSelection>(_context);
+        ProductComments = new Repository<ProductComment>(_context);
     }
 
     public IRepository<User> Users { get; }
@@ -71,6 +72,7 @@ public class UnitOfWork : IUnitOfWork
     public IRepository<ProductAttribute> ProductAttributes { get; }
     public IRepository<ProductAttributeValue> ProductAttributeValues { get; }
     public IRepository<ProductAttributeSelection> ProductAttributeSelections { get; }
+    public IRepository<ProductComment> ProductComments { get; }
 
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {

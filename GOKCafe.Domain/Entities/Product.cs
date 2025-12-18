@@ -45,4 +45,5 @@ public class Product : BaseEntity
     public virtual ICollection<ProductFlavourProfile> ProductFlavourProfiles { get; set; } = new List<ProductFlavourProfile>();
     public virtual ICollection<ProductEquipment> ProductEquipments { get; set; } = new List<ProductEquipment>();
     public virtual ICollection<ProductAttributeSelection> ProductAttributeSelections { get; set; } = new List<ProductAttributeSelection>();
+    public virtual ICollection<ProductComment> ProductComments { get; set; } = new List<ProductComment>();
 }
