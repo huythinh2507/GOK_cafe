@@ -748,7 +748,8 @@ $RECYCLE.BIN/
 # Additional files built by Visual Studio
 
 # End of https://www.toptal.com/developers/gitignore/api/dotnetcore,aspnetcore,visualstudio,visualstudiocode,windows,csharp
-Beta
-3 / 10
-used queries
-1
+
+# Application settings with secrets
+appsettings.Development.json
+appsettings.*.json
+!appsettings.json
