@@ -121,4 +121,20 @@ public class ProductTypesController : ControllerBase
         var result = await _productTypeService.DeleteProductTypeAsync(id);
         return result.Success ? Ok(result) : BadRequest(result);
     }
+
+    /// <summary>
+    /// Sync all attributes for a product type (bulk create/update/delete)
+    /// </summary>
+    /// <param name="id">The unique identifier of the product type</param>
+    /// <param name="dto">The sync data containing all attributes and values</param>
+    /// <returns>Success status</returns>
+    [HttpPut("{id:guid}/attributes")]
+    [ProducesResponseType<ApiResponse<bool>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ApiResponse<bool>>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ApiResponse<bool>>(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> SyncProductTypeAttributes(Guid id, [FromBody] SyncProductTypeAttributesDto dto)
+    {
+        var result = await _productTypeService.SyncProductTypeAttributesAsync(id, dto);
+        return result.Success ? Ok(result) : BadRequest(result);
+    }
 }

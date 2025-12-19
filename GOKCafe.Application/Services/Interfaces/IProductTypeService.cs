@@ -12,4 +12,5 @@ public interface IProductTypeService
     Task<ApiResponse<ProductTypeDto>> CreateProductTypeAsync(CreateProductTypeDto dto);
     Task<ApiResponse<ProductTypeDto>> UpdateProductTypeAsync(Guid id, UpdateProductTypeDto dto);
     Task<ApiResponse<bool>> DeleteProductTypeAsync(Guid id);
+    Task<ApiResponse<bool>> SyncProductTypeAttributesAsync(Guid productTypeId, SyncProductTypeAttributesDto dto);
 }

@@ -11,17 +11,20 @@ namespace GOKCafe.Web.Controllers
     {
         private readonly IProductService _productService;
         private readonly ICategoryService _categoryService;
+        private readonly Services.Interfaces.IBreadcrumbService _breadcrumbService;
 
         public ProductDetailController(
             ILogger<ProductDetailController> logger,
             ICompositeViewEngine compositeViewEngine,
             IUmbracoContextAccessor umbracoContextAccessor,
             IProductService productService,
-            ICategoryService categoryService)
+            ICategoryService categoryService,
+            Services.Interfaces.IBreadcrumbService breadcrumbService)
             : base(logger, compositeViewEngine, umbracoContextAccessor)
         {
             _productService = productService;
             _categoryService = categoryService;
+            _breadcrumbService = breadcrumbService;
         }
 
         public override IActionResult Index()
@@ -124,11 +127,18 @@ namespace GOKCafe.Web.Controllers
                 }
             }
 
+            // Build dynamic breadcrumbs using BreadcrumbService
+            var breadcrumbs = _breadcrumbService.BuildProductDetailBreadcrumbs(
+                currentPage,
+                product.Name,
+                category?.Name);
+
             var viewModel = new ProductDetailViewModel
             {
                 Product = product,
                 Category = category,
-                RelatedProducts = relatedProducts
+                RelatedProducts = relatedProducts,
+                Breadcrumbs = breadcrumbs
             };
 
             ViewData["ProductDetailViewModel"] = viewModel;
