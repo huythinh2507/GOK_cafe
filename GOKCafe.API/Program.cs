@@ -32,6 +32,7 @@ builder.Services.AddSingleton<ICacheService, CacheService>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IQRCodeService, QRCodeService>();
 builder.Services.AddScoped<IAzureBlobService, AzureBlobService>();
+builder.Services.AddHttpClient<IEmailService, ResendEmailService>();
 
 // Register application services
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -107,6 +108,21 @@ using (var scope = app.Services.CreateScope())
     {
         var context = services.GetRequiredService<ApplicationDbContext>();
         await DbSeeder.SeedAsync(context);
+
+        // Check if --seed-prices argument is provided
+        if (args.Contains("--seed-prices"))
+        {
+            var logger = services.GetRequiredService<ILogger<Program>>();
+            logger.LogInformation("Starting product price seeding...");
+            await PriceSeeder.SeedProductPricesAsync(context);
+            logger.LogInformation("Product price seeding completed.");
+
+            // Exit after seeding if this is the only operation requested
+            if (args.Contains("--exit-after-seed"))
+            {
+                return;
+            }
+        }
     }
     catch (Exception ex)
     {

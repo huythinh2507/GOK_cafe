@@ -4,6 +4,7 @@ using GOKCafe.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GOKCafe.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251217050826_AddPasswordResetFields")]
+    partial class AddPasswordResetFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1237,58 +1240,6 @@ namespace GOKCafe.Infrastructure.Data.Migrations
                     b.ToTable("ProductAttributeValues");
                 });
 
-            modelBuilder.Entity("GOKCafe.Domain.Entities.ProductComment", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Comment")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsApproved")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<Guid?>("ParentCommentId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ProductId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Rating")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("IsApproved");
-
-                    b.HasIndex("ParentCommentId");
-
-                    b.HasIndex("ProductId");
-
-                    b.HasIndex("UserId");
-
-                    b.HasIndex("ProductId", "IsApproved");
-
-                    b.ToTable("ProductComments");
-                });
-
             modelBuilder.Entity("GOKCafe.Domain.Entities.ProductEquipment", b =>
                 {
                     b.Property<Guid>("ProductId")
@@ -1776,32 +1727,6 @@ namespace GOKCafe.Infrastructure.Data.Migrations
                     b.Navigation("ProductAttribute");
                 });
 
-            modelBuilder.Entity("GOKCafe.Domain.Entities.ProductComment", b =>
-                {
-                    b.HasOne("GOKCafe.Domain.Entities.ProductComment", "ParentComment")
-                        .WithMany("Replies")
-                        .HasForeignKey("ParentCommentId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("GOKCafe.Domain.Entities.Product", "Product")
-                        .WithMany("ProductComments")
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("GOKCafe.Domain.Entities.User", "User")
-                        .WithMany("ProductComments")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("ParentComment");
-
-                    b.Navigation("Product");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("GOKCafe.Domain.Entities.ProductEquipment", b =>
                 {
                     b.HasOne("GOKCafe.Domain.Entities.Equipment", "Equipment")
@@ -1887,8 +1812,6 @@ namespace GOKCafe.Infrastructure.Data.Migrations
 
                     b.Navigation("ProductAttributeSelections");
 
-                    b.Navigation("ProductComments");
-
                     b.Navigation("ProductEquipments");
 
                     b.Navigation("ProductFlavourProfiles");
@@ -1908,11 +1831,6 @@ namespace GOKCafe.Infrastructure.Data.Migrations
                     b.Navigation("ProductAttributeSelections");
                 });
 
-            modelBuilder.Entity("GOKCafe.Domain.Entities.ProductComment", b =>
-                {
-                    b.Navigation("Replies");
-                });
-
             modelBuilder.Entity("GOKCafe.Domain.Entities.ProductType", b =>
                 {
                     b.Navigation("ProductAttributes");
@@ -1923,8 +1841,6 @@ namespace GOKCafe.Infrastructure.Data.Migrations
             modelBuilder.Entity("GOKCafe.Domain.Entities.User", b =>
                 {
                     b.Navigation("Orders");
-
-                    b.Navigation("ProductComments");
                 });
 #pragma warning restore 612, 618
         }

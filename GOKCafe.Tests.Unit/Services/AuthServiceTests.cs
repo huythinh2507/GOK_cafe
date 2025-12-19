@@ -3,6 +3,7 @@ using GOKCafe.Application.Services;
 using GOKCafe.Domain.Entities;
 using GOKCafe.Domain.Interfaces;
 using GOKCafe.Infrastructure.Services;
+using GOKCafe.Infrastructure.Services.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Moq;
 using Xunit;
@@ -14,6 +15,7 @@ public class AuthServiceTests
     private readonly Mock<IUnitOfWork> _mockUnitOfWork;
     private readonly Mock<IPasswordHasher> _mockPasswordHasher;
     private readonly Mock<IConfiguration> _mockConfiguration;
+    private readonly Mock<IEmailService> _mockEmailService;
     private readonly AuthService _authService;
 
     public AuthServiceTests()
@@ -21,6 +23,7 @@ public class AuthServiceTests
         _mockUnitOfWork = new Mock<IUnitOfWork>();
         _mockPasswordHasher = new Mock<IPasswordHasher>();
         _mockConfiguration = new Mock<IConfiguration>();
+        _mockEmailService = new Mock<IEmailService>();
 
         // Setup configuration for JWT
         _mockConfiguration.Setup(c => c["Jwt:SecretKey"]).Returns("SuperSecretKeyForTestingPurposes12345678");
@@ -28,10 +31,14 @@ public class AuthServiceTests
         _mockConfiguration.Setup(c => c["Jwt:Audience"]).Returns("TestAudience");
         _mockConfiguration.Setup(c => c["Jwt:ExpirationHours"]).Returns("24");
 
+        // Setup Google OAuth configuration
+        _mockConfiguration.Setup(c => c["GoogleAuth:ClientId"]).Returns("test-client-id");
+
         _authService = new AuthService(
             _mockUnitOfWork.Object,
             _mockPasswordHasher.Object,
-            _mockConfiguration.Object
+            _mockConfiguration.Object,
+            _mockEmailService.Object
         );
     }
 

@@ -78,3 +78,36 @@ public class ChangePasswordDto
     [MinLength(6, ErrorMessage = "Password must be at least 6 characters")]
     public string NewPassword { get; set; } = string.Empty;
 }
+
+public class ForgotPasswordDto
+{
+    [Required(ErrorMessage = "Email is required")]
+    [EmailAddress(ErrorMessage = "Invalid email format")]
+    public string Email { get; set; } = string.Empty;
+}
+
+public class ResetPasswordDto
+{
+    [Required(ErrorMessage = "Email is required")]
+    [EmailAddress(ErrorMessage = "Invalid email format")]
+    public string Email { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Reset token is required")]
+    public string Token { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "New password is required")]
+    [MinLength(6, ErrorMessage = "Password must be at least 6 characters")]
+    public string NewPassword { get; set; } = string.Empty;
+}
+
+public class ForgotPasswordResponseDto
+{
+    public string Message { get; set; } = string.Empty;
+    public string? ResetToken { get; set; } // Only for development/testing
+}
+
+public class GoogleLoginDto
+{
+    [Required(ErrorMessage = "Google ID token is required")]
+    public string IdToken { get; set; } = string.Empty;
+}

@@ -27,4 +27,12 @@ public interface IProductCommentService
         Guid userId,
         int pageNumber = 1,
         int pageSize = 10);
+
+    Task<ApiResponse<ProductCommentDto>> CreateReplyAsync(Guid userId, CreateReplyDto dto);
+
+    Task<ApiResponse<PaginatedResponse<ProductCommentDto>>> GetRepliesAsync(
+        Guid parentCommentId,
+        int pageNumber = 1,
+        int pageSize = 10,
+        bool? isApproved = true);
 }
