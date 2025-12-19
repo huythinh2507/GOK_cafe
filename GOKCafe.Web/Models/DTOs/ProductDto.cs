@@ -33,6 +33,9 @@ namespace GOKCafe.Web.Models.DTOs
         // Available product options
         public List<string>? AvailableSizes { get; set; }
         public List<string>? AvailableGrinds { get; set; }
+
+        // Dynamic product attributes
+        public List<ProductAttributeDisplayDto>? ProductAttributes { get; set; }
     }
 
     public class ProductImageDto
@@ -42,6 +45,23 @@ namespace GOKCafe.Web.Models.DTOs
         public string? AltText { get; set; }
         public int DisplayOrder { get; set; }
         public bool IsPrimary { get; set; }
+    }
+
+    public class ProductAttributeDisplayDto
+    {
+        public Guid AttributeId { get; set; }
+        public string AttributeName { get; set; } = string.Empty;
+        public string DisplayName { get; set; } = string.Empty;
+        public bool AllowMultipleSelection { get; set; }
+        public bool IsRequired { get; set; }
+        public List<ProductAttributeValueDisplayDto> Values { get; set; } = new();
+    }
+
+    public class ProductAttributeValueDisplayDto
+    {
+        public Guid? ValueId { get; set; }
+        public string Value { get; set; } = string.Empty;
+        public bool IsSelected { get; set; }
     }
 
     public class FlavourProfileDto

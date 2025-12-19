@@ -188,6 +188,38 @@
                             </div>
                         }
 
+                        <!-- Dynamic Product Attributes -->
+                        @if (Model.ProductAttributes != null && Model.ProductAttributes.Any())
+                        {
+                            foreach (var attr in Model.ProductAttributes)
+                            {
+                                <div class="space-y-3 mt-4">
+                                    <label class="block font-semibold text-gray-900 text-base">
+                                        Select @(attr.DisplayName)@(attr.IsRequired ? " *" : ""):
+                                    </label>
+                                    <div class="flex flex-wrap gap-3" id="attribute-@(attr.AttributeId)-container">
+                                        @{
+                                            var selectedValues = attr.Values.Where(v => v.IsSelected).ToList();
+                                            var firstSelectedValue = selectedValues.FirstOrDefault();
+                                        }
+                                        @foreach (var value in attr.Values)
+                                        {
+                                            <button type="button"
+                                                    class="attribute-option px-6 py-2.5 @(value.IsSelected ? "bg-primary text-white" : "bg-gray-200 text-gray-900") hover:bg-primary hover:text-white transition-colors font-medium focus:outline-none"
+                                                    data-attribute-id="@attr.AttributeId"
+                                                    data-attribute-name="@attr.AttributeName"
+                                                    data-value-id="@value.ValueId"
+                                                    data-value="@value.Value"
+                                                    data-allow-multiple="@(attr.AllowMultipleSelection.ToString().ToLower())"
+                                                    onclick="selectAttributeValue(this)">
+                                                @value.Value
+                                            </button>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        }
+
                         <!-- Quantity and Actions -->
                         <div class="flex flex-wrap items-center gap-3 pt-4">
                             <!-- Quantity Input -->
@@ -225,6 +257,7 @@
                             const productId = '@Model.Id';
                             let productDetailSelectedSize = '@(Model.AvailableSizes?.FirstOrDefault())';
                             let productDetailSelectedGrind = '@(Model.AvailableGrinds?.FirstOrDefault())';
+                            let productDetailSelectedAttributes = {};
 
                             function selectSize(button) {
                                 // Remove active class from all size buttons
@@ -250,6 +283,41 @@
                                 productDetailSelectedGrind = button.getAttribute('data-grind');
                             }
 
+                            function selectAttributeValue(button) {
+                                const attributeId = button.getAttribute('data-attribute-id');
+                                const attributeName = button.getAttribute('data-attribute-name');
+                                const value = button.getAttribute('data-value');
+                                const allowMultiple = button.getAttribute('data-allow-multiple') === 'true';
+                                const containerId = `attribute-${attributeId}-container`;
+
+                                if (allowMultiple) {
+                                    // Multi-select: toggle selection
+                                    if (button.classList.contains('bg-primary')) {
+                                        // Deselect
+                                        button.classList.remove('bg-primary', 'text-white');
+                                        button.classList.add('bg-gray-200', 'text-gray-900');
+                                    } else {
+                                        // Select
+                                        button.classList.remove('bg-gray-200', 'text-gray-900');
+                                        button.classList.add('bg-primary', 'text-white');
+                                    }
+
+                                    // Update selected values array
+                                    const selectedButtons = document.querySelectorAll(`#${containerId} button.bg-primary`);
+                                    const selectedValues = Array.from(selectedButtons).map(btn => btn.getAttribute('data-value'));
+                                    productDetailSelectedAttributes[attributeName] = selectedValues.join(', ');
+                                } else {
+                                    // Single-select: deselect all others and select this one
+                                    document.querySelectorAll(`#${containerId} button`).forEach(btn => {
+                                        btn.classList.remove('bg-primary', 'text-white');
+                                        btn.classList.add('bg-gray-200', 'text-gray-900');
+                                    });
+                                    button.classList.remove('bg-gray-200', 'text-gray-900');
+                                    button.classList.add('bg-primary', 'text-white');
+                                    productDetailSelectedAttributes[attributeName] = value;
+                                }
+                            }
+
                             function addProductToCart() {
                                 const quantity = parseInt(document.getElementById('productQuantity').value) || 1;
 
@@ -264,6 +332,7 @@
                                     quantity: quantity,
                                     size: productDetailSelectedSize,
                                     grind: productDetailSelectedGrind,
+                                    attributes: productDetailSelectedAttributes,
                                     addedAt: new Date().toISOString()
                                 };
 

@@ -63,6 +63,34 @@ public class ProductDto
     /// Style/Fit information for clothes (e.g., "Regular Fit", "Slim Fit")
     /// </summary>
     public string? Style { get; set; }
+
+    /// <summary>
+    /// Dynamic product attributes with their selected values
+    /// </summary>
+    public List<ProductAttributeDisplayDto>? ProductAttributes { get; set; }
+}
+
+/// <summary>
+/// Represents a product attribute for display on product details page
+/// </summary>
+public class ProductAttributeDisplayDto
+{
+    public Guid AttributeId { get; set; }
+    public string AttributeName { get; set; } = string.Empty;
+    public string DisplayName { get; set; } = string.Empty;
+    public bool AllowMultipleSelection { get; set; }
+    public bool IsRequired { get; set; }
+    public List<ProductAttributeValueDisplayDto> Values { get; set; } = new();
+}
+
+/// <summary>
+/// Represents a product attribute value for display
+/// </summary>
+public class ProductAttributeValueDisplayDto
+{
+    public Guid? ValueId { get; set; }
+    public string Value { get; set; } = string.Empty;
+    public bool IsSelected { get; set; }
 }
 
 /// <summary>
