@@ -32,6 +32,7 @@ builder.Services.AddSingleton<ICacheService, CacheService>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IQRCodeService, QRCodeService>();
 builder.Services.AddScoped<IAzureBlobService, AzureBlobService>();
+builder.Services.AddHttpClient<IEmailService, ResendEmailService>();
 
 // Register application services
 builder.Services.AddScoped<IAuthService, AuthService>();

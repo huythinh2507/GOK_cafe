@@ -53,6 +53,20 @@ public class AuthController : ControllerBase
     }
 
     /// <summary>
+    /// Login with Google OAuth
+    /// </summary>
+    /// <param name="dto">Google ID token</param>
+    /// <returns>Authentication response with JWT token</returns>
+    [HttpPost("google-login")]
+    [ProducesResponseType<ApiResponse<AuthResponseDto>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ApiResponse<AuthResponseDto>>(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GoogleLogin([FromBody] GoogleLoginDto dto)
+    {
+        var result = await _authService.GoogleLoginAsync(dto);
+        return result.Success ? Ok(result) : BadRequest(result);
+    }
+
+    /// <summary>
     /// Logout and invalidate current JWT token
     /// </summary>
     /// <returns>Success status</returns>
@@ -139,6 +153,39 @@ public class AuthController : ControllerBase
     {
         var userId = GetCurrentUserId();
         var result = await _authService.DeactivateAccountAsync(userId);
+        return result.Success ? Ok(result) : BadRequest(result);
+    }
+
+    /// <summary>
+    /// Request a password reset token
+    /// </summary>
+    /// <param name="dto">Email to send reset token to</param>
+    /// <returns>Success message (token returned in dev mode only)</returns>
+    [HttpPost("forgot-password")]
+    [ProducesResponseType<ApiResponse<ForgotPasswordResponseDto>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ApiResponse<ForgotPasswordResponseDto>>(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto dto)
+    {
+        // Build reset URL (should point to frontend reset password page)
+        var scheme = Request.Scheme;
+        var host = Request.Host.Value;
+        var resetBaseUrl = $"{scheme}://{host}/reset-password";
+
+        var result = await _authService.ForgotPasswordAsync(dto, resetBaseUrl);
+        return result.Success ? Ok(result) : BadRequest(result);
+    }
+
+    /// <summary>
+    /// Reset password using a valid reset token
+    /// </summary>
+    /// <param name="dto">Reset token and new password</param>
+    /// <returns>Success status</returns>
+    [HttpPost("reset-password")]
+    [ProducesResponseType<ApiResponse<bool>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ApiResponse<bool>>(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto dto)
+    {
+        var result = await _authService.ResetPasswordAsync(dto);
         return result.Success ? Ok(result) : BadRequest(result);
     }
 
