@@ -14,6 +14,7 @@ public class User : BaseEntity
 
     // Navigation properties
     public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
+    public virtual ICollection<ProductComment> ProductComments { get; set; } = new List<ProductComment>();
 }
 
 public enum UserRole
