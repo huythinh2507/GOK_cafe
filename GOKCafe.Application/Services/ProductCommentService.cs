@@ -13,7 +13,9 @@ public class ProductCommentService : IProductCommentService
     private readonly ICacheService _cacheService;
     private const string CommentCacheKeyPrefix = "comment:";
     private const string ProductCommentsCacheKeyPrefix = "product-comments:";
+    private const string CommentRepliesCacheKeyPrefix = "comment-replies:";
     private static readonly TimeSpan CacheExpiration = TimeSpan.FromMinutes(15);
+    private const int MaxReplyDepth = 3; // Maximum nesting level for replies
 
     public ProductCommentService(IUnitOfWork unitOfWork, ICacheService cacheService)
     {
@@ -345,7 +347,124 @@ public class ProductCommentService : IProductCommentService
         }
     }
 
-    private ProductCommentDto MapToDto(ProductComment comment)
+    public async Task<ApiResponse<ProductCommentDto>> CreateReplyAsync(Guid userId, CreateReplyDto dto)
+    {
+        try
+        {
+            // Validate parent comment exists
+            var parentComment = await _unitOfWork.ProductComments.GetQueryable()
+                .Include(c => c.User)
+                .FirstOrDefaultAsync(c => c.Id == dto.ParentCommentId);
+
+            if (parentComment == null)
+                return ApiResponse<ProductCommentDto>.FailureResult("Parent comment not found");
+
+            // Validate user exists
+            var user = await _unitOfWork.Users.GetByIdAsync(userId);
+            if (user == null)
+                return ApiResponse<ProductCommentDto>.FailureResult("User not found");
+
+            // Check reply depth to prevent excessive nesting
+            var depth = await GetCommentDepthAsync(dto.ParentCommentId);
+            if (depth >= MaxReplyDepth)
+                return ApiResponse<ProductCommentDto>.FailureResult(
+                    $"Maximum reply depth ({MaxReplyDepth}) exceeded. Cannot nest replies further.");
+
+            var reply = new ProductComment
+            {
+                Id = Guid.NewGuid(),
+                ProductId = parentComment.ProductId,
+                UserId = userId,
+                Comment = dto.Comment,
+                Rating = 0, // Replies don't have ratings
+                ParentCommentId = dto.ParentCommentId,
+                IsApproved = false, // Replies need approval by default
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await _unitOfWork.ProductComments.AddAsync(reply);
+            await _unitOfWork.SaveChangesAsync();
+
+            // Invalidate cache
+            await InvalidateCommentCache(dto.ParentCommentId);
+            await InvalidateProductCommentsCache(parentComment.ProductId);
+            await InvalidateRepliesCache(dto.ParentCommentId);
+
+            // Load related data for response
+            reply = await _unitOfWork.ProductComments.GetQueryable()
+                .Include(c => c.User)
+                .FirstOrDefaultAsync(c => c.Id == reply.Id);
+
+            var replyDto = MapToDto(reply!, depth + 1);
+            return ApiResponse<ProductCommentDto>.SuccessResult(
+                replyDto,
+                "Reply created successfully. It will be visible after approval.");
+        }
+        catch (Exception ex)
+        {
+            return ApiResponse<ProductCommentDto>.FailureResult(
+                $"Error creating reply: {ex.Message}");
+        }
+    }
+
+    public async Task<ApiResponse<PaginatedResponse<ProductCommentDto>>> GetRepliesAsync(
+        Guid parentCommentId,
+        int pageNumber = 1,
+        int pageSize = 10,
+        bool? isApproved = true)
+    {
+        try
+        {
+            var cacheKey = $"{CommentRepliesCacheKeyPrefix}{parentCommentId}:page:{pageNumber}:size:{pageSize}:approved:{isApproved}";
+            var cachedResponse = await _cacheService.GetAsync<ApiResponse<PaginatedResponse<ProductCommentDto>>>(cacheKey);
+            if (cachedResponse != null)
+                return cachedResponse;
+
+            // Validate parent comment exists
+            var parentComment = await _unitOfWork.ProductComments.GetByIdAsync(parentCommentId);
+            if (parentComment == null)
+                return ApiResponse<PaginatedResponse<ProductCommentDto>>.FailureResult("Parent comment not found");
+
+            var query = _unitOfWork.ProductComments.GetQueryable()
+                .Include(c => c.User)
+                .Include(c => c.Replies)
+                    .ThenInclude(r => r.User)
+                .Where(c => c.ParentCommentId == parentCommentId);
+
+            if (isApproved.HasValue)
+                query = query.Where(c => c.IsApproved == isApproved.Value);
+
+            var totalItems = await query.CountAsync();
+            var replies = await query
+                .OrderByDescending(c => c.CreatedAt)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            // Get the depth of the parent comment
+            var parentDepth = await GetCommentDepthAsync(parentCommentId);
+            var replyDtos = replies.Select(r => MapToDto(r, parentDepth + 1)).ToList();
+
+            var response = ApiResponse<PaginatedResponse<ProductCommentDto>>.SuccessResult(
+                new PaginatedResponse<ProductCommentDto>
+                {
+                    Items = replyDtos,
+                    TotalItems = totalItems,
+                    PageNumber = pageNumber,
+                    PageSize = pageSize
+                });
+
+            await _cacheService.SetAsync(cacheKey, response, CacheExpiration);
+            return response;
+        }
+        catch (Exception ex)
+        {
+            return ApiResponse<PaginatedResponse<ProductCommentDto>>.FailureResult(
+                $"Error retrieving replies: {ex.Message}");
+        }
+    }
+
+    private ProductCommentDto MapToDto(ProductComment comment, int depth = 0)
     {
         return new ProductCommentDto
         {
@@ -359,7 +478,9 @@ public class ProductCommentService : IProductCommentService
             ParentCommentId = comment.ParentCommentId,
             CreatedAt = comment.CreatedAt,
             UpdatedAt = comment.UpdatedAt,
-            Replies = comment.Replies?.Select(MapToDto).ToList() ?? new List<ProductCommentDto>()
+            ReplyCount = comment.Replies?.Count ?? 0,
+            Depth = depth,
+            Replies = comment.Replies?.Select(r => MapToDto(r, depth + 1)).ToList() ?? new List<ProductCommentDto>()
         };
     }
 
@@ -380,5 +501,32 @@ public class ProductCommentService : IProductCommentService
         await _cacheService.RemoveAsync(approvedKey);
         await _cacheService.RemoveAsync(allKey);
         await _cacheService.RemoveAsync(summaryKey);
+    }
+
+    private async Task InvalidateRepliesCache(Guid parentCommentId)
+    {
+        var approvedKey = $"{CommentRepliesCacheKeyPrefix}{parentCommentId}:page:1:size:10:approved:True";
+        var allKey = $"{CommentRepliesCacheKeyPrefix}{parentCommentId}:page:1:size:10:approved:";
+
+        await _cacheService.RemoveAsync(approvedKey);
+        await _cacheService.RemoveAsync(allKey);
+    }
+
+    private async Task<int> GetCommentDepthAsync(Guid commentId)
+    {
+        var depth = 0;
+        var currentCommentId = commentId;
+
+        while (currentCommentId != Guid.Empty)
+        {
+            var comment = await _unitOfWork.ProductComments.GetByIdAsync(currentCommentId);
+            if (comment == null || !comment.ParentCommentId.HasValue)
+                break;
+
+            depth++;
+            currentCommentId = comment.ParentCommentId.Value;
+        }
+
+        return depth;
     }
 }

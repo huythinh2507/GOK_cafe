@@ -185,6 +185,53 @@ public class ProductCommentsController : ControllerBase
         return result.Success ? Ok(result) : BadRequest(result);
     }
 
+    /// <summary>
+    /// Create a reply to an existing comment (requires authentication)
+    /// </summary>
+    /// <param name="productId">The unique identifier of the product</param>
+    /// <param name="dto">The reply creation data</param>
+    /// <returns>The newly created reply</returns>
+    [Authorize]
+    [HttpPost("replies")]
+    [ProducesResponseType<ApiResponse<ProductCommentDto>>(StatusCodes.Status201Created)]
+    [ProducesResponseType<ApiResponse<ProductCommentDto>>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ApiResponse<ProductCommentDto>>(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> CreateReply(Guid productId, [FromBody] CreateReplyDto dto)
+    {
+        var userId = GetUserId();
+        if (!userId.HasValue)
+            return Unauthorized(ApiResponse<ProductCommentDto>.FailureResult("User authentication required"));
+
+        var result = await _commentService.CreateReplyAsync(userId.Value, dto);
+        return result.Success
+            ? CreatedAtAction(nameof(GetCommentById), new { productId, id = result.Data?.Id }, result)
+            : BadRequest(result);
+    }
+
+    /// <summary>
+    /// Get all replies for a specific comment with pagination
+    /// </summary>
+    /// <param name="productId">The unique identifier of the product</param>
+    /// <param name="commentId">The unique identifier of the parent comment</param>
+    /// <param name="pageNumber">The page number for pagination (default: 1)</param>
+    /// <param name="pageSize">The number of items per page (default: 10)</param>
+    /// <param name="isApproved">Filter by approval status (default: true - approved replies only)</param>
+    /// <returns>A paginated list of replies for the comment</returns>
+    [HttpGet("{commentId:guid}/replies")]
+    [ProducesResponseType<ApiResponse<PaginatedResponse<ProductCommentDto>>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ApiResponse<PaginatedResponse<ProductCommentDto>>>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ApiResponse<PaginatedResponse<ProductCommentDto>>>(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetReplies(
+        Guid productId,
+        Guid commentId,
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] bool? isApproved = true)
+    {
+        var result = await _commentService.GetRepliesAsync(commentId, pageNumber, pageSize, isApproved);
+        return result.Success ? Ok(result) : BadRequest(result);
+    }
+
     #region Helper Methods
 
     private Guid? GetUserId()

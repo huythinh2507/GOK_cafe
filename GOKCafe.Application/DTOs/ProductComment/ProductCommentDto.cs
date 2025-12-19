@@ -12,6 +12,8 @@ public class ProductCommentDto
     public Guid? ParentCommentId { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
+    public int ReplyCount { get; set; }
+    public int Depth { get; set; } // Nesting level (0 for top-level comments)
     public List<ProductCommentDto> Replies { get; set; } = new();
 }
 
@@ -27,6 +29,13 @@ public class UpdateProductCommentDto
 {
     public string Comment { get; set; } = string.Empty;
     public int Rating { get; set; }
+}
+
+public class CreateReplyDto
+{
+    public Guid ParentCommentId { get; set; }
+    public string Comment { get; set; } = string.Empty;
+    // Note: Replies don't have ratings, only parent comments do
 }
 
 public class ApproveProductCommentDto
