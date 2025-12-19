@@ -111,7 +111,7 @@ function renderDynamicAttributes(attributes) {
                 <p class="text-gray-500 text-sm mb-4">No additional options available for this product type.</p>
                 <button type="button"
                         onclick="openManageAttributesModal('${currentProductTypeId}')"
-                        class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500">
+                        class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500">
                     <i class="fas fa-plus mr-2"></i>Add Attributes
                 </button>
             </div>
@@ -127,8 +127,8 @@ function renderDynamicAttributes(attributes) {
             <h4 class="text-sm font-semibold text-gray-700">Product Attributes</h4>
             <button type="button"
                     onclick="openManageAttributesModal('${currentProductTypeId}')"
-                    class="px-3 py-1 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500">
-                <i class="fas fa-cog mr-1"></i>Manage Attributes
+                    class="px-3 py-1 text-sm bg-primary text-white rounded-md hover:bg-blue-700 focus:ring-2 focus:ring-blue-500">
+                <i class="fas fa-cog mr-1"></i>Custome Fields
             </button>
         </div>
     `;
@@ -153,18 +153,16 @@ function renderAttributeField(attribute) {
     const fieldId = `attr_${attribute.id}`;
 
     let html = '<div>';
+
+    // Add label
     html += `<label for="${fieldId}" class="block text-sm font-medium text-gray-700 mb-2">`;
     html += `${attribute.displayName || attribute.name} ${isRequired}`;
     html += '</label>';
 
+    // Render based on whether attribute has values (dropdown) or not (text field)
     if (hasValues) {
-        if (attribute.allowMultipleSelection) {
-            // Multi-select dropdown
-            html += renderMultiSelectDropdown(attribute, fieldId);
-        } else {
-            // Single-select dropdown
-            html += renderSingleSelectDropdown(attribute, fieldId);
-        }
+        // Render multi-select dropdown for attributes with values
+        html += renderMultiSelectDropdown(attribute, fieldId);
     } else {
         // Text input for free-form values
         html += `<input type="text" id="${fieldId}" name="${fieldId}"
@@ -221,6 +219,28 @@ function renderSingleSelectDropdown(attribute, fieldId) {
     });
 
     html += '</select>';
+    return html;
+}
+
+// Render date field
+function renderDateField(attribute, fieldId) {
+    let html = `<input type="date" id="${fieldId}" name="${fieldId}"
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                       ${attribute.isRequired ? 'required' : ''}>`;
+    return html;
+}
+
+// Render checkbox field
+function renderCheckboxField(attribute, fieldId) {
+    const isRequired = attribute.isRequired ? '<span class="text-red-500">*</span>' : '';
+    let html = `<div class="flex items-center">
+                    <input type="checkbox" id="${fieldId}" name="${fieldId}" value="true"
+                           class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-2 focus:ring-primary"
+                           ${attribute.isRequired ? 'required' : ''}>
+                    <label for="${fieldId}" class="ml-2 text-sm text-gray-700">
+                        ${attribute.displayName || attribute.name} ${isRequired}
+                    </label>
+                </div>`;
     return html;
 }
 
@@ -439,17 +459,38 @@ function getFormData() {
     }
 
     // Collect all uploaded images
-    if (typeof uploadedImages !== 'undefined' && uploadedImages.length > 0) {
-        formData.images = uploadedImages
-            .filter(img => img.uploadedUrl) // Only include successfully uploaded images
-            .map((img, index) => ({
-                imageUrl: img.uploadedUrl,
-                altText: img.name || null,
-                displayOrder: index,
-                isPrimary: img.isDefault || false
-            }));
+    if (window.ProductImageUpload) {
+        // Try to get uploaded images - check both method and property access
+        let uploadedImages = null;
+
+        if (typeof window.ProductImageUpload.getUploadedImages === 'function') {
+            uploadedImages = window.ProductImageUpload.getUploadedImages();
+        } else if (window.ProductImageUpload.uploadedImages) {
+            uploadedImages = window.ProductImageUpload.uploadedImages;
+        }
+
+        console.log('Uploaded images array:', uploadedImages);
+
+        if (uploadedImages && uploadedImages.length > 0) {
+            formData.images = uploadedImages
+                .filter(img => img.uploadedUrl) // Only include successfully uploaded images
+                .map((img, index) => ({
+                    imageUrl: img.uploadedUrl,
+                    altText: img.name || null,
+                    displayOrder: index,
+                    isPrimary: img.isDefault || false
+                }));
+
+            console.log('Formatted images to send:', formData.images);
+            console.log('Number of images to send:', formData.images.length);
+        } else {
+            console.log('No uploaded images found');
+        }
+    } else {
+        console.log('ProductImageUpload module not found');
     }
 
+    console.log('Final form data to submit:', formData);
     return formData;
 }
 

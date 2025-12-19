@@ -4,9 +4,15 @@
 @{
     Layout = "_Layout.cshtml";
 
-    // Get ViewModel from ViewData (provided by ProductDetailController)
+    // Get Product from ViewData (provided by ProductDetailPageController) or from Model
+    var product = ViewData["Product"] as ProductDto ?? Model as ProductDto;
+
+    // Alternative: Try to get from ProductDetailViewModel if using ViewModel pattern
     var viewModel = ViewData["ProductDetailViewModel"] as ProductDetailViewModel;
-    var product = viewModel?.Product;
+    if (product == null && viewModel != null)
+    {
+        product = viewModel.Product;
+    }
 
     // Fallback to mock data for preview if no product found
     if (product == null)

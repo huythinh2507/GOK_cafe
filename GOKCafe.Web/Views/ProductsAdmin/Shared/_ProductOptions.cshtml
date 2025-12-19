@@ -1,0 +1,22 @@
+@*
+    Product Options Component
+    Shared partial for displaying dynamic product attributes/options
+
+    Includes related modals:
+    - Add Product Type Modal
+    - Manage Attributes Modal
+    - Add Category Modal
+*@
+
+<!-- Product Options Card -->
+<div class="bg-white rounded-lg shadow-sm p-6">
+    <h2 class="text-xl font-semibold text-gray-800 mb-4">Product Options</h2>
+
+    <!-- Dynamic Product Options Container -->
+    <div id="dynamicProductOptions">
+        <p class="text-gray-500 text-sm">Please select a product type to see available options.</p>
+    </div>
+</div>
+
+<!-- Include Modals -->
+@await Html.PartialAsync("~/Views/ProductsAdmin/Shared/Modals/_ModalManageAttributes.cshtml")

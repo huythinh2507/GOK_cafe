@@ -24,36 +24,31 @@
             <!-- Left Column: Product Image Slider (4/12) -->
             <div class="col-span-12 sm:col-span-8 lg:col-span-6 xl:col-span-4">
                 @{
-                    // Prepare image list - use Images from API or fallback to ImageUrl
                     var productImages = new List<string>();
 
                     if (Model.Images != null && Model.Images.Any())
                     {
-                        // Use images from API, sorted by DisplayOrder and IsPrimary
                         productImages = Model.Images
                             .OrderByDescending(x => x.IsPrimary)
                             .ThenBy(x => x.DisplayOrder)
                             .Select(x => x.ImageUrl)
-                            .Where(url => !string.IsNullOrEmpty(url))
+                            .Where(url => !string.IsNullOrWhiteSpace(url))
                             .ToList();
                     }
 
-                    // If no images from API, use main ImageUrl
-                    if (!productImages.Any() && !string.IsNullOrEmpty(Model.ImageUrl))
+                    // fallback: ImageUrl
+                    if (!productImages.Any() && !string.IsNullOrWhiteSpace(Model.ImageUrl))
                     {
                         productImages.Add(Model.ImageUrl);
                     }
 
-                    // Fill up to 6 images with default placeholder if needed
-                    var defaultImage = !string.IsNullOrEmpty(Model.ImageUrl) ? Model.ImageUrl : "/media/default-product.png";
-                    while (productImages.Count < 6)
+                    // fallback cuối: default image
+                    if (!productImages.Any())
                     {
-                        productImages.Add(defaultImage);
+                        productImages.Add("/media/default-product.png");
                     }
-
-                    // Limit to max 6 images
-                    productImages = productImages.Take(6).ToList();
-                }
+                    
+                }   
 
                 <div class="flex gap-4 h-full lg:h-[640px]">
                     <!-- Thumbnail Sidebar (Left) -->
@@ -61,7 +56,8 @@
                         @for (int i = 0; i < productImages.Count; i++)
                         {
                             var imageUrl = productImages[i];
-                            var isActive = i == 0;
+                            var isActive = i == 0;                           
+                           
                             <button type="button"
                                     class="thumbnail-btn flex-shrink-0 w-14 h-14 border-2 @(isActive ? "border-primary" : "border-gray-200") hover:border-primary transition-colors overflow-hidden bg-gray-100"
                                     onclick="changeMainImage(@i)"

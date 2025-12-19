@@ -132,6 +132,7 @@ public class ProductService : IProductService
                     IsFeatured = p.IsFeatured,
                     CategoryId = p.CategoryId,
                     CategoryName = p.Category.Name,
+                    ProductTypeId = p.ProductTypeId,
                     AvailableSizes = !string.IsNullOrEmpty(p.AvailableSizes)
                         ? System.Text.Json.JsonSerializer.Deserialize<List<string>>(p.AvailableSizes)
                         : null,
@@ -364,9 +365,23 @@ public class ProductService : IProductService
         }
         catch (Exception ex)
         {
+            var errors = new List<string> { ex.Message };
+
+            // Add inner exception details if available
+            if (ex.InnerException != null)
+            {
+                errors.Add($"Inner Exception: {ex.InnerException.Message}");
+
+                // Check for database-specific errors
+                if (ex.InnerException.InnerException != null)
+                {
+                    errors.Add($"Database Error: {ex.InnerException.InnerException.Message}");
+                }
+            }
+
             return ApiResponse<ProductDto>.FailureResult(
                 "An error occurred while creating the product",
-                new List<string> { ex.Message });
+                errors);
         }
     }
 
@@ -392,7 +407,7 @@ public class ProductService : IProductService
             product.DiscountPrice = dto.DiscountPrice;
             product.ImageUrl = dto.ImageUrl;
             product.StockQuantity = dto.StockQuantity;
-            product.IsActive = dto.IsActive;
+            product.IsActive = true; // Always set to active when updating
             product.IsFeatured = dto.IsFeatured;
             product.CategoryId = dto.CategoryId;
             product.ProductTypeId = dto.ProductTypeId;
@@ -603,6 +618,7 @@ public class ProductService : IProductService
             IsFeatured = product.IsFeatured,
             CategoryId = product.CategoryId,
             CategoryName = product.Category?.Name ?? string.Empty,
+            ProductTypeId = product.ProductTypeId,
             AvailableSizes = !string.IsNullOrEmpty(product.AvailableSizes)
                 ? System.Text.Json.JsonSerializer.Deserialize<List<string>>(product.AvailableSizes)
                 : null,

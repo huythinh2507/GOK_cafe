@@ -12,9 +12,7 @@
             <p class="text-gray-600 mt-1">Viewing details for: <strong>@Model.Name</strong></p>
         </div>
         <div class="flex gap-3">
-            <a href="/admin/products/edit/@Model.Id" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-                <i class="fas fa-edit mr-2"></i>Edit Product
-            </a>
+        
             <a href="/admin/products" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition">
                 <i class="fas fa-arrow-left mr-2"></i>Back to List
             </a>
@@ -229,15 +227,15 @@
             <!-- Quick Actions -->
             <div class="bg-white rounded-lg shadow-sm p-6">
                 <h2 class="text-xl font-semibold text-gray-800 mb-4">Quick Actions</h2>
-                <div class="space-y-2">
-                    <a href="/admin/products/edit/@Model.Id" class="block w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-center">
-                        <i class="fas fa-edit mr-2"></i>Edit Product
+                <div class="flex flex-row justify-between">
+                    <a href="/admin/products/edit/@Model.Id" class="w-32 p-2 bg-primary text-white rounded-lg hover:bg-primary transition text-center">
+                        <i class="fas fa-edit mr-2"></i>Edit
                     </a>
-                    <button onclick="deleteProduct('@Model.Id', '@Model.Name')" class="block w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
-                        <i class="fas fa-trash mr-2"></i>Delete Product
+                    <button onclick="deleteProduct('@Model.Id', '@Model.Name')" class=" w-32  p-2 bg-gray-600 text-white rounded-lg hover:bg-gray-600 transition">
+                        <i class="fas fa-trash mr-2"></i>Delete
                     </button>
-                    <a href="/products/@Model.Slug" target="_blank" class="block w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-center">
-                        <i class="fas fa-eye mr-2"></i>View on Website
+                    <a href="/product-details?id=@Model.Id" target="_blank" class=" w-32 p-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-center">
+                        <i class="fas fa-eye mr-2"></i>Web
                     </a>
                 </div>
             </div>
@@ -271,21 +269,7 @@
                 </div>
             </div>
 
-            <!-- Promotion Tips -->
-            @if (!Model.DiscountPrice.HasValue || Model.DiscountPrice.Value == 0)
-            {
-                <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
-                    <h3 class="font-semibold text-blue-900 mb-2">
-                        <i class="fas fa-lightbulb mr-2"></i>Marketing Tip
-                    </h3>
-                    <p class="text-sm text-blue-800 mb-3">
-                        This product doesn't have a discount price. Consider adding a promotional price to boost sales!
-                    </p>
-                    <a href="/admin/products/edit/@Model.Id" class="text-sm text-blue-700 font-semibold hover:underline">
-                        Add Discount Price →
-                    </a>
-                </div>
-            }
+        
         </div>
     </div>
 </div>
