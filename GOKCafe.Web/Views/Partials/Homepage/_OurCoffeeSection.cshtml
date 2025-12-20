@@ -45,7 +45,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-6">
                 @foreach (var product in products)
                 {
-                    <div class="group justify-center">
+                    <a href="/product-details?id=@product.Id" class="group justify-center block">
                         <!-- Product Image -->
                         <div class="overflow-hidden mb-4 flex items-center justify-center bg-gray-100 w-full h-[480px] cursor-pointer">
                             @if (!string.IsNullOrEmpty(product.ImageUrl))
@@ -62,10 +62,10 @@
 
                         <!-- Product Info -->
                         <div class="text-center w-full">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-2">@product.Name</h3>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2 group-hover:text-primary transition-colors">@product.Name</h3>
                             <p class="text-gray-600">From <span class="font-semibold">@product.Price.ToString("N0") VNĐ</span></p>
                         </div>
-                    </div>
+                    </a>
                 }
             </div>
         }
