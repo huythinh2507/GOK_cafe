@@ -216,6 +216,11 @@ public class ProductService : IProductService
                     .ThenInclude(pfp => pfp.FlavourProfile)
                 .Include(p => p.ProductEquipments)
                     .ThenInclude(pe => pe.Equipment)
+                .Include(p => p.ProductAttributeSelections)
+                    .ThenInclude(pas => pas.ProductAttribute)
+                        .ThenInclude(pa => pa.AttributeValues)
+                .Include(p => p.ProductAttributeSelections)
+                    .ThenInclude(pas => pas.ProductAttributeValue)
                 .FirstOrDefaultAsync(p => p.Id == id);
 
             if (product == null)
@@ -653,7 +658,38 @@ public class ProductService : IProductService
                 Description = pe.Equipment.Description,
                 DisplayOrder = pe.Equipment.DisplayOrder,
                 IsActive = pe.Equipment.IsActive
-            }).ToList() ?? new List<EquipmentDto>()
+            }).ToList() ?? new List<EquipmentDto>(),
+            ProductAttributes = product.ProductAttributeSelections?
+                .GroupBy(pas => pas.ProductAttribute)
+                .Select(g => new ProductAttributeDisplayDto
+                {
+                    AttributeId = g.Key.Id,
+                    AttributeName = g.Key.Name,
+                    DisplayName = g.Key.DisplayName,
+                    AllowMultipleSelection = g.Key.AllowMultipleSelection,
+                    IsRequired = g.Key.IsRequired,
+                    Values = g.Key.AttributeValues?
+                        .OrderBy(av => av.DisplayOrder)
+                        .Select(av => new ProductAttributeValueDisplayDto
+                        {
+                            ValueId = av.Id,
+                            Value = av.Value,
+                            IsSelected = g.Any(pas => pas.ProductAttributeValueId == av.Id)
+                        })
+                        .Union(
+                            // Include custom values that were entered for this attribute
+                            g.Where(pas => pas.ProductAttributeValueId == null && !string.IsNullOrEmpty(pas.CustomValue))
+                             .Select(pas => new ProductAttributeValueDisplayDto
+                             {
+                                 ValueId = null,
+                                 Value = pas.CustomValue!,
+                                 IsSelected = true
+                             })
+                        )
+                        .ToList() ?? new List<ProductAttributeValueDisplayDto>()
+                })
+                .OrderBy(attr => attr.DisplayName)
+                .ToList() ?? null
         };
     }
 
