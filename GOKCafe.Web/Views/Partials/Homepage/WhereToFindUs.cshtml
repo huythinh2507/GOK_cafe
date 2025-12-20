@@ -8,8 +8,8 @@
     var email = "hello@gok.com";
     var time = "7:00 - 22:30 (Monday - Sunday)";
     var buttonText = "View Map";
-    var buttonUrl = "#";
-    var image = "/media/mpwjwsqp/freshness.png"; // Default location image
+    var buttonUrl = "/vision";
+    var image = "/media/image/Wheretofindus.png"; // Default location image
 
     // Get Where To Find Us section from Home children
     if (UmbracoContext?.Content != null)
@@ -50,7 +50,7 @@
     <div class="container mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid lg:grid-cols-2 gap-12 items-center">
             <!-- Left: Image -->
-            <div class="order-2 lg:order-1">
+            <div class="order-2 h-[600px] lg:order-1">
                 @if (!string.IsNullOrEmpty(image))
                 {
                     <img src="@image" alt="Where to find us" class="w-full h-auto  shadow-lg object-cover" />

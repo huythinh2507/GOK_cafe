@@ -2,7 +2,8 @@
 @inject GOKCafe.Web.Services.Interfaces.ICategoryService CategoryService
 @{
     var siteName = "GOK Cafe";
-    var logoUrl = "/media/kp3l0tpg/logo.png"; // Default header logo
+    var logoUrl = "/media/kp3l0tpg/logo.png"; // Default header logo for desktop
+    var mobileLogoUrl = "/media/image/logoGK_mobile.png"; // Default mobile logo
 
     // Try to get Header document from Home children
     if (UmbracoContext?.Content != null)
@@ -20,6 +21,13 @@
                 if (logoMedia != null)
                 {
                     logoUrl = logoMedia.Url();
+                }
+
+                // Get mobile logo if exists
+                var mobileLogoMedia = headerNode.Value<Umbraco.Cms.Core.Models.PublishedContent.IPublishedContent>("mobileLogo");
+                if (mobileLogoMedia != null)
+                {
+                    mobileLogoUrl = mobileLogoMedia.Url();
                 }
             }
         }
@@ -87,7 +95,10 @@
 
             <!-- Center Logo -->
             <a href="/" class="flex items-center">
-                <img src="@logoUrl" alt="@siteName" class="h-10" />
+                <!-- Desktop Logo -->
+                <img src="@logoUrl" alt="@siteName" class="hidden md:block h-10" />
+                <!-- Mobile Logo -->
+                <img src="@mobileLogoUrl" alt="@siteName" class="block md:hidden h-10" />
             </a>
 
             <!-- Right Navigation -->

@@ -17,19 +17,19 @@
             new {
                 Title = "Freshness",
                 Description = "Experience the exceptional taste of our freshly roasted coffee beans, carefully selected from the finest origins.",
-                BackgroundUrl = "/media/mpwjwsqp/freshness.png",
+                BackgroundUrl = "/media/image/Delicious1.png",
                 Url = "/products"
             },
             new {
                 Title = "Flavorful",
                 Description = "Discover bold and rich flavors in every cup, crafted to perfection for the true coffee lover.",
-                BackgroundUrl = "/media/v4zlk0np/flavorful.png",
+                BackgroundUrl = "/media/image/Delicious2.png",
                 Url = "/products"
             },
             new {
                 Title = "Sustainability",
                 Description = "We are committed to sustainable practices, ensuring every bean supports both the environment and farming communities.",
-                BackgroundUrl = "/media/j0eorpxw/sustainability.png",
+                BackgroundUrl = "/media/image/Delicious3.png",
                 Url = "/products"
             }
         };
@@ -60,7 +60,7 @@
                         var backgroundImage = item.Value<Umbraco.Cms.Core.Models.PublishedContent.IPublishedContent>("backgroundImage");
                         var backgroundUrl = backgroundImage?.Url() ?? "";
 
-                        <div class="group relative overflow-hidden shadow-lg h-[400px] sm:h-[450px] lg:h-[500px] xl:h-[600px]">
+                        <div class="group relative overflow-hidden shadow-lg h-[600px] sm:h-[450px] lg:h-[500px] xl:h-[600px]">
                             <!-- Background Image with Overlay -->
                             <div class="absolute inset-0">
                                 @if (!string.IsNullOrEmpty(backgroundUrl))
