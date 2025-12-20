@@ -1,7 +1,9 @@
 @inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@inject GOKCafe.Web.Services.Interfaces.ICategoryService CategoryService
 @{
     var siteName = "GOK Cafe";
-    var logoUrl = "/media/kp3l0tpg/logo.png"; // Default header logo
+    var logoUrl = "/media/kp3l0tpg/logo.png"; // Default header logo for desktop
+    var mobileLogoUrl = "/media/image/logoGK_mobile.png"; // Default mobile logo
 
     // Try to get Header document from Home children
     if (UmbracoContext?.Content != null)
@@ -20,13 +22,24 @@
                 {
                     logoUrl = logoMedia.Url();
                 }
+
+                // Get mobile logo if exists
+                var mobileLogoMedia = headerNode.Value<Umbraco.Cms.Core.Models.PublishedContent.IPublishedContent>("mobileLogo");
+                if (mobileLogoMedia != null)
+                {
+                    mobileLogoUrl = mobileLogoMedia.Url();
+                }
             }
         }
     }
+
+    // Fetch categories for mega menu
+    var categories = await CategoryService.GetAllCategoriesAsync();
+    var activeCategories = categories.Where(c => c.IsActive).OrderBy(c => c.DisplayOrder).ToList();
 }
 
 <!-- Header -->
-<header id="stickyHeader" class="sticky top-0 z-10 bg-gray-50 border-b border-gray-200 transition-shadow duration-300">
+<header id="stickyHeader" class="sticky top-0 z-30 bg-gray-50 border-b border-gray-200 transition-shadow duration-300">
     <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between h-20">
             <!-- Mobile menu button -->
@@ -37,12 +50,55 @@
             <div class="hidden md:flex items-center md:gap-3 lg:gap-12">
                 <a href="/" class="text-gray-700 hover:text-primary font-medium transition-colors uppercase text-base">Home</a>
                 <a href="/visions" class="text-gray-700 hover:text-primary font-medium transition-colors uppercase  text-base">Visions</a>
-                <a href="/products" class="text-gray-700 hover:text-primary font-medium transition-colors uppercase  text-base">Products</a>
+
+                <!-- Products with Mega Menu -->
+                <div class="relative group">
+                    <a href="/products" class="text-gray-700 hover:text-primary font-medium transition-colors uppercase text-base flex items-center gap-1">
+                        Products
+                        <i class="fas fa-chevron-down text-xs transition-transform group-hover:rotate-180"></i>
+                    </a>
+
+                    <!-- Mega Menu Dropdown -->
+                    <div class="absolute left-0 top-full mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
+                        <div class="p-4">
+                            <h3 class="text-sm font-semibold text-gray-800 mb-3 uppercase">Filter by Category</h3>
+                            <div class="space-y-2">
+                                @if (activeCategories.Any())
+                                {
+                                    <!-- All Products -->
+                                    <a href="/products" class="block px-3 py-2 text-gray-700 hover:bg-gray-100 hover:text-primary rounded-md transition-colors">
+                                        <span class="font-medium">All Products</span>
+                                    </a>
+
+                                    @foreach (var category in activeCategories)
+                                    {
+                                        <a href="/products?category=@category.Id" class="block px-3 py-2 text-gray-700 hover:bg-gray-100 hover:text-primary rounded-md transition-colors">
+                                            <span class="font-medium">@category.Name</span>
+                                            @if (category.ProductCount > 0)
+                                            {
+                                                <span class="text-xs text-gray-500 ml-1">(@category.ProductCount)</span>
+                                            }
+                                        </a>
+                                    }
+                                }
+                                else
+                                {
+                                    <a href="/products" class="block px-3 py-2 text-gray-700 hover:bg-gray-100 hover:text-primary rounded-md transition-colors">
+                                        <span class="font-medium">All Products</span>
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Center Logo -->
             <a href="/" class="flex items-center">
-                <img src="@logoUrl" alt="@siteName" class="h-10" />
+                <!-- Desktop Logo -->
+                <img src="@logoUrl" alt="@siteName" class="hidden md:block h-10" />
+                <!-- Mobile Logo -->
+                <img src="@mobileLogoUrl" alt="@siteName" class="block md:hidden h-10" />
             </a>
 
             <!-- Right Navigation -->
@@ -73,7 +129,22 @@
             <div class="flex flex-col space-y-3">
                 <a href="/" class="text-gray-700 hover:text-primary font-medium transition-colors py-2 uppercase text-sm">Home</a>
                 <a href="/visions" class="text-gray-700 hover:text-primary font-medium transition-colors py-2 uppercase text-sm">Visions</a>
-                <a href="/products" class="text-gray-700 hover:text-primary font-medium transition-colors py-2 uppercase text-sm">Products</a>
+
+                <!-- Products with sub-menu for mobile -->
+                <div>
+                    <button type="button" onclick="toggleMobileProductsMenu()" class="w-full text-left text-gray-700 hover:text-primary font-medium transition-colors py-2 uppercase text-sm flex items-center justify-between">
+                        Products
+                        <i id="mobileProductsChevron" class="fas fa-chevron-down text-xs transition-transform"></i>
+                    </button>
+                    <div id="mobileProductsSubmenu" class="hidden pl-4 mt-2 space-y-2">
+                        <a href="/products" class="block text-gray-600 hover:text-primary transition-colors py-1 text-sm">All Products</a>
+                        @foreach (var category in activeCategories)
+                        {
+                            <a href="/products?category=@category.Id" class="block text-gray-600 hover:text-primary transition-colors py-1 text-sm">@category.Name</a>
+                        }
+                    </div>
+                </div>
+
                 <a href="/partners" class="text-gray-700 hover:text-primary font-medium transition-colors py-2 uppercase text-sm">Partners</a>
                 <a href="/contact" class="text-gray-700 hover:text-primary font-medium transition-colors py-2 uppercase text-sm">Contact</a>
                 <a href="/blog" class="text-gray-700 hover:text-primary font-medium transition-colors py-2 uppercase text-sm">Blog</a>
@@ -96,6 +167,13 @@
     function toggleMobileMenu() {
         const menu = document.getElementById('mobileMenu');
         menu.classList.toggle('hidden');
+    }
+
+    function toggleMobileProductsMenu() {
+        const submenu = document.getElementById('mobileProductsSubmenu');
+        const chevron = document.getElementById('mobileProductsChevron');
+        submenu.classList.toggle('hidden');
+        chevron.classList.toggle('rotate-180');
     }
 </script>
 

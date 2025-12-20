@@ -5,6 +5,7 @@ using GOKCafe.Domain.Interfaces;
 using GOKCafe.Infrastructure.Data;
 using GOKCafe.Infrastructure.Repositories;
 using GOKCafe.Infrastructure.Services;
+using GOKCafe.Infrastructure.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -30,17 +31,22 @@ builder.Services.AddSingleton<ICacheService, CacheService>();
 // Register infrastructure services
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IQRCodeService, QRCodeService>();
+builder.Services.AddScoped<IAzureBlobService, AzureBlobService>();
+builder.Services.AddHttpClient<IEmailService, ResendEmailService>();
 
 // Register application services
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<IProductTypeService, ProductTypeService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IHomeService, HomeService>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IOdooService, OdooService>();
 builder.Services.AddScoped<ICouponService, CouponService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<ILoyaltyPlatformService, LoyaltyPlatformService>();
+builder.Services.AddScoped<IProductCommentService, ProductCommentService>();
 
 // Register HttpClient for external API calls
 builder.Services.AddHttpClient();
@@ -102,6 +108,21 @@ using (var scope = app.Services.CreateScope())
     {
         var context = services.GetRequiredService<ApplicationDbContext>();
         await DbSeeder.SeedAsync(context);
+
+        // Check if --seed-prices argument is provided
+        if (args.Contains("--seed-prices"))
+        {
+            var logger = services.GetRequiredService<ILogger<Program>>();
+            logger.LogInformation("Starting product price seeding...");
+            await PriceSeeder.SeedProductPricesAsync(context);
+            logger.LogInformation("Product price seeding completed.");
+
+            // Exit after seeding if this is the only operation requested
+            if (args.Contains("--exit-after-seed"))
+            {
+                return;
+            }
+        }
     }
     catch (Exception ex)
     {
@@ -129,4 +150,4 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.Run();
+await app.RunAsync();

@@ -138,8 +138,17 @@ namespace GOKCafe.Infrastructure.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("AppliedCouponCode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("AppliedCouponId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<decimal>("DiscountAmount")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime?>("ExpiresAt")
                         .HasColumnType("datetime2");
@@ -150,6 +159,9 @@ namespace GOKCafe.Infrastructure.Data.Migrations
                     b.Property<string>("SessionId")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<decimal>("ShippingFee")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -157,6 +169,8 @@ namespace GOKCafe.Infrastructure.Data.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AppliedCouponId");
 
                     b.HasIndex("UserId");
 
@@ -186,6 +200,12 @@ namespace GOKCafe.Infrastructure.Data.Migrations
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
+
+                    b.Property<string>("SelectedGrind")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SelectedSize")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("UnitPrice")
                         .HasColumnType("decimal(18,2)");
@@ -972,6 +992,9 @@ namespace GOKCafe.Infrastructure.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("AvailableColors")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("AvailableGrinds")
                         .HasColumnType("nvarchar(max)");
 
@@ -1007,6 +1030,9 @@ namespace GOKCafe.Infrastructure.Data.Migrations
                     b.Property<bool>("IsFeatured")
                         .HasColumnType("bit");
 
+                    b.Property<string>("Material")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -1018,6 +1044,9 @@ namespace GOKCafe.Infrastructure.Data.Migrations
                     b.Property<string>("Process")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid?>("ProductTypeId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Region")
                         .HasColumnType("nvarchar(max)");
 
@@ -1027,6 +1056,9 @@ namespace GOKCafe.Infrastructure.Data.Migrations
                     b.Property<string>("ShortDescription")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Sku")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Slug")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -1034,6 +1066,9 @@ namespace GOKCafe.Infrastructure.Data.Migrations
 
                     b.Property<int>("StockQuantity")
                         .HasColumnType("int");
+
+                    b.Property<string>("Style")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("TastingNote")
                         .HasColumnType("nvarchar(max)");
@@ -1051,12 +1086,207 @@ namespace GOKCafe.Infrastructure.Data.Migrations
 
                     b.HasIndex("IsFeatured");
 
+                    b.HasIndex("ProductTypeId");
+
                     b.HasIndex("Slug")
                         .IsUnique();
 
                     b.HasIndex("CategoryId", "IsActive", "DisplayOrder");
 
                     b.ToTable("Products");
+                });
+
+            modelBuilder.Entity("GOKCafe.Domain.Entities.ProductAttribute", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("AllowMultipleSelection")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsRequired")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<Guid>("ProductTypeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DisplayOrder");
+
+                    b.HasIndex("IsActive");
+
+                    b.HasIndex("ProductTypeId");
+
+                    b.HasIndex("ProductTypeId", "IsActive", "DisplayOrder");
+
+                    b.ToTable("ProductAttributes");
+                });
+
+            modelBuilder.Entity("GOKCafe.Domain.Entities.ProductAttributeSelection", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CustomValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("ProductAttributeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ProductAttributeValueId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductAttributeId");
+
+                    b.HasIndex("ProductAttributeValueId");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("ProductId", "ProductAttributeId", "ProductAttributeValueId")
+                        .IsUnique()
+                        .HasFilter("[ProductAttributeValueId] IS NOT NULL");
+
+                    b.ToTable("ProductAttributeSelections");
+                });
+
+            modelBuilder.Entity("GOKCafe.Domain.Entities.ProductAttributeValue", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("ProductAttributeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DisplayOrder");
+
+                    b.HasIndex("IsActive");
+
+                    b.HasIndex("ProductAttributeId");
+
+                    b.HasIndex("ProductAttributeId", "IsActive", "DisplayOrder");
+
+                    b.ToTable("ProductAttributeValues");
+                });
+
+            modelBuilder.Entity("GOKCafe.Domain.Entities.ProductComment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Comment")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsApproved")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false);
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid?>("ParentCommentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IsApproved");
+
+                    b.HasIndex("ParentCommentId");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("ProductId", "IsApproved");
+
+                    b.ToTable("ProductComments");
                 });
 
             modelBuilder.Entity("GOKCafe.Domain.Entities.ProductEquipment", b =>
@@ -1129,6 +1359,55 @@ namespace GOKCafe.Infrastructure.Data.Migrations
                     b.HasIndex("ProductId");
 
                     b.ToTable("ProductImages");
+                });
+
+            modelBuilder.Entity("GOKCafe.Domain.Entities.ProductType", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DisplayOrder");
+
+                    b.HasIndex("IsActive");
+
+                    b.HasIndex("Slug")
+                        .IsUnique();
+
+                    b.HasIndex("IsActive", "DisplayOrder");
+
+                    b.ToTable("ProductTypes");
                 });
 
             modelBuilder.Entity("GOKCafe.Domain.Entities.RevokedToken", b =>
@@ -1289,14 +1568,18 @@ namespace GOKCafe.Infrastructure.Data.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
+                    b.Property<string>("PasswordResetToken")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("PasswordResetTokenExpiry")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("PhoneNumber")
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
-                    b.Property<string>("Role")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                    b.Property<int>("Role")
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -1321,9 +1604,15 @@ namespace GOKCafe.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("GOKCafe.Domain.Entities.Cart", b =>
                 {
+                    b.HasOne("GOKCafe.Domain.Entities.Coupon", "AppliedCoupon")
+                        .WithMany()
+                        .HasForeignKey("AppliedCouponId");
+
                     b.HasOne("GOKCafe.Domain.Entities.User", "User")
                         .WithMany()
                         .HasForeignKey("UserId");
+
+                    b.Navigation("AppliedCoupon");
 
                     b.Navigation("User");
                 });
@@ -1429,7 +1718,88 @@ namespace GOKCafe.Infrastructure.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("GOKCafe.Domain.Entities.ProductType", "ProductType")
+                        .WithMany("Products")
+                        .HasForeignKey("ProductTypeId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.Navigation("Category");
+
+                    b.Navigation("ProductType");
+                });
+
+            modelBuilder.Entity("GOKCafe.Domain.Entities.ProductAttribute", b =>
+                {
+                    b.HasOne("GOKCafe.Domain.Entities.ProductType", "ProductType")
+                        .WithMany("ProductAttributes")
+                        .HasForeignKey("ProductTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ProductType");
+                });
+
+            modelBuilder.Entity("GOKCafe.Domain.Entities.ProductAttributeSelection", b =>
+                {
+                    b.HasOne("GOKCafe.Domain.Entities.ProductAttribute", "ProductAttribute")
+                        .WithMany("ProductAttributeSelections")
+                        .HasForeignKey("ProductAttributeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("GOKCafe.Domain.Entities.ProductAttributeValue", "ProductAttributeValue")
+                        .WithMany("ProductAttributeSelections")
+                        .HasForeignKey("ProductAttributeValueId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("GOKCafe.Domain.Entities.Product", "Product")
+                        .WithMany("ProductAttributeSelections")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("ProductAttribute");
+
+                    b.Navigation("ProductAttributeValue");
+                });
+
+            modelBuilder.Entity("GOKCafe.Domain.Entities.ProductAttributeValue", b =>
+                {
+                    b.HasOne("GOKCafe.Domain.Entities.ProductAttribute", "ProductAttribute")
+                        .WithMany("AttributeValues")
+                        .HasForeignKey("ProductAttributeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ProductAttribute");
+                });
+
+            modelBuilder.Entity("GOKCafe.Domain.Entities.ProductComment", b =>
+                {
+                    b.HasOne("GOKCafe.Domain.Entities.ProductComment", "ParentComment")
+                        .WithMany("Replies")
+                        .HasForeignKey("ParentCommentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("GOKCafe.Domain.Entities.Product", "Product")
+                        .WithMany("ProductComments")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GOKCafe.Domain.Entities.User", "User")
+                        .WithMany("ProductComments")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ParentComment");
+
+                    b.Navigation("Product");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("GOKCafe.Domain.Entities.ProductEquipment", b =>
@@ -1515,6 +1885,10 @@ namespace GOKCafe.Infrastructure.Data.Migrations
                 {
                     b.Navigation("OrderItems");
 
+                    b.Navigation("ProductAttributeSelections");
+
+                    b.Navigation("ProductComments");
+
                     b.Navigation("ProductEquipments");
 
                     b.Navigation("ProductFlavourProfiles");
@@ -1522,9 +1896,35 @@ namespace GOKCafe.Infrastructure.Data.Migrations
                     b.Navigation("ProductImages");
                 });
 
+            modelBuilder.Entity("GOKCafe.Domain.Entities.ProductAttribute", b =>
+                {
+                    b.Navigation("AttributeValues");
+
+                    b.Navigation("ProductAttributeSelections");
+                });
+
+            modelBuilder.Entity("GOKCafe.Domain.Entities.ProductAttributeValue", b =>
+                {
+                    b.Navigation("ProductAttributeSelections");
+                });
+
+            modelBuilder.Entity("GOKCafe.Domain.Entities.ProductComment", b =>
+                {
+                    b.Navigation("Replies");
+                });
+
+            modelBuilder.Entity("GOKCafe.Domain.Entities.ProductType", b =>
+                {
+                    b.Navigation("ProductAttributes");
+
+                    b.Navigation("Products");
+                });
+
             modelBuilder.Entity("GOKCafe.Domain.Entities.User", b =>
                 {
                     b.Navigation("Orders");
+
+                    b.Navigation("ProductComments");
                 });
 #pragma warning restore 612, 618
         }

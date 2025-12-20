@@ -123,6 +123,7 @@ public class ProductService : IProductService
                     Region = p.Region,
                     Process = p.Process,
                     Slug = p.Slug,
+                    Sku = p.Sku,
                     Price = p.Price,
                     DiscountPrice = p.DiscountPrice,
                     ImageUrl = p.ImageUrl,
@@ -131,12 +132,18 @@ public class ProductService : IProductService
                     IsFeatured = p.IsFeatured,
                     CategoryId = p.CategoryId,
                     CategoryName = p.Category.Name,
+                    ProductTypeId = p.ProductTypeId,
                     AvailableSizes = !string.IsNullOrEmpty(p.AvailableSizes)
                         ? System.Text.Json.JsonSerializer.Deserialize<List<string>>(p.AvailableSizes)
                         : null,
                     AvailableGrinds = !string.IsNullOrEmpty(p.AvailableGrinds)
                         ? System.Text.Json.JsonSerializer.Deserialize<List<string>>(p.AvailableGrinds)
                         : null,
+                    AvailableColors = !string.IsNullOrEmpty(p.AvailableColors)
+                        ? System.Text.Json.JsonSerializer.Deserialize<List<string>>(p.AvailableColors)
+                        : null,
+                    Material = p.Material,
+                    Style = p.Style,
                     Images = p.ProductImages.Select(pi => new ProductImageDto
                     {
                         Id = pi.Id,
@@ -145,22 +152,26 @@ public class ProductService : IProductService
                         DisplayOrder = pi.DisplayOrder,
                         IsPrimary = pi.IsPrimary
                     }).ToList(),
-                    FlavourProfiles = p.ProductFlavourProfiles.Select(pfp => new FlavourProfileDto
-                    {
-                        Id = pfp.FlavourProfile.Id,
-                        Name = pfp.FlavourProfile.Name,
-                        Description = pfp.FlavourProfile.Description,
-                        DisplayOrder = pfp.FlavourProfile.DisplayOrder,
-                        IsActive = pfp.FlavourProfile.IsActive
-                    }).ToList(),
-                    Equipments = p.ProductEquipments.Select(pe => new EquipmentDto
-                    {
-                        Id = pe.Equipment.Id,
-                        Name = pe.Equipment.Name,
-                        Description = pe.Equipment.Description,
-                        DisplayOrder = pe.Equipment.DisplayOrder,
-                        IsActive = pe.Equipment.IsActive
-                    }).ToList()
+                    FlavourProfiles = p.ProductFlavourProfiles
+                        .Where(pfp => pfp.FlavourProfile != null)
+                        .Select(pfp => new FlavourProfileDto
+                        {
+                            Id = pfp.FlavourProfile.Id,
+                            Name = pfp.FlavourProfile.Name,
+                            Description = pfp.FlavourProfile.Description,
+                            DisplayOrder = pfp.FlavourProfile.DisplayOrder,
+                            IsActive = pfp.FlavourProfile.IsActive
+                        }).ToList(),
+                    Equipments = p.ProductEquipments
+                        .Where(pe => pe.Equipment != null)
+                        .Select(pe => new EquipmentDto
+                        {
+                            Id = pe.Equipment.Id,
+                            Name = pe.Equipment.Name,
+                            Description = pe.Equipment.Description,
+                            DisplayOrder = pe.Equipment.DisplayOrder,
+                            IsActive = pe.Equipment.IsActive
+                        }).ToList()
                 }).ToList();
 
             var response = new PaginatedResponse<ProductDto>
@@ -205,6 +216,11 @@ public class ProductService : IProductService
                     .ThenInclude(pfp => pfp.FlavourProfile)
                 .Include(p => p.ProductEquipments)
                     .ThenInclude(pe => pe.Equipment)
+                .Include(p => p.ProductAttributeSelections)
+                    .ThenInclude(pas => pas.ProductAttribute)
+                        .ThenInclude(pa => pa.AttributeValues)
+                .Include(p => p.ProductAttributeSelections)
+                    .ThenInclude(pas => pas.ProductAttributeValue)
                 .FirstOrDefaultAsync(p => p.Id == id);
 
             if (product == null)
@@ -230,24 +246,39 @@ public class ProductService : IProductService
     {
         try
         {
-            var slug = GenerateSlug(dto.Name);
-            var existingProduct = await _unitOfWork.Products.FirstOrDefaultAsync(p => p.Slug == slug);
-            if (existingProduct != null)
-                return ApiResponse<ProductDto>.FailureResult("A product with this name already exists");
+            var slug = await GenerateUniqueSlugAsync(dto.Name);
 
             var product = new Product
             {
                 Id = Guid.NewGuid(),
                 Name = dto.Name,
                 Description = dto.Description,
+                ShortDescription = dto.ShortDescription,
                 Slug = slug,
+                Sku = dto.Sku,
                 Price = dto.Price,
                 DiscountPrice = dto.DiscountPrice,
                 ImageUrl = dto.ImageUrl,
-                StockQuantity = dto.StockQuantity,
+                StockQuantity = dto.StockQuantity + 1, // Auto increment by 1
                 IsFeatured = dto.IsFeatured,
                 CategoryId = dto.CategoryId,
-                IsActive = true
+                ProductTypeId = dto.ProductTypeId,
+                IsActive = true,
+                // Legacy fields (for backward compatibility)
+                TastingNote = dto.TastingNote,
+                Region = dto.Region,
+                Process = dto.Process,
+                AvailableSizes = dto.AvailableSizes != null && dto.AvailableSizes.Any()
+                    ? System.Text.Json.JsonSerializer.Serialize(dto.AvailableSizes)
+                    : null,
+                AvailableGrinds = dto.AvailableGrinds != null && dto.AvailableGrinds.Any()
+                    ? System.Text.Json.JsonSerializer.Serialize(dto.AvailableGrinds)
+                    : null,
+                AvailableColors = dto.AvailableColors != null && dto.AvailableColors.Any()
+                    ? System.Text.Json.JsonSerializer.Serialize(dto.AvailableColors)
+                    : null,
+                Material = dto.Material,
+                Style = dto.Style
             };
 
             // Add flavour profile relationships
@@ -276,6 +307,45 @@ public class ProductService : IProductService
                 }
             }
 
+            // Add dynamic product attribute selections
+            if (dto.ProductAttributeSelections != null && dto.ProductAttributeSelections.Any())
+            {
+                foreach (var selection in dto.ProductAttributeSelections)
+                {
+                    product.ProductAttributeSelections.Add(new ProductAttributeSelection
+                    {
+                        ProductId = product.Id,
+                        ProductAttributeId = selection.ProductAttributeId,
+                        ProductAttributeValueId = selection.ProductAttributeValueId,
+                        CustomValue = selection.CustomValue
+                    });
+                }
+            }
+
+            // Add product images
+            if (dto.Images != null && dto.Images.Any())
+            {
+                int displayOrder = 0;
+                foreach (var imageDto in dto.Images)
+                {
+                    product.ProductImages.Add(new ProductImage
+                    {
+                        ProductId = product.Id,
+                        ImageUrl = imageDto.ImageUrl,
+                        AltText = imageDto.AltText ?? dto.Name,
+                        DisplayOrder = imageDto.DisplayOrder > 0 ? imageDto.DisplayOrder : displayOrder++,
+                        IsPrimary = imageDto.IsPrimary
+                    });
+                }
+
+                // Ensure the primary image URL is set in the product
+                var primaryImage = dto.Images.FirstOrDefault(i => i.IsPrimary);
+                if (primaryImage != null)
+                {
+                    product.ImageUrl = primaryImage.ImageUrl;
+                }
+            }
+
             await _unitOfWork.Products.AddAsync(product);
             await _unitOfWork.SaveChangesAsync();
 
@@ -290,6 +360,11 @@ public class ProductService : IProductService
                     .ThenInclude(pfp => pfp.FlavourProfile)
                 .Include(p => p.ProductEquipments)
                     .ThenInclude(pe => pe.Equipment)
+                .Include(p => p.ProductAttributeSelections)
+                    .ThenInclude(pas => pas.ProductAttribute)
+                        .ThenInclude(pa => pa.AttributeValues)
+                .Include(p => p.ProductAttributeSelections)
+                    .ThenInclude(pas => pas.ProductAttributeValue)
                 .FirstOrDefaultAsync(p => p.Id == product.Id);
 
             var productDto = MapToDto(createdProduct!);
@@ -297,9 +372,23 @@ public class ProductService : IProductService
         }
         catch (Exception ex)
         {
+            var errors = new List<string> { ex.Message };
+
+            // Add inner exception details if available
+            if (ex.InnerException != null)
+            {
+                errors.Add($"Inner Exception: {ex.InnerException.Message}");
+
+                // Check for database-specific errors
+                if (ex.InnerException.InnerException != null)
+                {
+                    errors.Add($"Database Error: {ex.InnerException.InnerException.Message}");
+                }
+            }
+
             return ApiResponse<ProductDto>.FailureResult(
                 "An error occurred while creating the product",
-                new List<string> { ex.Message });
+                errors);
         }
     }
 
@@ -310,6 +399,7 @@ public class ProductService : IProductService
             var product = await _unitOfWork.Products.GetQueryable()
                 .Include(p => p.ProductFlavourProfiles)
                 .Include(p => p.ProductEquipments)
+                .Include(p => p.ProductAttributeSelections)
                 .FirstOrDefaultAsync(p => p.Id == id);
 
             if (product == null)
@@ -317,14 +407,35 @@ public class ProductService : IProductService
 
             product.Name = dto.Name;
             product.Description = dto.Description;
+            product.ShortDescription = dto.ShortDescription;
             product.Slug = GenerateSlug(dto.Name);
+            product.Sku = dto.Sku;
             product.Price = dto.Price;
             product.DiscountPrice = dto.DiscountPrice;
             product.ImageUrl = dto.ImageUrl;
             product.StockQuantity = dto.StockQuantity;
-            product.IsActive = dto.IsActive;
+            product.IsActive = true; // Always set to active when updating
             product.IsFeatured = dto.IsFeatured;
             product.CategoryId = dto.CategoryId;
+            product.ProductTypeId = dto.ProductTypeId;
+
+            // Update coffee-specific fields
+            product.TastingNote = dto.TastingNote;
+            product.Region = dto.Region;
+            product.Process = dto.Process;
+            product.AvailableSizes = dto.AvailableSizes != null && dto.AvailableSizes.Any()
+                ? System.Text.Json.JsonSerializer.Serialize(dto.AvailableSizes)
+                : null;
+            product.AvailableGrinds = dto.AvailableGrinds != null && dto.AvailableGrinds.Any()
+                ? System.Text.Json.JsonSerializer.Serialize(dto.AvailableGrinds)
+                : null;
+
+            // Update clothes-specific fields
+            product.AvailableColors = dto.AvailableColors != null && dto.AvailableColors.Any()
+                ? System.Text.Json.JsonSerializer.Serialize(dto.AvailableColors)
+                : null;
+            product.Material = dto.Material;
+            product.Style = dto.Style;
 
             // Update flavour profile relationships
             product.ProductFlavourProfiles.Clear();
@@ -350,6 +461,22 @@ public class ProductService : IProductService
                     {
                         ProductId = product.Id,
                         EquipmentId = equipmentId
+                    });
+                }
+            }
+
+            // Update dynamic product attribute selections
+            product.ProductAttributeSelections.Clear();
+            if (dto.ProductAttributeSelections != null && dto.ProductAttributeSelections.Any())
+            {
+                foreach (var selection in dto.ProductAttributeSelections)
+                {
+                    product.ProductAttributeSelections.Add(new ProductAttributeSelection
+                    {
+                        ProductId = product.Id,
+                        ProductAttributeId = selection.ProductAttributeId,
+                        ProductAttributeValueId = selection.ProductAttributeValueId,
+                        CustomValue = selection.CustomValue
                     });
                 }
             }
@@ -489,6 +616,7 @@ public class ProductService : IProductService
             Region = product.Region,
             Process = product.Process,
             Slug = product.Slug,
+            Sku = product.Sku,
             Price = product.Price,
             DiscountPrice = product.DiscountPrice,
             ImageUrl = product.ImageUrl,
@@ -497,12 +625,18 @@ public class ProductService : IProductService
             IsFeatured = product.IsFeatured,
             CategoryId = product.CategoryId,
             CategoryName = product.Category?.Name ?? string.Empty,
+            ProductTypeId = product.ProductTypeId,
             AvailableSizes = !string.IsNullOrEmpty(product.AvailableSizes)
                 ? System.Text.Json.JsonSerializer.Deserialize<List<string>>(product.AvailableSizes)
                 : null,
             AvailableGrinds = !string.IsNullOrEmpty(product.AvailableGrinds)
                 ? System.Text.Json.JsonSerializer.Deserialize<List<string>>(product.AvailableGrinds)
                 : null,
+            AvailableColors = !string.IsNullOrEmpty(product.AvailableColors)
+                ? System.Text.Json.JsonSerializer.Deserialize<List<string>>(product.AvailableColors)
+                : null,
+            Material = product.Material,
+            Style = product.Style,
             Images = product.ProductImages?.Select(pi => new ProductImageDto
             {
                 Id = pi.Id,
@@ -526,7 +660,39 @@ public class ProductService : IProductService
                 Description = pe.Equipment.Description,
                 DisplayOrder = pe.Equipment.DisplayOrder,
                 IsActive = pe.Equipment.IsActive
-            }).ToList() ?? new List<EquipmentDto>()
+            }).ToList() ?? new List<EquipmentDto>(),
+            ProductAttributes = product.ProductAttributeSelections?
+                .Where(pas => pas.ProductAttribute != null) // Filter out null navigation properties
+                .GroupBy(pas => pas.ProductAttribute)
+                .Select(g => new ProductAttributeDisplayDto
+                {
+                    AttributeId = g.Key!.Id,
+                    AttributeName = g.Key!.Name,
+                    DisplayName = g.Key!.DisplayName,
+                    AllowMultipleSelection = g.Key!.AllowMultipleSelection,
+                    IsRequired = g.Key!.IsRequired,
+                    Values = (g.Key.AttributeValues?
+                        .OrderBy(av => av.DisplayOrder)
+                        .Select(av => new ProductAttributeValueDisplayDto
+                        {
+                            ValueId = av.Id,
+                            Value = av.Value,
+                            IsSelected = g.Any(pas => pas.ProductAttributeValueId == av.Id)
+                        }) ?? Enumerable.Empty<ProductAttributeValueDisplayDto>())
+                        .Union(
+                            // Include custom values that were entered for this attribute
+                            g.Where(pas => pas.ProductAttributeValueId == null && !string.IsNullOrEmpty(pas.CustomValue))
+                             .Select(pas => new ProductAttributeValueDisplayDto
+                             {
+                                 ValueId = null,
+                                 Value = pas.CustomValue!,
+                                 IsSelected = true
+                             })
+                        )
+                        .ToList()
+                })
+                .OrderBy(attr => attr.DisplayName)
+                .ToList()
         };
     }
 
@@ -536,5 +702,21 @@ public class ProductService : IProductService
             .Replace(" ", "-")
             .Replace("&", "and")
             .Trim();
+    }
+
+    private async Task<string> GenerateUniqueSlugAsync(string name)
+    {
+        var baseSlug = GenerateSlug(name);
+        var slug = baseSlug;
+        var counter = 1;
+
+        // Keep trying until we find a unique slug
+        while (await _unitOfWork.Products.AnyAsync(p => p.Slug == slug))
+        {
+            slug = $"{baseSlug}-{counter}";
+            counter++;
+        }
+
+        return slug;
     }
 }

@@ -141,7 +141,7 @@ function renderProductsGrid(products) {
     grid.innerHTML = products.map(product => `
         <div class="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition group">
             <!-- Product Image -->
-            <div class="relative aspect-square bg-gray-100 overflow-hidden">
+            <a href="/admin/products/details/${product.id}" class="block relative aspect-square bg-gray-100 overflow-hidden">
                 ${product.imageUrl ? `
                     <img src="${product.imageUrl}"
                          alt="${product.name}"
@@ -155,15 +155,13 @@ function renderProductsGrid(products) {
 
                 <!-- Status Badges -->
                 <div class="absolute top-2 right-2 flex flex-col gap-1">
-                    ${product.isFeatured ? '<span class="px-2 py-1 bg-yellow-500 text-white text-xs rounded shadow">Featured</span>' : ''}
                     ${product.stockQuantity === 0 ? '<span class="px-2 py-1 bg-red-500 text-white text-xs rounded shadow">Out of Stock</span>' : ''}
-                    ${product.discountPrice ? '<span class="px-2 py-1 bg-green-500 text-white text-xs rounded shadow">Sale</span>' : ''}
                 </div>
-            </div>
+            </a>
 
             <!-- Product Info -->
             <div class="p-4">
-                <h3 class="font-semibold text-gray-900 mb-1 truncate" title="${product.name}">${product.name}</h3>
+                <h3 class="font-semibold text-gray-900 mb-2 truncate" title="${product.name}">${product.name}</h3>
 
                 <!-- Categories -->
                 ${product.categories && product.categories.length > 0 ? `
@@ -187,20 +185,11 @@ function renderProductsGrid(products) {
                     `}
                 </div>
 
-                <!-- Stock and SKU -->
-                <div class="flex justify-between items-center text-xs text-gray-500 mb-3">
-                    <span>Stock: <strong class="${product.stockQuantity > 0 ? 'text-gray-900' : 'text-red-600'}">${product.stockQuantity}</strong></span>
-                    <span>${product.sku || 'No SKU'}</span>
-                </div>
+        
 
-                <!-- Status Info -->
-                <div class="flex items-center gap-2 text-xs text-gray-500 border-t pt-3">
-                    <span class="flex items-center gap-1">
-                        <i class="fas fa-circle ${product.stockQuantity > 0 ? 'text-green-500' : 'text-red-500'}" style="font-size: 6px;"></i>
-                        ${product.stockQuantity > 0 ? 'Published' : 'Out of Stock'}
-                    </span>
-                    <span>•</span>
-                    <span>Last edited: ${formatDate(product.updatedAt || product.createdAt)}</span>
+                <!-- Last Edited -->
+                <div class="text-xs text-gray-500 mb-3">
+                    Last edited: ${formatDate(product.updatedAt || product.createdAt)}
                 </div>
 
                 <!-- Actions -->
@@ -211,11 +200,11 @@ function renderProductsGrid(products) {
                         <i class="fas fa-eye"></i>
                     </a>
                     <a href="/admin/products/edit/${product.id}"
-                       class="flex-1 px-3 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition text-center">
+                       class="flex-1 px-3 py-2 bg-primary text-white text-sm rounded hover:bg-green-700 transition text-center">
                         <i class="fas fa-edit mr-1"></i>Edit
                     </a>
                     <button onclick="deleteProduct('${product.id}', '${escapeHtml(product.name)}')"
-                            class="px-3 py-2 bg-red-600 text-white text-sm rounded hover:bg-red-700 transition">
+                            class="px-3 py-2 bg-gray-600 text-white text-sm rounded hover:bg-gray-700 transition">
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
@@ -286,7 +275,7 @@ function renderProductsList(products) {
                     <a href="/admin/products/edit/${product.id}" class="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700">
                         <i class="fas fa-edit"></i>
                     </a>
-                    <button onclick="deleteProduct('${product.id}', '${escapeHtml(product.name)}')" class="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700">
+                    <button onclick="deleteProduct('${product.id}', '${escapeHtml(product.name)}')" class="px-3 py-1 bg-gray-600 text-white text-sm rounded hover:bg-gray-700">
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>

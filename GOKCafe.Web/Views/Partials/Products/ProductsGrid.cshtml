@@ -69,8 +69,27 @@
 <!-- Products Grid Section -->
 <section class="py-12 bg-white">
     <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div class=" flex flex-row justify-between ">
+
         <!-- Page Title -->
         <h1 class="text-3xl font-semibold text-gray-900 mb-8">PRODUCTS LIST</h1>
+        <!-- Search Bar -->
+        <div class="mb-8">
+            <div class="max-w-2xl">
+                <div class="relative">
+                    <input
+                        type="text"
+                        id="productSearchInput"
+                        value="@searchTerm"
+                        placeholder="Search for products..."
+                        class="w-60 px-4 py-3 pl-12 border-2 border-gray-300 rounded-lg focus:border-primary focus:outline-none text-lg"
+                    />
+                    <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                </div>
+            </div>
+        </div>
+        </div>
+
 
         <div class="flex flex-col justify-between lg:flex-row gap-8">
             <!-- Filters Sidebar -->
@@ -200,6 +219,7 @@
                         @foreach (var product in products)
                         {
                             var productUrl = $"/product-details?id={product.Id}";
+               
 
                             <!-- Product Card -->
                             <div class="group">
@@ -224,20 +244,27 @@
                                     <p class="text-sm font-medium text-gray-500 uppercase mb-1">@product.CategoryName</p>
 
                                     <!-- Title -->
-                                    <h3 class="text-lg font-bold text-gray-900 mb-2 uppercase">
+                                    <h3 class="text-lg font-bold text-gray-900 mb-2 uppercase truncate">
                                         <a href="@productUrl" class="hover:text-primary transition-colors">@product.Name</a>
                                     </h3>
 
                                     <!-- Price -->
-                                    <div class="text-gray-600 mb-4">
-                                        @if (product.DiscountPrice.HasValue && product.DiscountPrice > 0)
+                                    <div class="text-gray-600 mb-2 flex items-center justify-center gap-2">
+                                        @if (product.DiscountPrice.HasValue && product.DiscountPrice > 0 && product.DiscountPrice < product.Price)
                                         {
-                                            <span class="text-gray-400 line-through mr-2">@product.Price.ToString("N0") VNĐ</span>
-                                            <span class="font-semibold text-primary">@product.DiscountPrice.Value.ToString("N0") VNĐ</span>
+                                            var discountPercent = Math.Round(((product.Price - product.DiscountPrice.Value) / product.Price) * 100);
+                                            // Format prices - show as integer if no decimal, otherwise show full price
+                                            var priceDisplay = product.Price % 1 == 0 ? ((int)product.Price).ToString() : product.Price.ToString();
+                                            var discountPriceDisplay = product.DiscountPrice.Value % 1 == 0 ? ((int)product.DiscountPrice.Value).ToString() : product.DiscountPrice.Value.ToString();
+                                            <div>From</div>
+                                            <span class="text-gray-400 line-through text-base">@priceDisplay</span>
+                                            <span class="font-semibold text-primary text-lg">@discountPriceDisplay</span>
+                                            <span class="bg-primary text-white px-3 py-1  rounded-xl text-sm font-bold">-@discountPercent%</span>
                                         }
                                         else
                                         {
-                                            <span>From <span class="font-semibold">@product.Price.ToString("N0") VNĐ</span></span>
+                                            var priceDisplay = product.Price % 1 == 0 ? ((int)product.Price).ToString() : product.Price.ToString();
+                                            <span>From <span class="font-semibold text-lg">@priceDisplay</span></span>
                                         }
                                     </div>
                                 </div>
@@ -254,9 +281,11 @@
                 }
                 else
                 {
-                    <div class="text-center py-12">
-                        <i class="fas fa-coffee text-6xl text-gray-300 mb-4"></i>
-                        <p class="text-gray-500 text-lg">No products found.</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4  mb-12">
+                        <div class="text-center">
+                            <i class="fas fa-coffee text-6xl text-gray-300 mb-4"></i>
+                            <p class="text-gray-500 text-lg">No products found.</p>
+                        </div>
                     </div>
                 }
 
@@ -344,6 +373,59 @@
 </section>
 
 <script>
+    // Search functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('productSearchInput');
+        let searchTimeout;
+
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                const value = this.value.trim();
+
+                searchTimeout = setTimeout(() => {
+                    const url = new URL(window.location.href);
+
+                    if (value.length > 0) {
+                        url.searchParams.set('search', value);
+                    } else {
+                        url.searchParams.delete('search');
+                    }
+
+                    url.searchParams.set('page', '1'); // Reset to first page
+                    window.location.href = url.toString();
+                }, 500); // 500ms debounce
+            });
+
+            // Allow Enter key to search immediately
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault(); // Prevent form submission if in a form
+                    clearTimeout(searchTimeout);
+                    const value = this.value.trim();
+                    const url = new URL(window.location.href);
+                    const currentSearch = url.searchParams.get('search') || '';
+
+                    // Only navigate if search value changed
+                    if (value.length > 0) {
+                        if (value !== currentSearch) {
+                            url.searchParams.set('search', value);
+                            url.searchParams.set('page', '1');
+                            window.location.href = url.toString();
+                        }
+                    } else {
+                        // Only reload if there was a search term to clear
+                        if (currentSearch) {
+                            url.searchParams.delete('search');
+                            url.searchParams.set('page', '1');
+                            window.location.href = url.toString();
+                        }
+                    }
+                }
+            });
+        }
+    });
+
     function toggleFilter(filterId) {
         const filterDiv = document.getElementById(filterId + '-filter');
         const icon = document.getElementById(filterId + '-icon');

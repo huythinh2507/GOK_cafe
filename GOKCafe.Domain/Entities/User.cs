@@ -12,8 +12,13 @@ public class User : BaseEntity
     public bool IsActive { get; set; } = true;
     public DateTime? LastLoginAt { get; set; }
 
+    // Password reset fields
+    public string? PasswordResetToken { get; set; }
+    public DateTime? PasswordResetTokenExpiry { get; set; }
+
     // Navigation properties
     public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
+    public virtual ICollection<ProductComment> ProductComments { get; set; } = new List<ProductComment>();
 }
 
 public enum UserRole

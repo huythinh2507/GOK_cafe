@@ -79,8 +79,8 @@ class PaymentManager {
         modal.classList.add('show');
         document.body.style.overflow = 'hidden';
 
-        // Start checking payment status
-        this.startPaymentStatusCheck();
+        // TODO: Payment status verification will be implemented later
+        // this.startPaymentStatusCheck();
     }
 
     /**

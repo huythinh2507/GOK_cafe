@@ -44,7 +44,8 @@ namespace GOKCafe.Web.Composers
             builder.Services.AddScoped<ICartService, CartService>();
             builder.Services.AddScoped<IOrderService, OrderService>();
             builder.Services.AddScoped<IHomeService, HomeService>();
-            // Skip IOdooService registration - not needed for Umbraco Web
+            builder.Services.AddScoped<IOdooService, OdooService>();
+            builder.Services.AddScoped<IProductTypeService, ProductTypeService>();
 
             // Register HttpClient with base URL for API
             var apiBaseUrl = builder.Config.GetSection("ApiSettings:BaseUrl").Value ?? "https://localhost:7045";
@@ -74,6 +75,7 @@ namespace GOKCafe.Web.Composers
             // Register Web layer services (Umbraco-specific)
             builder.Services.AddScoped<WebProductService, GOKCafe.Web.Services.Implementations.ProductService>();
             builder.Services.AddScoped<WebCategoryService, GOKCafe.Web.Services.Implementations.CategoryService>();
+            builder.Services.AddScoped<GOKCafe.Web.Services.Interfaces.IBreadcrumbService, BreadcrumbService>();
 
             // Register HttpClient for external API calls (Odoo, etc.)
             builder.Services.AddHttpClient();

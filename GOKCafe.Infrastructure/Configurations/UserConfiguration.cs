@@ -36,7 +36,6 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
             .HasMaxLength(500);
 
         builder.Property(u => u.Role)
-            .HasConversion<string>()
-            .HasMaxLength(20);
+            .HasConversion<int>();
     }
 }

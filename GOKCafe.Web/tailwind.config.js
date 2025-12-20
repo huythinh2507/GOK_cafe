@@ -3,6 +3,7 @@ module.exports = {
   content: [
     "./Views/**/*.cshtml",
     "./wwwroot/**/*.{js,html}",
+    "./node_modules/flowbite/**/*.js"
   ],
   theme: {
     extend: {
@@ -17,11 +18,16 @@ module.exports = {
           light: '#3ba6e6',
         },
       },
+      accentColor: {
+        primary: '#0767B3',
+      },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
         heading: ['Poppins', 'system-ui', 'sans-serif'],
       },
     },
   },
-  plugins: [],
+  plugins: [
+    require('flowbite/plugin')
+  ],
 }

@@ -21,6 +21,7 @@ public class OdooService : IOdooService
     private readonly string _odooDatabase;
     private readonly string _odooUsername;
     private readonly string _odooApiKey;
+    private readonly OdooAttributeMappingConfig _attributeMappingConfig;
 
     public OdooService(
         IHttpClientFactory httpClientFactory,
@@ -37,6 +38,10 @@ public class OdooService : IOdooService
         _odooDatabase = _configuration["Odoo:Database"] ?? throw new InvalidOperationException("Odoo Database not configured");
         _odooUsername = _configuration["Odoo:Username"] ?? throw new InvalidOperationException("Odoo Username not configured");
         _odooApiKey = _configuration["Odoo:ApiKey"] ?? throw new InvalidOperationException("Odoo API Key not configured");
+
+        // Load attribute mapping configuration (with defaults if not configured)
+        _attributeMappingConfig = new OdooAttributeMappingConfig();
+        _configuration.GetSection("OdooAttributeMapping").Bind(_attributeMappingConfig);
     }
 
     public async Task<ApiResponse<List<OdooProductDto>>> FetchProductsFromOdooAsync()
@@ -123,6 +128,13 @@ public class OdooService : IOdooService
                 {
                     var slug = GenerateSlug($"{odooProduct.Name}-{odooProduct.Id}");
 
+                    // Determine ProductType based on category mapping
+                    ProductType? productType = null;
+                    if (!string.IsNullOrEmpty(odooProduct.CategoryName))
+                    {
+                        productType = await GetOrCreateProductTypeAsync(odooProduct.CategoryName);
+                    }
+
                     if (existingProducts.TryGetValue(slug, out var existingProduct))
                     {
                         // Update existing product
@@ -133,6 +145,18 @@ public class OdooService : IOdooService
                         existingProduct.ImageUrl = odooProduct.ImageUrl;
                         existingProduct.IsActive = odooProduct.Active;
                         existingProduct.UpdatedAt = DateTime.UtcNow;
+
+                        // Update ProductType if mapping is enabled
+                        if (productType != null)
+                        {
+                            existingProduct.ProductTypeId = productType.Id;
+                        }
+
+                        // Update attributes (clear and re-add for simplicity)
+                        if (_attributeMappingConfig.EnableAutoMapping && odooProduct.Attributes.Any() && productType != null)
+                        {
+                            await UpdateProductAttributesAsync(existingProduct, odooProduct.Attributes, productType);
+                        }
 
                         productsToUpdate.Add(existingProduct);
                         result.Updated++;
@@ -152,10 +176,17 @@ public class OdooService : IOdooService
                             IsActive = odooProduct.Active,
                             IsFeatured = false,
                             CategoryId = defaultCategory.Id,
+                            ProductTypeId = productType?.Id,
                             DisplayOrder = 0,
                             CreatedAt = DateTime.UtcNow,
                             UpdatedAt = DateTime.UtcNow
                         };
+
+                        // Add attributes if available
+                        if (_attributeMappingConfig.EnableAutoMapping && odooProduct.Attributes.Any() && productType != null)
+                        {
+                            await AddProductAttributesAsync(newProduct, odooProduct.Attributes, productType);
+                        }
 
                         productsToAdd.Add(newProduct);
                         result.Created++;
@@ -243,7 +274,16 @@ public class OdooService : IOdooService
             {
                 context = new { lang = "en_US" },
                 domain = new object[] { },
-                fields = new[] { "id", "name"},
+                fields = new[] {
+                    "id",
+                    "name",
+                    "description_sale",
+                    "list_price",
+                    "qty_available",
+                    "image_1920",
+                    "categ_id",
+                    "product_template_attribute_value_ids" // Get variant attributes
+                },
                 limit = 20
             };
 
@@ -273,16 +313,49 @@ public class OdooService : IOdooService
 
             var simpleProducts = JsonSerializer.Deserialize<List<OdooSimpleProductDto>>(responseBody, options) ?? throw new ArgumentException($"No products found");
 
-            var products = simpleProducts.Select(p => new OdooProductDto
+            // Fetch attribute mappings if any products have attributes
+            var attributeValueIds = simpleProducts
+                .Where(p => p.ProductTemplateAttributeValueIds != null && p.ProductTemplateAttributeValueIds.Any())
+                .SelectMany(p => p.ProductTemplateAttributeValueIds!)
+                .Distinct()
+                .ToList();
+
+            var attributeMapping = new Dictionary<int, (string AttributeName, string ValueName)>();
+
+            if (_attributeMappingConfig.EnableAutoMapping && attributeValueIds.Any())
             {
-                Id = p.Id,
-                Name = p.Name,
-                Description = null,
-                Price = 0,
-                StockQuantity = 0,
-                ImageUrl = null,
-                CategoryName = null,
-                Active = true
+                attributeMapping = await FetchAttributeValuesFromOdooAsync(attributeValueIds);
+            }
+
+            var products = simpleProducts.Select(p =>
+            {
+                var categoryName = ExtractOdooName(p.CategId);
+
+                var productDto = new OdooProductDto
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Description = null, // Can be populated from description_sale if needed
+                    Price = 0, // Can be populated from list_price if needed
+                    StockQuantity = 0, // Can be populated from qty_available if needed
+                    ImageUrl = null, // Can be populated from image_1920 if needed
+                    CategoryName = categoryName,
+                    Active = true
+                };
+
+                // Map attributes
+                if (p.ProductTemplateAttributeValueIds != null && p.ProductTemplateAttributeValueIds.Any())
+                {
+                    foreach (var attrValueId in p.ProductTemplateAttributeValueIds)
+                    {
+                        if (attributeMapping.TryGetValue(attrValueId, out var attrInfo))
+                        {
+                            productDto.Attributes[attrInfo.AttributeName] = attrInfo.ValueName;
+                        }
+                    }
+                }
+
+                return productDto;
             }).ToList();
 
             return products;
@@ -321,6 +394,203 @@ public class OdooService : IOdooService
         return category;
     }
 
+    /// <summary>
+    /// Gets or creates a ProductType based on Odoo category name and configuration mapping
+    /// </summary>
+    private async Task<ProductType?> GetOrCreateProductTypeAsync(string? odooCategoryName)
+    {
+        if (string.IsNullOrEmpty(odooCategoryName) || !_attributeMappingConfig.EnableAutoMapping)
+            return null;
+
+        // Check if there's a mapping in configuration
+        string productTypeName;
+        if (_attributeMappingConfig.CategoryToProductTypeMap.TryGetValue(odooCategoryName, out var mappedName))
+        {
+            productTypeName = mappedName;
+        }
+        else
+        {
+            // Use default or the category name itself
+            productTypeName = _attributeMappingConfig.DefaultProductType;
+        }
+
+        // Try to find existing ProductType
+        var allProductTypes = await _unitOfWork.ProductTypes.GetAllAsync();
+        var productType = allProductTypes.FirstOrDefault(pt =>
+            pt.Name.Equals(productTypeName, StringComparison.OrdinalIgnoreCase));
+
+        if (productType == null)
+        {
+            // Create new ProductType
+            productType = new ProductType
+            {
+                Id = Guid.NewGuid(),
+                Name = productTypeName,
+                Slug = GenerateSlug(productTypeName),
+                Description = $"Product type auto-created from Odoo category: {odooCategoryName}",
+                DisplayOrder = 100,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+
+            await _unitOfWork.ProductTypes.AddAsync(productType);
+            _logger.LogInformation("Created new ProductType: {ProductTypeName} from Odoo category: {CategoryName}",
+                productTypeName, odooCategoryName);
+        }
+
+        return productType;
+    }
+
+    /// <summary>
+    /// Gets or creates a ProductAttribute for a ProductType
+    /// </summary>
+    private async Task<ProductAttribute> GetOrCreateProductAttributeAsync(
+        Guid productTypeId,
+        string attributeName,
+        string displayName)
+    {
+        var allAttributes = await _unitOfWork.ProductAttributes.GetAllAsync();
+        var attribute = allAttributes.FirstOrDefault(a =>
+            a.ProductTypeId == productTypeId &&
+            a.Name.Equals(attributeName, StringComparison.OrdinalIgnoreCase));
+
+        if (attribute == null)
+        {
+            attribute = new ProductAttribute
+            {
+                Id = Guid.NewGuid(),
+                ProductTypeId = productTypeId,
+                Name = attributeName,
+                DisplayName = displayName,
+                Description = $"Auto-created from Odoo attribute: {displayName}",
+                DisplayOrder = 0,
+                IsRequired = false,
+                AllowMultipleSelection = false,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+
+            await _unitOfWork.ProductAttributes.AddAsync(attribute);
+            _logger.LogInformation("Created new ProductAttribute: {AttributeName} for ProductType: {ProductTypeId}",
+                attributeName, productTypeId);
+        }
+
+        return attribute;
+    }
+
+    /// <summary>
+    /// Gets or creates a ProductAttributeValue for a ProductAttribute
+    /// </summary>
+    private async Task<ProductAttributeValue> GetOrCreateProductAttributeValueAsync(
+        Guid productAttributeId,
+        string value)
+    {
+        var allValues = await _unitOfWork.ProductAttributeValues.GetAllAsync();
+        var attributeValue = allValues.FirstOrDefault(av =>
+            av.ProductAttributeId == productAttributeId &&
+            av.Value.Equals(value, StringComparison.OrdinalIgnoreCase));
+
+        if (attributeValue == null)
+        {
+            attributeValue = new ProductAttributeValue
+            {
+                Id = Guid.NewGuid(),
+                ProductAttributeId = productAttributeId,
+                Value = value,
+                DisplayOrder = 0,
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+
+            await _unitOfWork.ProductAttributeValues.AddAsync(attributeValue);
+            _logger.LogInformation("Created new ProductAttributeValue: {Value} for ProductAttribute: {ProductAttributeId}",
+                value, productAttributeId);
+        }
+
+        return attributeValue;
+    }
+
+    /// <summary>
+    /// Adds product attribute selections to a new product based on Odoo attributes
+    /// </summary>
+    private async Task AddProductAttributesAsync(
+        Product product,
+        Dictionary<string, string> odooAttributes,
+        ProductType productType)
+    {
+        foreach (var (attributeName, attributeValue) in odooAttributes)
+        {
+            // Check if there's a mapping configuration for this ProductType and attribute
+            var mappedAttributeName = GetMappedAttributeName(productType.Name, attributeName);
+
+            // Get or create the ProductAttribute
+            var productAttribute = await GetOrCreateProductAttributeAsync(
+                productType.Id,
+                mappedAttributeName,
+                attributeName); // Use original name as display name
+
+            // Get or create the ProductAttributeValue
+            var productAttributeValue = await GetOrCreateProductAttributeValueAsync(
+                productAttribute.Id,
+                attributeValue);
+
+            // Create the ProductAttributeSelection
+            var selection = new ProductAttributeSelection
+            {
+                Id = Guid.NewGuid(),
+                ProductId = product.Id,
+                ProductAttributeId = productAttribute.Id,
+                ProductAttributeValueId = productAttributeValue.Id,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+
+            product.ProductAttributeSelections.Add(selection);
+        }
+    }
+
+    /// <summary>
+    /// Updates product attribute selections for an existing product
+    /// Clears existing selections and adds new ones based on Odoo attributes
+    /// </summary>
+    private async Task UpdateProductAttributesAsync(
+        Product product,
+        Dictionary<string, string> odooAttributes,
+        ProductType productType)
+    {
+        // Clear existing selections for this product
+        var existingSelections = await _unitOfWork.ProductAttributeSelections
+            .FindAsync(pas => pas.ProductId == product.Id);
+
+        foreach (var selection in existingSelections)
+        {
+            _unitOfWork.ProductAttributeSelections.Remove(selection);
+        }
+
+        // Add new selections
+        await AddProductAttributesAsync(product, odooAttributes, productType);
+    }
+
+    /// <summary>
+    /// Gets the mapped attribute name from configuration, or returns the original name if no mapping exists
+    /// </summary>
+    private string GetMappedAttributeName(string productTypeName, string odooAttributeName)
+    {
+        if (_attributeMappingConfig.AttributeMapping.TryGetValue(productTypeName, out var typeMapping))
+        {
+            if (typeMapping.TryGetValue(odooAttributeName, out var mappedName))
+            {
+                return mappedName;
+            }
+        }
+
+        // If no mapping found, normalize the attribute name (lowercase, no spaces)
+        return odooAttributeName.ToLower().Replace(" ", "_");
+    }
+
     private static string GenerateSlug(string name)
     {
         return name.ToLower()
@@ -328,5 +598,117 @@ public class OdooService : IOdooService
             .Replace("&", "and")
             .Replace("'", "")
             .Trim();
+    }
+
+    /// <summary>
+    /// Fetches attribute value details from Odoo product.template.attribute.value model
+    /// Returns mapping of value ID to (AttributeName, ValueName)
+    /// </summary>
+    private async Task<Dictionary<int, (string AttributeName, string ValueName)>> FetchAttributeValuesFromOdooAsync(List<int> valueIds)
+    {
+        var result = new Dictionary<int, (string, string)>();
+
+        if (!valueIds.Any())
+            return result;
+
+        try
+        {
+            var client = _httpClientFactory.CreateClient();
+            var rpcUrl = $"{_odooUrl}/json/2/product.template.attribute.value/search_read";
+
+            client.DefaultRequestHeaders.Clear();
+            client.DefaultRequestHeaders.Add("Authorization", $"Bearer {_odooApiKey}");
+            client.DefaultRequestHeaders.Add("X-Odoo-Database", _odooDatabase);
+
+            var payload = new
+            {
+                context = new { lang = "en_US" },
+                domain = new object[] { new object[] { "id", "in", valueIds } },
+                fields = new[] { "id", "name", "attribute_id", "product_attribute_value_id" }
+            };
+
+            var content = new StringContent(
+                JsonSerializer.Serialize(payload),
+                Encoding.UTF8,
+                "application/json");
+
+            var response = await client.PostAsync(rpcUrl, content);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                _logger.LogWarning("Failed to fetch attribute values from Odoo. Status: {Status}", response.StatusCode);
+                return result;
+            }
+
+            var responseBody = await response.Content.ReadAsStringAsync();
+            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+
+            var attributeValues = JsonSerializer.Deserialize<List<OdooAttributeValueDto>>(responseBody, options);
+
+            if (attributeValues != null)
+            {
+                foreach (var attrValue in attributeValues)
+                {
+                    var attributeName = ExtractOdooName(attrValue.AttributeId) ?? "Unknown";
+                    var valueName = ExtractOdooName(attrValue.ProductAttributeValueId) ?? attrValue.Name;
+
+                    result[attrValue.Id] = (attributeName, valueName);
+                }
+            }
+
+            _logger.LogInformation("Fetched {Count} attribute values from Odoo", result.Count);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching attribute values from Odoo");
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Extracts the name from Odoo's [id, name] array format
+    /// Example: [1, "Medium"] returns "Medium"
+    /// </summary>
+    private static string? ExtractOdooName(object? odooField)
+    {
+        if (odooField == null)
+            return null;
+
+        if (odooField is JsonElement jsonElement)
+        {
+            if (jsonElement.ValueKind == JsonValueKind.Array && jsonElement.GetArrayLength() >= 2)
+            {
+                return jsonElement[1].GetString();
+            }
+            if (jsonElement.ValueKind == JsonValueKind.String)
+            {
+                return jsonElement.GetString();
+            }
+        }
+
+        // Handle string directly
+        if (odooField is string str)
+            return str;
+
+        // Try to parse as JSON if it's a string representation
+        var odooStr = odooField.ToString();
+        if (odooStr != null && odooStr.StartsWith("["))
+        {
+            try
+            {
+                var arr = JsonSerializer.Deserialize<JsonElement>(odooStr);
+                if (arr.ValueKind == JsonValueKind.Array && arr.GetArrayLength() >= 2)
+                {
+                    return arr[1].GetString();
+                }
+            }
+            catch
+            {
+                // Fall through to return null
+            }
+        }
+
+        return null;
     }
 }

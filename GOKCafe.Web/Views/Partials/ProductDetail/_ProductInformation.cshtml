@@ -1,9 +1,11 @@
 @model GOKCafe.Web.Models.DTOs.ProductDto
 
 @{
-    // Format price with thousands separator and use period for thousands
-    var priceMin = Model.Price.ToString("#,0", new System.Globalization.CultureInfo("en-US")).Replace(",", ".");
-    var priceMax = Model.DiscountPrice.HasValue ? Model.DiscountPrice.Value.ToString("#,0", new System.Globalization.CultureInfo("en-US")).Replace(",", ".") : "";
+    // Format price - show as integer if no decimal, otherwise show full price
+    var priceMin = Model.Price % 1 == 0 ? ((int)Model.Price).ToString() : Model.Price.ToString();
+    var priceMax = Model.DiscountPrice.HasValue
+        ? (Model.DiscountPrice.Value % 1 == 0 ? ((int)Model.DiscountPrice.Value).ToString() : Model.DiscountPrice.Value.ToString())
+        : "";
 
     // Get additional properties
     var region = Model.Region;
@@ -19,25 +21,147 @@
     <!-- Top Section: Image and Information -->
     <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:h-[640px]">
         <div class="grid grid-cols-12 gap-8">
-            <!-- Left Column: Product Image (4/12) -->
+            <!-- Left Column: Product Image Slider (4/12) -->
             <div class="col-span-12 sm:col-span-8 lg:col-span-6 xl:col-span-4">
-                <div class="flex items-center justify-center h-full lg:h-[640px] overflow-hidden">
-                    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                @{
+                    var productImages = new List<string>();
+
+                    if (Model.Images != null && Model.Images.Any())
                     {
-                        <img src="@Model.ImageUrl"
-                             alt="@Model.Name"
-                             class="w-full h-full object-cover " />
+                        productImages = Model.Images
+                            .OrderByDescending(x => x.IsPrimary)
+                            .ThenBy(x => x.DisplayOrder)
+                            .Select(x => x.ImageUrl)
+                            .Where(url => !string.IsNullOrWhiteSpace(url))
+                            .ToList();
                     }
-                    else
+
+                    // fallback: ImageUrl
+                    if (!productImages.Any() && !string.IsNullOrWhiteSpace(Model.ImageUrl))
                     {
-                        <div class="w-full bg-gray-200 flex items-center justify-center">
-                            <svg class="w-24 h-24 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
+                        productImages.Add(Model.ImageUrl);
+                    }
+
+                    // fallback cuối: default image
+                    if (!productImages.Any())
+                    {
+                        productImages.Add("/media/default-product.png");
+                    }
+                    
+                }   
+
+                <div class="flex gap-4 h-full lg:h-[640px]">
+                    <!-- Thumbnail Sidebar (Left) -->
+                    <div class="flex flex-col gap-2 w-16 overflow-y-auto">
+                        @for (int i = 0; i < productImages.Count; i++)
+                        {
+                            var imageUrl = productImages[i];
+                            var isActive = i == 0;                           
+                           
+                            <button type="button"
+                                    class="thumbnail-btn flex-shrink-0 w-14 h-14 border-2 @(isActive ? "border-primary" : "border-gray-200") hover:border-primary transition-colors overflow-hidden bg-gray-100"
+                                    onclick="changeMainImage(@i)"
+                                    data-index="@i">
+                                <img src="@imageUrl"
+                                     alt="@Model.Name - Image @(i + 1)"
+                                     class="w-full h-full object-cover" />
+                            </button>
+                        }
+                    </div>
+
+                    <!-- Main Image Display (Right) -->
+                    <div class="flex-1 relative bg-gray-50 overflow-hidden">
+                        <div id="mainImageContainer" class="w-full h-full flex items-center justify-center">
+                            @if (productImages.Any())
+                            {
+                                @for (int i = 0; i < productImages.Count; i++)
+                                {
+                                    var imageUrl = productImages[i];
+                                    var isActive = i == 0;
+                                    <img id="mainImage_@i"
+                                         src="@imageUrl"
+                                         alt="@Model.Name"
+                                         class="main-image w-full h-full object-cover @(isActive ? "" : "hidden")"
+                                         data-index="@i" />
+                                }
+                            }
+                            else
+                            {
+                                <div class="w-full h-full bg-gray-200 flex items-center justify-center">
+                                    <svg class="w-24 h-24 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                </div>
+                            }
                         </div>
-                    }
+
+                        <!-- Navigation Arrows - Positioned at bottom center -->
+                        <div class="absolute bottom-4 left-3/4 flex gap-3">
+                            <button type="button"
+                                    onclick="previousImage()"
+                                    class="w-10 h-10 bg-white/80 hover:bg-white rounded-full shadow-lg flex items-center justify-center transition-all">
+                                <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                                </svg>
+                            </button>
+                            <button type="button"
+                                    onclick="nextImage()"
+                                    class="w-10 h-10 bg-white/80 hover:bg-white rounded-full shadow-lg flex items-center justify-center transition-all">
+                                <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
                 </div>
+
+                <script>
+                    let currentImageIndex = 0;
+                    const totalImages = @productImages.Count;
+
+                    function changeMainImage(index) {
+                        // Hide all main images
+                        document.querySelectorAll('.main-image').forEach(img => {
+                            img.classList.add('hidden');
+                        });
+
+                        // Show selected image
+                        const selectedImage = document.getElementById('mainImage_' + index);
+                        if (selectedImage) {
+                            selectedImage.classList.remove('hidden');
+                        }
+
+                        // Update thumbnail borders
+                        document.querySelectorAll('.thumbnail-btn').forEach(btn => {
+                            btn.classList.remove('border-primary');
+                            btn.classList.add('border-gray-200');
+                        });
+
+                        const selectedThumb = document.querySelector(`.thumbnail-btn[data-index="${index}"]`);
+                        if (selectedThumb) {
+                            selectedThumb.classList.remove('border-gray-200');
+                            selectedThumb.classList.add('border-primary');
+                        }
+
+                        currentImageIndex = index;
+                    }
+
+                    function nextImage() {
+                        const nextIndex = (currentImageIndex + 1) % totalImages;
+                        changeMainImage(nextIndex);
+                    }
+
+                    function previousImage() {
+                        const prevIndex = (currentImageIndex - 1 + totalImages) % totalImages;
+                        changeMainImage(prevIndex);
+                    }
+
+                    // Optional: Auto-play slider
+                    // setInterval(() => {
+                    //     nextImage();
+                    // }, 3000);
+                </script>
             </div>
 
             <!-- Right Column: Product Information (8/12) -->
@@ -61,11 +185,19 @@
                         </h1>
 
                         <!-- Price -->
-                        <div class="flex items-baseline gap-2">
-                            @if (!string.IsNullOrEmpty(priceMax) && Model.DiscountPrice.HasValue)
+                        <div class="flex items-center gap-3 flex-wrap">
+                            @if (Model.DiscountPrice.HasValue && Model.DiscountPrice > 0 && Model.DiscountPrice < Model.Price)
                             {
+                                var discountPercent = Math.Round(((Model.Price - Model.DiscountPrice.Value) / Model.Price) * 100);
+
+                                <span class="text-xl text-gray-400 line-through">
+                                    @priceMin VND
+                                </span>
                                 <span class="text-2xl font-semibold text-primary">
-                                    @priceMin VND - @priceMax VND
+                                    @priceMax VND
+                                </span>
+                                <span class="bg-primary text-white px-3 py-1 rounded-full text-sm font-bold">
+                                    -@discountPercent%
                                 </span>
                             }
                             else
@@ -178,6 +310,38 @@
                             </div>
                         }
 
+                        <!-- Dynamic Product Attributes -->
+                        @if (Model.ProductAttributes != null && Model.ProductAttributes.Any())
+                        {
+                            foreach (var attr in Model.ProductAttributes)
+                            {
+                                <div class="space-y-3 mt-4">
+                                    <label class="block font-semibold text-gray-900 text-base">
+                                        Select @(attr.DisplayName)@(attr.IsRequired ? " *" : ""):
+                                    </label>
+                                    <div class="flex flex-wrap gap-3" id="attribute-@(attr.AttributeId)-container">
+                                        @{
+                                            var selectedValues = attr.Values.Where(v => v.IsSelected).ToList();
+                                            var firstSelectedValue = selectedValues.FirstOrDefault();
+                                        }
+                                        @foreach (var value in attr.Values)
+                                        {
+                                            <button type="button"
+                                                    class="attribute-option px-6 py-2.5 @(value.IsSelected ? "bg-primary text-white" : "bg-gray-200 text-gray-900") hover:bg-primary hover:text-white transition-colors font-medium focus:outline-none"
+                                                    data-attribute-id="@attr.AttributeId"
+                                                    data-attribute-name="@attr.AttributeName"
+                                                    data-value-id="@value.ValueId"
+                                                    data-value="@value.Value"
+                                                    data-allow-multiple="@(attr.AllowMultipleSelection.ToString().ToLower())"
+                                                    onclick="selectAttributeValue(this)">
+                                                @value.Value
+                                            </button>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        }
+
                         <!-- Quantity and Actions -->
                         <div class="flex flex-wrap items-center gap-3 pt-4">
                             <!-- Quantity Input -->
@@ -213,8 +377,9 @@
                         <script>
                             // Product detail page cart integration
                             const productId = '@Model.Id';
-                            let selectedSize = '@(Model.AvailableSizes?.FirstOrDefault())';
-                            let selectedGrind = '@(Model.AvailableGrinds?.FirstOrDefault())';
+                            let productDetailSelectedSize = '@(Model.AvailableSizes?.FirstOrDefault())';
+                            let productDetailSelectedGrind = '@(Model.AvailableGrinds?.FirstOrDefault())';
+                            let productDetailSelectedAttributes = {};
 
                             function selectSize(button) {
                                 // Remove active class from all size buttons
@@ -225,7 +390,7 @@
                                 // Add active class to clicked button
                                 button.classList.remove('bg-gray-200', 'text-gray-900');
                                 button.classList.add('bg-primary', 'text-white');
-                                selectedSize = button.getAttribute('data-size');
+                                productDetailSelectedSize = button.getAttribute('data-size');
                             }
 
                             function selectGrind(button) {
@@ -237,31 +402,85 @@
                                 // Add active class to clicked button
                                 button.classList.remove('bg-gray-200', 'text-gray-900');
                                 button.classList.add('bg-primary', 'text-white');
-                                selectedGrind = button.getAttribute('data-grind');
+                                productDetailSelectedGrind = button.getAttribute('data-grind');
+                            }
+
+                            function selectAttributeValue(button) {
+                                const attributeId = button.getAttribute('data-attribute-id');
+                                const attributeName = button.getAttribute('data-attribute-name');
+                                const value = button.getAttribute('data-value');
+                                const allowMultiple = button.getAttribute('data-allow-multiple') === 'true';
+                                const containerId = `attribute-${attributeId}-container`;
+
+                                if (allowMultiple) {
+                                    // Multi-select: toggle selection
+                                    if (button.classList.contains('bg-primary')) {
+                                        // Deselect
+                                        button.classList.remove('bg-primary', 'text-white');
+                                        button.classList.add('bg-gray-200', 'text-gray-900');
+                                    } else {
+                                        // Select
+                                        button.classList.remove('bg-gray-200', 'text-gray-900');
+                                        button.classList.add('bg-primary', 'text-white');
+                                    }
+
+                                    // Update selected values array
+                                    const selectedButtons = document.querySelectorAll(`#${containerId} button.bg-primary`);
+                                    const selectedValues = Array.from(selectedButtons).map(btn => btn.getAttribute('data-value'));
+                                    productDetailSelectedAttributes[attributeName] = selectedValues.join(', ');
+                                } else {
+                                    // Single-select: deselect all others and select this one
+                                    document.querySelectorAll(`#${containerId} button`).forEach(btn => {
+                                        btn.classList.remove('bg-primary', 'text-white');
+                                        btn.classList.add('bg-gray-200', 'text-gray-900');
+                                    });
+                                    button.classList.remove('bg-gray-200', 'text-gray-900');
+                                    button.classList.add('bg-primary', 'text-white');
+                                    productDetailSelectedAttributes[attributeName] = value;
+                                }
                             }
 
                             function addProductToCart() {
                                 const quantity = parseInt(document.getElementById('productQuantity').value) || 1;
 
-                                if (window.addToCart) {
-                                    window.addToCart(productId, quantity, selectedSize, selectedGrind);
+                                // Create cart item object directly (same as modal)
+                                const cartItem = {
+                                    productId: productId,
+                                    name: '@Model.Name',
+                                    imageUrl: '@Model.ImageUrl',
+                                    price: @(Model.DiscountPrice.HasValue && Model.DiscountPrice > 0 && Model.DiscountPrice < Model.Price ? Model.DiscountPrice.Value : Model.Price),
+                                    originalPrice: @Model.Price,
+                                    discountPrice: @(Model.DiscountPrice?.ToString() ?? "null"),
+                                    quantity: quantity,
+                                    size: productDetailSelectedSize,
+                                    grind: productDetailSelectedGrind,
+                                    attributes: productDetailSelectedAttributes,
+                                    addedAt: new Date().toISOString()
+                                };
+
+                                // Add to cart directly (cart is global variable)
+                                if (typeof cart !== 'undefined') {
+                                    cart.addItem(cartItem);
+
+                                    // Open cart sidebar after adding
+                                    setTimeout(() => {
+                                        if (typeof openCartSidebar !== 'undefined') {
+                                            openCartSidebar();
+                                        }
+                                    }, 300);
                                 } else {
-                                    console.error('Cart function not available');
+                                    console.error('Cart not available');
                                 }
                             }
 
                             function buyProductNow() {
-                                const quantity = parseInt(document.getElementById('productQuantity').value) || 1;
+                                // Add to cart first
+                                addProductToCart();
 
-                                if (window.addToCart) {
-                                    window.addToCart(productId, quantity, selectedSize, selectedGrind);
-                                    // Redirect to checkout after a short delay
-                                    setTimeout(() => {
-                                        window.location.href = '/checkout?buyNow=true';
-                                    }, 500);
-                                } else {
-                                    console.error('Cart function not available');
-                                }
+                                // Redirect to checkout after cart opens
+                                setTimeout(() => {
+                                    window.location.href = '/checkout?buyNow=true';
+                                }, 500);
                             }
                         </script>
                     </div>

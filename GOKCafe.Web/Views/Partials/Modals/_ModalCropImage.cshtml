@@ -1,0 +1,135 @@
+@* Modal Crop Image Component *@
+<div id="cropImageModal" class="fixed inset-0 z-50 hidden overflow-y-auto opacity-0 transition-opacity duration-300">
+    <!-- Overlay -->
+    <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" onclick="closeCropModal()"></div>
+
+    <!-- Modal Content -->
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="relative bg-white rounded-lg shadow-xl max-w-4xl w-full mx-auto" onclick="event.stopPropagation()">
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between p-6 border-b border-gray-200">
+                <h3 class="text-2xl font-semibold text-gray-800">
+                    <i class="fas fa-crop-alt mr-2 text-primary"></i>Crop Image
+                </h3>
+                <button type="button"
+                        onclick="closeCropModal()"
+                        class="text-gray-400 hover:text-gray-600 transition">
+                    <i class="fas fa-times text-2xl"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="p-6">
+                <!-- Crop Container -->
+                <div class="mb-6">
+                    <div class="h-[400px] overflow-hidden rounded-lg border-2 border-gray-300 bg-gray-500 flex items-center justify-center">
+                        <img id="cropImagePreview" src="" alt="Crop preview" class="block" style="max-width: 100%; max-height: 100%;">
+                    </div>
+                </div>
+
+                <!-- Crop Controls -->
+                <div class="space-y-4">
+                    
+                    
+                    <!-- Aspect Ratio -->
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                      <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                <i class="fas fa-expand-arrows-alt mr-1"></i>Aspect Ratio
+                            </label>
+                            <div class="flex gap-2 flex-wrap">
+                                <button type="button"
+                                        onclick="setCropAspectRatio(null, event)"
+                                        class="aspect-ratio-btn px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:border-primary hover:text-primary transition font-medium">
+                                    Free
+                                </button>
+                                <button type="button"
+                                        onclick="setCropAspectRatio(5/7, event)"
+                                        class="aspect-ratio-btn aspect-ratio-default px-4 py-2 border-2 border-primary bg-primary text-white rounded-lg hover:bg-primary-dark transition font-medium">
+                                    5:7 (Default)
+                                </button>
+                            </div>
+                        </div>
+                           <!-- Zoom Control -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            <i class="fas fa-search-plus mr-1"></i>Zoom
+                        </label>
+                        <div class="flex items-center gap-3">
+                            <button type="button"
+                                    onclick="zoomCrop(-0.1)"
+                                    class="px-3 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <input type="range"
+                                   id="zoomRange"
+                                   min="0"
+                                   max="1"
+                                   step="0.01"
+                                   value="0"
+                                   oninput="zoomCropTo(this.value)"
+                                   class="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-primary">
+                            <button type="button"
+                                    onclick="zoomCrop(0.1)"
+                                    class="px-3 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg transition">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    </div>
+
+                 
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+
+                        <!-- Action Buttons -->
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                            <button type="button"
+                                    onclick="rotateCrop(-90)"
+                                    class="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition">
+                                <i class="fas fa-undo mr-1"></i>Rotate Left
+                            </button>
+                            <button type="button"
+                                    onclick="rotateCrop(90)"
+                                    class="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition">
+                                <i class="fas fa-redo mr-1"></i>Rotate Right
+                            </button>
+                            <button type="button"
+                                    onclick="flipCropHorizontal()"
+                                    class="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition">
+                                <i class="fas fa-arrows-alt-h mr-1"></i>Flip H
+                            </button>
+                            <button type="button"
+                                    onclick="flipCropVertical()"
+                                    class="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition">
+                                <i class="fas fa-arrows-alt-v mr-1"></i>Flip V
+                            </button>
+                        </div>
+
+                        <!-- Reset Button -->
+                        <div>
+                            <button type="button"
+                                    onclick="resetCrop()"
+                                    class="w-full px-3 py-1.5 text-sm bg-primary hover:bg-primary-dark text-white rounded-lg transition font-medium">
+                                <i class="fas fa-sync-alt mr-2"></i>Reset
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="flex items-center justify-end gap-3 p-6 border-t border-gray-200 bg-gray-50">
+                <button type="button"
+                        onclick="closeCropModal()"
+                        class="px-6 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg transition font-medium">
+                    Cancel
+                </button>
+                <button type="button"
+                        onclick="saveCroppedImage()"
+                        class="px-6 py-3 bg-primary hover:bg-primary-dark text-white rounded-lg transition font-semibold">
+                    Save 
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

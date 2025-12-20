@@ -98,9 +98,9 @@ class ShoppingCart {
         notification.className = `cart-notification ${type}`;
         notification.style.cssText = `
             position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%) translateY(100px);
+            top: 20px;
+            right: 20px;
+            transform: translateX(400px);
             z-index: 10000;
             background: #10B981;
             color: white;
@@ -112,6 +112,7 @@ class ShoppingCart {
             gap: 12px;
             font-weight: 500;
             min-width: 320px;
+            max-width: 400px;
             transition: transform 0.3s ease;
         `;
         notification.innerHTML = `
@@ -121,14 +122,14 @@ class ShoppingCart {
 
         document.body.appendChild(notification);
 
-        // Slide up animation
+        // Slide in animation from right
         setTimeout(() => {
-            notification.style.transform = 'translateX(-50%) translateY(0)';
+            notification.style.transform = 'translateX(0)';
         }, 10);
 
         // Remove after 3 seconds
         setTimeout(() => {
-            notification.style.transform = 'translateX(-50%) translateY(100px)';
+            notification.style.transform = 'translateX(400px)';
             setTimeout(() => notification.remove(), 300);
         }, 3000);
     }
@@ -315,6 +316,11 @@ window.toggleCartSidebar = function() {
     const sidebar = document.getElementById('cartSidebar');
     const overlay = document.getElementById('cartOverlay');
 
+    if (!sidebar || !overlay) {
+        console.error('Cart sidebar or overlay not found in DOM');
+        return;
+    }
+
     if (sidebar.classList.contains('open')) {
         closeCartSidebar();
     } else {
@@ -325,6 +331,11 @@ window.toggleCartSidebar = function() {
 window.openCartSidebar = function() {
     const sidebar = document.getElementById('cartSidebar');
     const overlay = document.getElementById('cartOverlay');
+
+    if (!sidebar || !overlay) {
+        console.error('Cart sidebar or overlay not found in DOM');
+        return;
+    }
 
     // Show overlay
     overlay.classList.remove('hidden');
@@ -489,10 +500,7 @@ function createCartItemElement(item) {
     });
 
     removeBtn.addEventListener('click', () => {
-        if (confirm('Remove this item from cart?')) {
-            cart.removeItem(item.productId);
-            renderCartSidebar();
-        }
+        openConfirmDeleteModal(item.productId);
     });
 
     return clone;
@@ -500,6 +508,98 @@ function createCartItemElement(item) {
 
 function formatPrice(price) {
     return price.toLocaleString('en-US').replace(/,/g, '.') + ' VND';
+}
+
+// ========================================
+// Cart Item Selection (Checkbox) Functions
+// ========================================
+window.toggleSelectAll = function() {
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+    const itemCheckboxes = document.querySelectorAll('.cart-item-checkbox');
+
+    itemCheckboxes.forEach(checkbox => {
+        checkbox.checked = selectAllCheckbox.checked;
+    });
+
+    updateCartSelection();
+};
+
+window.updateCartSelection = function() {
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+    const deleteBtn = document.getElementById('deleteSelectedBtn');
+    const itemCheckboxes = document.querySelectorAll('.cart-item-checkbox');
+    const checkedCheckboxes = document.querySelectorAll('.cart-item-checkbox:checked');
+
+    // Update "Select All" checkbox state - only checked when ALL items are selected
+    if (itemCheckboxes.length === 0) {
+        selectAllCheckbox.checked = false;
+    } else if (checkedCheckboxes.length === itemCheckboxes.length) {
+        selectAllCheckbox.checked = true;
+    } else {
+        selectAllCheckbox.checked = false;
+    }
+
+    // Show/hide delete button
+    if (checkedCheckboxes.length > 0) {
+        deleteBtn.classList.remove('hidden');
+    } else {
+        deleteBtn.classList.add('hidden');
+    }
+
+    // Update total to only include selected items
+    updateCartTotal();
+};
+
+window.deleteSelectedItems = function() {
+    const checkedCheckboxes = document.querySelectorAll('.cart-item-checkbox:checked');
+
+    if (checkedCheckboxes.length === 0) {
+        return;
+    }
+
+    // Get product IDs of selected items
+    const selectedProductIds = [];
+    checkedCheckboxes.forEach(checkbox => {
+        const cartItem = checkbox.closest('.cart-item');
+        const productId = cartItem.getAttribute('data-item-id');
+        selectedProductIds.push(productId);
+    });
+
+    // Confirm deletion
+    if (confirm(`Are you sure you want to delete ${selectedProductIds.length} item(s)?`)) {
+        // Remove selected items from cart
+        selectedProductIds.forEach(productId => {
+            cart.removeItem(productId);
+        });
+
+        // Re-render cart
+        renderCartSidebar();
+        cart.showNotification(`${selectedProductIds.length} item(s) removed from cart`, 'info');
+    }
+};
+
+function getSelectedCartTotal() {
+    const checkedCheckboxes = document.querySelectorAll('.cart-item-checkbox:checked');
+
+    // If no items are selected, calculate total for all items (default behavior)
+    if (checkedCheckboxes.length === 0) {
+        return getCartSubtotal();
+    }
+
+    // Calculate total only for selected items
+    let selectedTotal = 0;
+    checkedCheckboxes.forEach(checkbox => {
+        const cartItem = checkbox.closest('.cart-item');
+        const productId = cartItem.getAttribute('data-item-id');
+        const item = cart.items.find(i => i.productId === productId);
+
+        if (item) {
+            const priceNum = parseInt(item.price) || 0;
+            selectedTotal += priceNum * item.quantity;
+        }
+    });
+
+    return selectedTotal;
 }
 
 // ========================================
@@ -664,7 +764,7 @@ window.openProductModal = async function(productId) {
         if (currentProduct.originalPrice) {
             priceElement.innerHTML = `
                 <span class="text-gray-400 line-through text-xl mr-2">${currentProduct.originalPrice.toLocaleString('en-US')}</span>
-                <span class="text-red-600">${currentProduct.price.toLocaleString('en-US')}</span>
+                <span class="text-primary">${currentProduct.price.toLocaleString('en-US')}</span>
             `;
         } else {
             priceElement.textContent = currentProduct.price.toLocaleString('en-US');
@@ -724,9 +824,18 @@ window.openProductModal = async function(productId) {
             detailsContainer.classList.add('hidden');
         }
 
-        // Set images
-        document.getElementById('modalMainImage').src = currentProduct.imageUrl || '/images/placeholder-product.jpg';
-        document.getElementById('modalMainImage').alt = currentProduct.name || '';
+        // Set images with default fallback
+        const modalImage = document.getElementById('modalMainImage');
+        if (currentProduct.imageUrl && currentProduct.imageUrl.trim() !== '') {
+            modalImage.src = currentProduct.imageUrl;
+            modalImage.alt = currentProduct.name || '';
+            modalImage.style.display = 'block';
+        } else {
+            // Set default placeholder for missing images
+            modalImage.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="340" height="500" viewBox="0 0 340 500"%3E%3Crect fill="%23E8DCC4" width="340" height="500"/%3E%3Ctext fill="%239CA3AF" font-family="Arial" font-size="80" x="50%25" y="50%25" text-anchor="middle" dominant-baseline="middle"%3E%E2%98%95%3C/text%3E%3C/svg%3E';
+            modalImage.alt = 'No image available';
+            modalImage.style.display = 'block';
+        }
 
         // Render size options from backend data (or use defaults if not available)
         const sizeOptions = currentProduct.availableSizes && currentProduct.availableSizes.length > 0
@@ -979,7 +1088,10 @@ function getCartSubtotal() {
 
 // Update cart total with shipping and discounts
 function updateCartTotal() {
-    const subtotal = getCartSubtotal();
+    // Use selected items total if checkboxes are present and items are selected
+    const checkedCheckboxes = document.querySelectorAll('.cart-item-checkbox:checked');
+    const subtotal = checkedCheckboxes.length > 0 ? getSelectedCartTotal() : getCartSubtotal();
+
     const shippingFee = subtotal > 0 ? SHIPPING_FEE : 0;
 
     // Calculate total discount
@@ -992,6 +1104,7 @@ function updateCartTotal() {
     if (total < 0) total = 0;
 
     // Update UI
+    document.getElementById('cartSubtotal').textContent = formatPriceVND(subtotal);
     document.getElementById('shippingFee').textContent = formatPriceVND(shippingFee);
     document.getElementById('cartTotal').textContent = formatPriceVND(total);
 
