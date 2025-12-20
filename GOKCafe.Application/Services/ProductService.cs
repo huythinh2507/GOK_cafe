@@ -132,6 +132,7 @@ public class ProductService : IProductService
                     IsFeatured = p.IsFeatured,
                     CategoryId = p.CategoryId,
                     CategoryName = p.Category.Name,
+                    ProductTypeId = p.ProductTypeId,
                     AvailableSizes = !string.IsNullOrEmpty(p.AvailableSizes)
                         ? System.Text.Json.JsonSerializer.Deserialize<List<string>>(p.AvailableSizes)
                         : null,
@@ -151,22 +152,26 @@ public class ProductService : IProductService
                         DisplayOrder = pi.DisplayOrder,
                         IsPrimary = pi.IsPrimary
                     }).ToList(),
-                    FlavourProfiles = p.ProductFlavourProfiles.Select(pfp => new FlavourProfileDto
-                    {
-                        Id = pfp.FlavourProfile.Id,
-                        Name = pfp.FlavourProfile.Name,
-                        Description = pfp.FlavourProfile.Description,
-                        DisplayOrder = pfp.FlavourProfile.DisplayOrder,
-                        IsActive = pfp.FlavourProfile.IsActive
-                    }).ToList(),
-                    Equipments = p.ProductEquipments.Select(pe => new EquipmentDto
-                    {
-                        Id = pe.Equipment.Id,
-                        Name = pe.Equipment.Name,
-                        Description = pe.Equipment.Description,
-                        DisplayOrder = pe.Equipment.DisplayOrder,
-                        IsActive = pe.Equipment.IsActive
-                    }).ToList()
+                    FlavourProfiles = p.ProductFlavourProfiles
+                        .Where(pfp => pfp.FlavourProfile != null)
+                        .Select(pfp => new FlavourProfileDto
+                        {
+                            Id = pfp.FlavourProfile.Id,
+                            Name = pfp.FlavourProfile.Name,
+                            Description = pfp.FlavourProfile.Description,
+                            DisplayOrder = pfp.FlavourProfile.DisplayOrder,
+                            IsActive = pfp.FlavourProfile.IsActive
+                        }).ToList(),
+                    Equipments = p.ProductEquipments
+                        .Where(pe => pe.Equipment != null)
+                        .Select(pe => new EquipmentDto
+                        {
+                            Id = pe.Equipment.Id,
+                            Name = pe.Equipment.Name,
+                            Description = pe.Equipment.Description,
+                            DisplayOrder = pe.Equipment.DisplayOrder,
+                            IsActive = pe.Equipment.IsActive
+                        }).ToList()
                 }).ToList();
 
             var response = new PaginatedResponse<ProductDto>
@@ -365,9 +370,23 @@ public class ProductService : IProductService
         }
         catch (Exception ex)
         {
+            var errors = new List<string> { ex.Message };
+
+            // Add inner exception details if available
+            if (ex.InnerException != null)
+            {
+                errors.Add($"Inner Exception: {ex.InnerException.Message}");
+
+                // Check for database-specific errors
+                if (ex.InnerException.InnerException != null)
+                {
+                    errors.Add($"Database Error: {ex.InnerException.InnerException.Message}");
+                }
+            }
+
             return ApiResponse<ProductDto>.FailureResult(
                 "An error occurred while creating the product",
-                new List<string> { ex.Message });
+                errors);
         }
     }
 
@@ -393,7 +412,7 @@ public class ProductService : IProductService
             product.DiscountPrice = dto.DiscountPrice;
             product.ImageUrl = dto.ImageUrl;
             product.StockQuantity = dto.StockQuantity;
-            product.IsActive = dto.IsActive;
+            product.IsActive = true; // Always set to active when updating
             product.IsFeatured = dto.IsFeatured;
             product.CategoryId = dto.CategoryId;
             product.ProductTypeId = dto.ProductTypeId;
@@ -604,6 +623,7 @@ public class ProductService : IProductService
             IsFeatured = product.IsFeatured,
             CategoryId = product.CategoryId,
             CategoryName = product.Category?.Name ?? string.Empty,
+            ProductTypeId = product.ProductTypeId,
             AvailableSizes = !string.IsNullOrEmpty(product.AvailableSizes)
                 ? System.Text.Json.JsonSerializer.Deserialize<List<string>>(product.AvailableSizes)
                 : null,

@@ -222,6 +222,141 @@ public class ProductTypeService : IProductTypeService
         }
     }
 
+    public async Task<ApiResponse<bool>> SyncProductTypeAttributesAsync(Guid productTypeId, SyncProductTypeAttributesDto dto)
+    {
+        try
+        {
+            // 1. Verify ProductType exists
+            var productType = await _unitOfWork.ProductTypes.GetByIdAsync(productTypeId);
+            if (productType == null)
+                return ApiResponse<bool>.FailureResult("Product type not found");
+
+            // 2. Get existing attributes with values
+            var existingAttributes = await _unitOfWork.ProductAttributes.GetQueryable()
+                .Include(pa => pa.AttributeValues)
+                .Where(pa => pa.ProductTypeId == productTypeId)
+                .ToListAsync();
+
+            // 3. Determine which attributes to delete (existing but not in new list)
+            var incomingIds = dto.Attributes
+                .Where(a => a.Id.HasValue)
+                .Select(a => a.Id.Value)
+                .ToHashSet();
+
+            var attributesToDelete = existingAttributes
+                .Where(a => !incomingIds.Contains(a.Id))
+                .ToList();
+
+            // 4. Delete removed attributes (soft delete)
+            foreach (var attr in attributesToDelete)
+            {
+                _unitOfWork.ProductAttributes.SoftDelete(attr);
+            }
+
+            // 5. Create or Update attributes
+            foreach (var attrDto in dto.Attributes)
+            {
+                ProductAttribute attribute;
+
+                if (attrDto.Id.HasValue)
+                {
+                    // UPDATE existing
+                    attribute = existingAttributes.FirstOrDefault(a => a.Id == attrDto.Id.Value);
+                    if (attribute == null) continue;
+
+                    attribute.Name = attrDto.Name;
+                    attribute.DisplayName = attrDto.DisplayName;
+                    attribute.IsRequired = attrDto.IsRequired;
+                    attribute.AllowMultipleSelection = attrDto.AllowMultipleSelection;
+                    attribute.DisplayOrder = attrDto.DisplayOrder;
+
+                    _unitOfWork.ProductAttributes.Update(attribute);
+                }
+                else
+                {
+                    // CREATE new
+                    attribute = new ProductAttribute
+                    {
+                        Id = Guid.NewGuid(),
+                        ProductTypeId = productTypeId,
+                        Name = attrDto.Name,
+                        DisplayName = attrDto.DisplayName,
+                        IsRequired = attrDto.IsRequired,
+                        AllowMultipleSelection = attrDto.AllowMultipleSelection,
+                        DisplayOrder = attrDto.DisplayOrder,
+                        IsActive = true
+                    };
+
+                    await _unitOfWork.ProductAttributes.AddAsync(attribute);
+                }
+
+                // 6. Sync attribute values
+                await SyncAttributeValuesAsync(attribute.Id, attrDto.Values, existingAttributes);
+            }
+
+            await _unitOfWork.SaveChangesAsync();
+            return ApiResponse<bool>.SuccessResult(true, "Attributes synced successfully");
+        }
+        catch (Exception ex)
+        {
+            return ApiResponse<bool>.FailureResult(
+                "An error occurred while syncing attributes",
+                new List<string> { ex.Message });
+        }
+    }
+
+    private async Task SyncAttributeValuesAsync(Guid attributeId, List<AttributeValueItemDto> valueDtos, List<ProductAttribute> existingAttributes)
+    {
+        // Get existing values for this attribute
+        var existingAttribute = existingAttributes.FirstOrDefault(a => a.Id == attributeId);
+        var existingValues = existingAttribute?.AttributeValues.ToList() ?? new List<ProductAttributeValue>();
+
+        // Determine which values to delete
+        var incomingValueIds = valueDtos
+            .Where(v => v.Id.HasValue)
+            .Select(v => v.Id.Value)
+            .ToHashSet();
+
+        var valuesToDelete = existingValues
+            .Where(v => !incomingValueIds.Contains(v.Id))
+            .ToList();
+
+        // Delete removed values (soft delete)
+        foreach (var val in valuesToDelete)
+        {
+            _unitOfWork.ProductAttributeValues.SoftDelete(val);
+        }
+
+        // Create or update values
+        foreach (var valDto in valueDtos)
+        {
+            if (valDto.Id.HasValue)
+            {
+                // UPDATE existing
+                var existingVal = existingValues.FirstOrDefault(v => v.Id == valDto.Id.Value);
+                if (existingVal != null)
+                {
+                    existingVal.Value = valDto.Value;
+                    existingVal.DisplayOrder = valDto.DisplayOrder;
+                    _unitOfWork.ProductAttributeValues.Update(existingVal);
+                }
+            }
+            else
+            {
+                // CREATE new
+                var newValue = new ProductAttributeValue
+                {
+                    Id = Guid.NewGuid(),
+                    ProductAttributeId = attributeId,
+                    Value = valDto.Value,
+                    DisplayOrder = valDto.DisplayOrder,
+                    IsActive = true
+                };
+                await _unitOfWork.ProductAttributeValues.AddAsync(newValue);
+            }
+        }
+    }
+
     private ProductTypeDto MapToDto(ProductType productType)
     {
         return new ProductTypeDto

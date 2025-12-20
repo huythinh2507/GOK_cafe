@@ -69,9 +69,10 @@
 <!-- Products Grid Section -->
 <section class="py-12 bg-white">
     <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div class=" flex flex-row justify-between ">
+
         <!-- Page Title -->
         <h1 class="text-3xl font-semibold text-gray-900 mb-8">PRODUCTS LIST</h1>
-
         <!-- Search Bar -->
         <div class="mb-8">
             <div class="max-w-2xl">
@@ -81,12 +82,14 @@
                         id="productSearchInput"
                         value="@searchTerm"
                         placeholder="Search for products..."
-                        class="w-full px-4 py-3 pl-12 border-2 border-gray-300 rounded-lg focus:border-primary focus:outline-none text-lg"
+                        class="w-60 px-4 py-3 pl-12 border-2 border-gray-300 rounded-lg focus:border-primary focus:outline-none text-lg"
                     />
                     <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                 </div>
             </div>
         </div>
+        </div>
+
 
         <div class="flex flex-col justify-between lg:flex-row gap-8">
             <!-- Filters Sidebar -->
@@ -233,8 +236,6 @@
                                             <i class="fas fa-coffee text-6xl text-gray-400"></i>
                                         </div>
                                     }
-
-                                  
                                 </a>
 
                                 <!-- Product Info -->

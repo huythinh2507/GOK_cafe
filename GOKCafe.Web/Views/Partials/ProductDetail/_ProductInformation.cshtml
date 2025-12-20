@@ -21,25 +21,147 @@
     <!-- Top Section: Image and Information -->
     <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:h-[640px]">
         <div class="grid grid-cols-12 gap-8">
-            <!-- Left Column: Product Image (4/12) -->
+            <!-- Left Column: Product Image Slider (4/12) -->
             <div class="col-span-12 sm:col-span-8 lg:col-span-6 xl:col-span-4">
-                <div class="flex items-center justify-center h-full lg:h-[640px] overflow-hidden">
-                    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                @{
+                    var productImages = new List<string>();
+
+                    if (Model.Images != null && Model.Images.Any())
                     {
-                        <img src="@Model.ImageUrl"
-                             alt="@Model.Name"
-                             class="w-full h-full object-cover " />
+                        productImages = Model.Images
+                            .OrderByDescending(x => x.IsPrimary)
+                            .ThenBy(x => x.DisplayOrder)
+                            .Select(x => x.ImageUrl)
+                            .Where(url => !string.IsNullOrWhiteSpace(url))
+                            .ToList();
                     }
-                    else
+
+                    // fallback: ImageUrl
+                    if (!productImages.Any() && !string.IsNullOrWhiteSpace(Model.ImageUrl))
                     {
-                        <div class="w-full bg-gray-200 flex items-center justify-center">
-                            <svg class="w-24 h-24 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
+                        productImages.Add(Model.ImageUrl);
+                    }
+
+                    // fallback cuối: default image
+                    if (!productImages.Any())
+                    {
+                        productImages.Add("/media/default-product.png");
+                    }
+                    
+                }   
+
+                <div class="flex gap-4 h-full lg:h-[640px]">
+                    <!-- Thumbnail Sidebar (Left) -->
+                    <div class="flex flex-col gap-2 w-16 overflow-y-auto">
+                        @for (int i = 0; i < productImages.Count; i++)
+                        {
+                            var imageUrl = productImages[i];
+                            var isActive = i == 0;                           
+                           
+                            <button type="button"
+                                    class="thumbnail-btn flex-shrink-0 w-14 h-14 border-2 @(isActive ? "border-primary" : "border-gray-200") hover:border-primary transition-colors overflow-hidden bg-gray-100"
+                                    onclick="changeMainImage(@i)"
+                                    data-index="@i">
+                                <img src="@imageUrl"
+                                     alt="@Model.Name - Image @(i + 1)"
+                                     class="w-full h-full object-cover" />
+                            </button>
+                        }
+                    </div>
+
+                    <!-- Main Image Display (Right) -->
+                    <div class="flex-1 relative bg-gray-50 overflow-hidden">
+                        <div id="mainImageContainer" class="w-full h-full flex items-center justify-center">
+                            @if (productImages.Any())
+                            {
+                                @for (int i = 0; i < productImages.Count; i++)
+                                {
+                                    var imageUrl = productImages[i];
+                                    var isActive = i == 0;
+                                    <img id="mainImage_@i"
+                                         src="@imageUrl"
+                                         alt="@Model.Name"
+                                         class="main-image w-full h-full object-cover @(isActive ? "" : "hidden")"
+                                         data-index="@i" />
+                                }
+                            }
+                            else
+                            {
+                                <div class="w-full h-full bg-gray-200 flex items-center justify-center">
+                                    <svg class="w-24 h-24 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                </div>
+                            }
                         </div>
-                    }
+
+                        <!-- Navigation Arrows - Positioned at bottom center -->
+                        <div class="absolute bottom-4 left-3/4 flex gap-3">
+                            <button type="button"
+                                    onclick="previousImage()"
+                                    class="w-10 h-10 bg-white/80 hover:bg-white rounded-full shadow-lg flex items-center justify-center transition-all">
+                                <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                                </svg>
+                            </button>
+                            <button type="button"
+                                    onclick="nextImage()"
+                                    class="w-10 h-10 bg-white/80 hover:bg-white rounded-full shadow-lg flex items-center justify-center transition-all">
+                                <svg class="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
                 </div>
+
+                <script>
+                    let currentImageIndex = 0;
+                    const totalImages = @productImages.Count;
+
+                    function changeMainImage(index) {
+                        // Hide all main images
+                        document.querySelectorAll('.main-image').forEach(img => {
+                            img.classList.add('hidden');
+                        });
+
+                        // Show selected image
+                        const selectedImage = document.getElementById('mainImage_' + index);
+                        if (selectedImage) {
+                            selectedImage.classList.remove('hidden');
+                        }
+
+                        // Update thumbnail borders
+                        document.querySelectorAll('.thumbnail-btn').forEach(btn => {
+                            btn.classList.remove('border-primary');
+                            btn.classList.add('border-gray-200');
+                        });
+
+                        const selectedThumb = document.querySelector(`.thumbnail-btn[data-index="${index}"]`);
+                        if (selectedThumb) {
+                            selectedThumb.classList.remove('border-gray-200');
+                            selectedThumb.classList.add('border-primary');
+                        }
+
+                        currentImageIndex = index;
+                    }
+
+                    function nextImage() {
+                        const nextIndex = (currentImageIndex + 1) % totalImages;
+                        changeMainImage(nextIndex);
+                    }
+
+                    function previousImage() {
+                        const prevIndex = (currentImageIndex - 1 + totalImages) % totalImages;
+                        changeMainImage(prevIndex);
+                    }
+
+                    // Optional: Auto-play slider
+                    // setInterval(() => {
+                    //     nextImage();
+                    // }, 3000);
+                </script>
             </div>
 
             <!-- Right Column: Product Information (8/12) -->

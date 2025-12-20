@@ -1,0 +1,90 @@
+@*
+    Category & Status Component
+    Shared partial for product type and category selection
+
+    Reads data from ViewBag:
+    - ViewBag.ProductTypes (IEnumerable): List of available product types
+    - ViewBag.Categories (IEnumerable): List of available categories
+    - ViewBag.SelectedProductTypeId (Guid?): Currently selected product type ID (for Edit mode)
+    - ViewBag.SelectedCategoryId (Guid?): Currently selected category ID (for Edit mode)
+*@
+
+@{
+    var productTypes = ViewBag.ProductTypes;
+    var categories = ViewBag.Categories;
+    var selectedProductTypeId = ViewBag.SelectedProductTypeId?.ToString();
+    var selectedCategoryId = ViewBag.SelectedCategoryId;
+}
+
+<!-- Category & Status Card -->
+<div class="bg-white rounded-lg shadow-sm p-6">
+    <h2 class="text-xl font-semibold text-gray-800 mb-4">Category & Status</h2>
+
+    <div class="space-y-4">
+        <!-- Product Type -->
+        <div>
+            <label for="productType" class="block text-sm font-medium text-gray-700 mb-2">
+                Product Type <span class="text-red-500">*</span>
+            </label>
+            <div class="flex gap-2">
+                <select id="productType" name="productType" required
+                    class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                    <option value="">Select product type</option>
+                    @if (productTypes != null)
+                    {
+                        @foreach (dynamic productType in productTypes)
+                        {
+                            var productTypeIdStr = productType.Id.ToString();
+                            @if (selectedProductTypeId == productTypeIdStr)
+                            {
+                                <option value="@productType.Id" selected>@productType.Name</option>
+                            }
+                            else
+                            {
+                                <option value="@productType.Id">@productType.Name</option>
+                            }
+                        }
+                    }
+                </select>
+                <button type="button" onclick="openAddProductTypeModal()"
+                    class="px-4 py-2 bg-primary text-white rounded-lg whitespace-nowrap">
+                    + Add New
+                </button>
+            </div>
+        </div>
+
+        <!-- Categories -->
+        <div>
+            <label for="categoryId" class="block text-sm font-medium text-gray-700 mb-2">
+                Category <span class="text-red-500">*</span>
+            </label>
+            <div class="flex gap-2">
+                <select id="categoryId" name="categoryId" required
+                    class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                    <option value="">Select a category</option>
+                    @if (categories != null)
+                    {
+                        @foreach (dynamic category in categories)
+                        {
+                            @if (selectedCategoryId != null && category.Id == selectedCategoryId)
+                            {
+                                <option value="@category.Id" selected>@category.Name</option>
+                            }
+                            else
+                            {
+                                <option value="@category.Id">@category.Name</option>
+                            }
+                        }
+                    }
+                </select>
+                <button type="button" onclick="openAddCategoryModal()"
+                    class="px-4 py-2 bg-primary text-white rounded-lg whitespace-nowrap">
+                    + Add New
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@await Html.PartialAsync("~/Views/ProductsAdmin/Shared/Modals/_ModalAddProductType.cshtml")
+@await Html.PartialAsync("~/Views/ProductsAdmin/Shared/Modals/_ModalAddCategory.cshtml")

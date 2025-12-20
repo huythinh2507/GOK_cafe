@@ -25,6 +25,12 @@ public class ProductDto
     public bool IsFeatured { get; set; }
     public Guid CategoryId { get; set; }
     public string CategoryName { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Product Type ID for dynamic attribute system
+    /// </summary>
+    public Guid? ProductTypeId { get; set; }
+
     public string? ShortDescription { get; set; }
     public string? TastingNote { get; set; }
     public string? Region { get; set; }

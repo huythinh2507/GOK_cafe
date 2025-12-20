@@ -73,7 +73,7 @@ public class ProductsAdminController : Controller
             ViewBag.Categories = categoriesResult.Data;
             ViewBag.ProductTypes = productTypesResult.Data;
 
-            return View();
+            return View("~/Views/ProductsAdmin/CreateProduct/Create.cshtml");
         }
         catch (Exception ex)
         {
@@ -103,8 +103,10 @@ public class ProductsAdminController : Controller
 
             ViewBag.Categories = categoriesResult.Data;
             ViewBag.ProductTypes = productTypesResult.Data;
+            ViewBag.SelectedProductTypeId = productResult.Data.ProductTypeId;
+            ViewBag.SelectedCategoryId = productResult.Data.CategoryId;
 
-            return View(productResult.Data);
+            return View("~/Views/ProductsAdmin/EditProduct/Edit.cshtml", productResult.Data);
         }
         catch (Exception ex)
         {
@@ -129,7 +131,7 @@ public class ProductsAdminController : Controller
                 return RedirectToAction(nameof(Index));
             }
 
-            return View(productResult.Data);
+            return View("~/Views/ProductsAdmin/DetailsProduct/Details.cshtml", productResult.Data);
         }
         catch (Exception ex)
         {
