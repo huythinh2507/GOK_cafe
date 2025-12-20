@@ -246,10 +246,7 @@ public class ProductService : IProductService
     {
         try
         {
-            var slug = GenerateSlug(dto.Name);
-            var existingProduct = await _unitOfWork.Products.FirstOrDefaultAsync(p => p.Slug == slug);
-            if (existingProduct != null)
-                return ApiResponse<ProductDto>.FailureResult("A product with this name already exists");
+            var slug = await GenerateUniqueSlugAsync(dto.Name);
 
             var product = new Product
             {
@@ -262,7 +259,7 @@ public class ProductService : IProductService
                 Price = dto.Price,
                 DiscountPrice = dto.DiscountPrice,
                 ImageUrl = dto.ImageUrl,
-                StockQuantity = dto.StockQuantity,
+                StockQuantity = dto.StockQuantity + 1, // Auto increment by 1
                 IsFeatured = dto.IsFeatured,
                 CategoryId = dto.CategoryId,
                 ProductTypeId = dto.ProductTypeId,
@@ -363,6 +360,11 @@ public class ProductService : IProductService
                     .ThenInclude(pfp => pfp.FlavourProfile)
                 .Include(p => p.ProductEquipments)
                     .ThenInclude(pe => pe.Equipment)
+                .Include(p => p.ProductAttributeSelections)
+                    .ThenInclude(pas => pas.ProductAttribute)
+                        .ThenInclude(pa => pa.AttributeValues)
+                .Include(p => p.ProductAttributeSelections)
+                    .ThenInclude(pas => pas.ProductAttributeValue)
                 .FirstOrDefaultAsync(p => p.Id == product.Id);
 
             var productDto = MapToDto(createdProduct!);
@@ -660,22 +662,23 @@ public class ProductService : IProductService
                 IsActive = pe.Equipment.IsActive
             }).ToList() ?? new List<EquipmentDto>(),
             ProductAttributes = product.ProductAttributeSelections?
+                .Where(pas => pas.ProductAttribute != null) // Filter out null navigation properties
                 .GroupBy(pas => pas.ProductAttribute)
                 .Select(g => new ProductAttributeDisplayDto
                 {
-                    AttributeId = g.Key.Id,
-                    AttributeName = g.Key.Name,
-                    DisplayName = g.Key.DisplayName,
-                    AllowMultipleSelection = g.Key.AllowMultipleSelection,
-                    IsRequired = g.Key.IsRequired,
-                    Values = g.Key.AttributeValues?
+                    AttributeId = g.Key!.Id,
+                    AttributeName = g.Key!.Name,
+                    DisplayName = g.Key!.DisplayName,
+                    AllowMultipleSelection = g.Key!.AllowMultipleSelection,
+                    IsRequired = g.Key!.IsRequired,
+                    Values = (g.Key.AttributeValues?
                         .OrderBy(av => av.DisplayOrder)
                         .Select(av => new ProductAttributeValueDisplayDto
                         {
                             ValueId = av.Id,
                             Value = av.Value,
                             IsSelected = g.Any(pas => pas.ProductAttributeValueId == av.Id)
-                        })
+                        }) ?? Enumerable.Empty<ProductAttributeValueDisplayDto>())
                         .Union(
                             // Include custom values that were entered for this attribute
                             g.Where(pas => pas.ProductAttributeValueId == null && !string.IsNullOrEmpty(pas.CustomValue))
@@ -686,10 +689,10 @@ public class ProductService : IProductService
                                  IsSelected = true
                              })
                         )
-                        .ToList() ?? new List<ProductAttributeValueDisplayDto>()
+                        .ToList()
                 })
                 .OrderBy(attr => attr.DisplayName)
-                .ToList() ?? null
+                .ToList()
         };
     }
 
@@ -699,5 +702,21 @@ public class ProductService : IProductService
             .Replace(" ", "-")
             .Replace("&", "and")
             .Trim();
+    }
+
+    private async Task<string> GenerateUniqueSlugAsync(string name)
+    {
+        var baseSlug = GenerateSlug(name);
+        var slug = baseSlug;
+        var counter = 1;
+
+        // Keep trying until we find a unique slug
+        while (await _unitOfWork.Products.AnyAsync(p => p.Slug == slug))
+        {
+            slug = $"{baseSlug}-{counter}";
+            counter++;
+        }
+
+        return slug;
     }
 }
