@@ -62,25 +62,24 @@
             new { Name = "Bubble Tea", Image = "/media/image/tearange3.png", Url = "/products" },
             new { Name = "Assam Black Tea", Image = "/media/image/tearange4.png", Url = "/products" },
             new { Name = "Honey Green Tea", Image = "/media/image/tearange5.png", Url = "/products" },
-            new { Name = "Mango Green Tea Macchiato", Image = "/media/image/tearange6.png", Url = "/products" }
+            new { Name = "Mango Green Tea ", Image = "/media/image/tearange6.png", Url = "/products" }
         };
     }
 }
 
 <!-- Our Tea Range Section -->
-<section class="py-12 bg-white">
-    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+<section class="pt-20 bg-white">
+    <div class="container mx-auto">
         <!-- Section Header -->
-        <div class="text-center mb-8">
-            <p class="text-2xl text-primary font-medium uppercase tracking-wide mb-2">@sectionTitle</p>
+        <div class="text-center mb-4">
+            <p class="text-lg text-primary font-medium uppercase tracking-wide mb-1">@sectionTitle</p>
             <h2 class="text-4xl md:text-5xl font-semibold text-gray-900">@sectionHeading</h2>
         </div>
-
         <!-- Tea Grid Layout -->
         <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-0 mb-8">
             @foreach (var item in teaItems)
             {
-                <a class="relative group overflow-hidden h-[300px] block bg-gray-200">
+                <a class="relative group overflow-hidden h-[400px] sm:h-[320px] lg:h-[380px] block bg-gray-200">
                     @if (!string.IsNullOrEmpty(item.Image))
                     {
                         <img src="@item.Image" alt="@item.Name" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />

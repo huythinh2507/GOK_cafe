@@ -34,7 +34,7 @@
 
 <!-- Banner Section -->
 <!-- DEBUG: Banner Image URL = @bannerImageUrl -->
-<section class="relative h-[800px] md:h-[600px] flex items-center justify-start overflow-hidden">
+<section class="relative h-[800px] md:h-[620px] flex items-center justify-start overflow-hidden">
     <!-- Background Image -->
     <div class="absolute inset-0 z-0"
         style="background-image: url('@bannerImageUrl'); background-size: cover; background-position: center;">
@@ -46,10 +46,10 @@
         </div>
 
         <!-- Content -->
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 mt-12 md:mt-36">
+        <div class="container mx-auto relative z-10 mt-12 md:mt-36">
             <div class="max-w-4xl">
                 <!-- Title -->
-                <h1 class="text-5xl md:text-5xl font-semibold text-white mb-4 leading-tight ">
+                <h1 class="text-5xl md:text-5xl font-semibold text-white mb-8 leading-tight ">
                     @bannerTitle
                     @if (!string.IsNullOrEmpty(bannerTitleHighlight))
                     {
@@ -69,14 +69,14 @@
                 @if (!string.IsNullOrEmpty(bannerButtonText))
                 {
                     <a href="@bannerButtonUrl"
-                        class="mb-4 inline-flex items-center gap-2 px-8 py-3 bg-transparent border-2 border-white text-white font-semibold hover:bg-white hover:text-gray-900 transition-all duration-300 text-lg">
+                        class="w-full justify-center sm:w-[180px] text-base sm:text-base mb-4 inline-flex items-center gap-2 px-8 py-3 bg-transparent border-2 border-white text-white font-semibold hover:bg-white hover:text-gray-900 transition-all duration-300 ">
                         @bannerButtonText
                         <i class="fas fa-arrow-right"></i>
                     </a>
                 }
 
                 <!-- Scroll Down Indicator -->
-                <div class="flex items-center gap-2 text-white text-sm mb-4">
+                <div class="flex items-center gap-2 text-white text-sm mt-8">
                     <i class="fas fa-mouse"></i>
                     <span>Scroll down for more</span>
                 </div>

@@ -40,17 +40,16 @@
 
 <!-- Header -->
 <header id="stickyHeader" class="sticky top-0 z-30 bg-gray-50 border-b border-gray-200 transition-shadow duration-300">
-    <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between h-20">
+    <nav class="container mx-auto ">
+        <div class="flex items-center justify-between h-[72px]">
             <!-- Mobile menu button -->
             <button type="button" class="md:hidden text-gray-700 hover:text-primary focus:outline-none" onclick="toggleMobileMenu()">
                 <i class="fas fa-bars text-2xl"></i>
             </button>
             <!-- Left Navigation -->
             <div class="hidden md:flex items-center md:gap-3 lg:gap-12">
-                <a href="/" class="text-gray-700 hover:text-primary font-medium transition-colors uppercase text-base">Home</a>
-                <a href="/visions" class="text-gray-700 hover:text-primary font-medium transition-colors uppercase  text-base">Visions</a>
-
+                <a href="/" class="text-gray-700 hover:text-primary font-medium transition-colors uppercase text-base">Home</a>           
+                <a href="/blog" class="text-gray-700 hover:text-primary font-medium transition-colors uppercase  text-base">Blog</a>
                 <!-- Products with Mega Menu -->
                 <div class="relative group">
                     <a href="/products" class="text-gray-700 hover:text-primary font-medium transition-colors uppercase text-base flex items-center gap-1">
@@ -106,7 +105,7 @@
             <div class="hidden md:flex items-center md:gap-3 lg:gap-12">
                 <a href="/partners" class="text-gray-700 hover:text-primary font-medium transition-colors uppercase  text-base">Partners</a>
                 <a href="/contact" class="text-gray-700 hover:text-primary font-medium transition-colors uppercase  text-base">Contact</a>
-                <a href="/blog" class="text-gray-700 hover:text-primary font-medium transition-colors uppercase  text-base">Blog</a>
+                <a href="/visions" class="text-gray-700 hover:text-primary font-medium transition-colors uppercase  text-base">Visions</a>
             </div>
             <div class="flex items-center gap-4">
                 <!-- Search Icon -->
@@ -181,7 +180,7 @@
 <!-- Search Modal -->
 <div id="searchModalOverlay" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 transition-opacity duration-300" onclick="closeSearchModal()"></div>
 <div id="searchModal" class="fixed top-0 left-0 right-0 bg-white shadow-lg hidden z-50 transition-all duration-300" style="transform: translateY(-100%);">
-    <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-4 py-6">
         <!-- Search Input -->
         <div class="flex items-center gap-4 mb-6">
             <div class="flex-1 relative">
