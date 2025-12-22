@@ -31,10 +31,10 @@
 
 <!-- Our Coffee Section -->
 <section class="pb-12 bg-white">
-    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="container mx-auto">
         <!-- Section Header -->
         <div class="text-center mb-4">
-            <p class="text-2xl text-primary font-medium uppercase tracking-wide mb-2">@sectionTitle</p>
+            <p class="text-lg text-primary font-medium uppercase tracking-wide mb-1">@sectionTitle</p>
             <h2 class="text-4xl md:text-5xl font-semibold text-gray-900">@sectionHeading</h2>
            
         </div>
@@ -42,12 +42,43 @@
         <!-- Products Grid -->
         @if (products.Any())
         {
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-6">
+            <!-- Mobile: Horizontal Scroll -->
+            <div class="lg:hidden overflow-x-auto mb-6 -mx-4 px-4">
+                <div class="flex gap-4" style="width: max-content;">
+                    @foreach (var product in products)
+                    {
+                        <a href="/product-details?id=@product.Id" class="group block" style="width: 280px; flex-shrink: 0;">
+                            <!-- Product Image -->
+                            <div class="overflow-hidden mb-4 flex items-center justify-center bg-gray-100 w-full h-[380px] cursor-pointer">
+                                @if (!string.IsNullOrEmpty(product.ImageUrl))
+                                {
+                                    <img src="@product.ImageUrl" alt="@product.Name" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                                }
+                                else
+                                {
+                                    <div class="w-full h-full bg-gray-200 flex items-center justify-center">
+                                        <i class="fas fa-coffee text-6xl text-gray-400"></i>
+                                    </div>
+                                }
+                            </div>
+
+                            <!-- Product Info -->
+                            <div class="text-center w-full">
+                                <h3 class="text-lg font-semibold text-gray-900 mb-2 group-hover:text-primary transition-colors">@product.Name</h3>
+                                <p class="text-gray-600">From <span class="font-semibold">@product.Price.ToString("N0") VNĐ</span></p>
+                            </div>
+                        </a>
+                    }
+                </div>
+            </div>
+
+            <!-- Desktop: Grid -->
+            <div class="hidden lg:grid grid-cols-4 gap-8 mb-2">
                 @foreach (var product in products)
                 {
                     <a href="/product-details?id=@product.Id" class="group justify-center block">
                         <!-- Product Image -->
-                        <div class="overflow-hidden mb-4 flex items-center justify-center bg-gray-100 w-full h-[480px] cursor-pointer">
+                        <div class="overflow-hidden mb-4 flex items-center justify-center bg-gray-100 w-full h-[400px] lg:h-[400px] 2xl:h-[480px] cursor-pointer">
                             @if (!string.IsNullOrEmpty(product.ImageUrl))
                             {
                                 <img src="@product.ImageUrl" alt="@product.Name" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
@@ -105,9 +136,9 @@
             </div>
         }
 
-        <!-- Shop All Button -->
+         <!-- Shop All Button -->
         <div class="text-center">
-            <a href="@buttonUrl" class="inline-block px-8 py-3 border-2 border-primary text-primary font-semibold hover:bg-primary hover:text-white transition-all duration-300">
+            <a href="@buttonUrl" class=" w-full text-center sm:w-[180px] inline-block px-4 py-3 border-2 border-primary text-primary font-semibold hover:bg-primary hover:text-white transition-all duration-300">
                 @buttonText
             </a>
         </div>
