@@ -126,10 +126,21 @@ builder.Services.AddSwaggerGen(options =>
         Version = "v1",
         Description = "API for GOK Cafe management system"
     });
+
+    // Include XML comments if available
+    var apiXmlFile = "GOKCafe.API.xml";
+    var apiXmlPath = Path.Combine(AppContext.BaseDirectory, apiXmlFile);
+    if (File.Exists(apiXmlPath))
+    {
+        options.IncludeXmlComments(apiXmlPath);
+    }
 });
 
 // Add API Controllers support (for Web API endpoints like ProductApiController)
-builder.Services.AddControllers();
+// Include controllers from GOKCafe.API assembly
+builder.Services.AddControllers()
+    .AddApplicationPart(typeof(GOKCafe.API.Controllers.AuthController).Assembly)
+    .AddControllersAsServices();
 
 WebApplication app = builder.Build();
 
