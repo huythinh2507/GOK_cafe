@@ -1,0 +1,26 @@
+@using Umbraco.Cms.Core.Models.PublishedContent
+@using Umbraco.Extensions
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@{
+    Layout = "_Layout.cshtml";
+    ViewData["Title"] = "Blog & News";
+}
+
+@* <!-- Blogs Banner (Optional) -->
+<section class="relative bg-gradient-to-r from-primary to-secondary text-white py-20">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-4 text-center">
+        <h1 class="text-4xl md:text-5xl font-bold mb-4">Blog & News</h1>
+        <p class="text-xl text-white/90 max-w-2xl mx-auto">
+            Discover stories, insights, and inspiration from the world of coffee and tea
+        </p>
+    </div>
+</section> *@
+
+@* Breadcrumbs *@
+@await Html.PartialAsync("~/Views/Partials/Shared/_Breadcrumbs.cshtml", Model)
+
+@* Products Banner Carousel *@
+@await Html.PartialAsync("~/Views/Partials/Products/ProductsBanner.cshtml", Model)
+
+<!-- Blogs List -->
+@await Html.PartialAsync("~/Views/Partials/Blogs/BlogsList.cshtml")

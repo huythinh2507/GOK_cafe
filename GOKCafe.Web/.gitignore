@@ -482,5 +482,5 @@ umbraco-package-schema.json
 ## Tailwind CSS
 ##
 tailwindcss-windows-x64.exe
-# /wwwroot/css/output.css
+# /wwwroot/css/output.css  # Need to commit for production
 package-lock.json
