@@ -127,6 +127,9 @@ builder.Services.AddSwaggerGen(options =>
         Description = "API for GOK Cafe management system"
     });
 
+    // Include all API controllers regardless of GroupName
+    options.DocInclusionPredicate((docName, apiDesc) => true);
+
     // Include XML comments if available
     var apiXmlFile = "GOKCafe.API.xml";
     var apiXmlPath = Path.Combine(AppContext.BaseDirectory, apiXmlFile);
