@@ -1,10 +1,11 @@
+@using GOKCafe.Web.Models.ViewModels
 @inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
 @{
     var sectionTitle = "EXPERIENCE THE TEA ZEN";
     var sectionHeading = "OUR TEA RANGE";
     var buttonText = "Shop All Tea";
     var buttonUrl = "/tea";
-    var teaItems = new List<dynamic>();
+    var teaItems = new List<PickupBrandItem>();
 
     // Get Our Tea Range section from Home children
     if (UmbracoContext?.Content != null)
@@ -28,7 +29,7 @@
                     var teaImage = item.Value<Umbraco.Cms.Core.Models.PublishedContent.IPublishedContent>("ourTeaRangeImage");
                     var teaImageUrl = teaImage != null ? teaImage.Url() : "";
 
-                    teaItems.Add(new
+                    teaItems.Add(new PickupBrandItem
                     {
                         Name = item.Value<string>("title") ?? item.Name,
                         Image = teaImageUrl,
@@ -53,17 +54,23 @@
         };
         foreach (var item in fallbackItems)
         {
-            teaItems.Add(new { Name = item.Name, Image = item.Image, Url = "#" });
+            teaItems.Add(new PickupBrandItem { Name = item.Name, Image = item.Image, Url = "#" });
         }
-        teaItems = new List<dynamic>
+        teaItems = new List<PickupBrandItem>
         {
-            new { Name = "Green Tea", Image = "/media/image/tearange1.png", Url = "/products" },
-            new { Name = "Honey Milk Tea", Image = "/media/image/tearange2.png", Url = "/products" },
-            new { Name = "Bubble Tea", Image = "/media/image/tearange3.png", Url = "/products" },
-            new { Name = "Assam Black Tea", Image = "/media/image/tearange4.png", Url = "/products" },
-            new { Name = "Honey Green Tea", Image = "/media/image/tearange5.png", Url = "/products" },
-            new { Name = "Mango Green Tea ", Image = "/media/image/tearange6.png", Url = "/products" }
+            new PickupBrandItem { Name = "Green Tea", Image = "/media/image/tearange1.png", Url = "/products" },
+            new PickupBrandItem { Name = "Honey Milk Tea", Image = "/media/image/tearange2.png", Url = "/products" },
+            new PickupBrandItem { Name = "Bubble Tea", Image = "/media/image/tearange3.png", Url = "/products" },
+            new PickupBrandItem { Name = "Assam Black Tea", Image = "/media/image/tearange4.png", Url = "/products" },
+            new PickupBrandItem { Name = "Honey Green Tea", Image = "/media/image/tearange5.png", Url = "/products" },
+            new PickupBrandItem { Name = "Mango Green Tea ", Image = "/media/image/tearange6.png", Url = "/products" }
         };
+    }
+
+    var pickUpBrandItem = teaItems.Take(6).ToList();
+    for (int i = 1; i < pickUpBrandItem.Count; i = i+2)
+    {
+        pickUpBrandItem[i].Name = "";
     }
 }
 
@@ -73,18 +80,21 @@
         <!-- Section Header -->
         <div class="text-center mb-4">
             <p class="text-lg text-primary font-medium uppercase tracking-wide mb-1">@sectionTitle</p>
-            <h2 class="text-4xl md:text-5xl font-semibold text-gray-900">@sectionHeading</h2>
+            <h2 class="text-4xl md:text-5xl font-semibold text-gray-900 md:pb-8">@sectionHeading</h2>
         </div>
         <!-- Tea Grid Layout -->
         <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-0 mb-8">
-            @foreach (var item in teaItems)
+            @foreach (var item in pickUpBrandItem)
             {
                 <a class="relative group overflow-hidden h-[400px] sm:h-[320px] lg:h-[380px] block bg-gray-200">
                     @if (!string.IsNullOrEmpty(item.Image))
                     {
-                        <img src="@item.Image" alt="@item.Name" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                        <img src="@item.Image"
+                             alt="@(string.IsNullOrWhiteSpace(item?.Name) ? "" : item.Name)"
+                             class="w-full h-full object-cover transition-all duration-300 group-hover:scale-105
+                                    @(string.IsNullOrWhiteSpace(item?.Name) ? "opacity-100" : "opacity-85")" />
                         <div class="absolute inset-0 flex items-center justify-center">
-                            <h3 class="text-white text-3xl font-bold drop-shadow-lg">@item.Name</h3>
+                            <h3 class="text-white text-3xl font-bold drop-shadow-lg">@item?.Name</h3>
                         </div>
                     }
                     else

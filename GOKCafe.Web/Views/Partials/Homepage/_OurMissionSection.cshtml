@@ -35,7 +35,7 @@
     {
 
         <!-- Our Mission Section -->
-        <section class="bg-white font-heading pt-20">
+        <section class="bg-white font-heading pt-20 overflow-hidden">
             <div class="container mx-auto ">
                 <!-- Mobile & Tablet Layout -->
                 <div class="block lg:hidden">
@@ -194,39 +194,45 @@
                 </div>
 
                 <!-- Desktop Layout -->
-                <div class="hidden lg:grid grid-cols-2 gap-12 xl:gap-16 items-center">
-                    <!-- Left Content -->
-                    <div>
-                        <!-- Small Heading -->
-                        <p class="text-[#0767B3] text-2xl font-medium uppercase tracking-wide mb-4">
-                            YOU'RE THE REASON WE'RE HERE.
-                        </p>
+                <div class="hidden lg:block">
+                    <div class="relative">
+                        <div class="grid grid-cols-2 gap-12 xl:gap-16 items-center">
+                            <!-- Left Content -->
+                            <div class="pr-8">
+                                <!-- Small Heading -->
+                                <p class="text-[#0767B3] text-2xl font-medium uppercase tracking-wide mb-4">
+                                    YOU'RE THE REASON WE'RE HERE.
+                                </p>
 
-                        <!-- Main Heading -->
-                        <h2 class="text-4xl md:text-5xl font-semibold text-gray-900 mb-6">
-                            OUR MISSIONS
-                        </h2>
+                                <!-- Main Heading -->
+                                <h2 class="text-4xl md:text-5xl font-semibold text-gray-900 mb-6">
+                                    OUR MISSIONS
+                                </h2>
 
-                        <!-- Description -->
-                        <p class="text-gray-700 text-sm sm:text-base lg:text-lg leading-relaxed mb-6">
-                            Everything we do is a matter of heart, body and soul.
-                        </p>
+                                <!-- Description -->
+                                <p class="text-gray-700 text-sm sm:text-base lg:text-lg leading-relaxed mb-6">
+                                    Everything we do is a matter of heart, body and soul.
+                                </p>
 
-                        <p class="text-gray-700 text-sm sm:text-base lg:text-lg leading-relaxed mb-8">
-                            We strive to form profound partnerships with farmers from all over the world to create perspective together and form healthy working relationships built on trust and respect.
-                        </p>
+                                <p class="text-gray-700 text-sm sm:text-base lg:text-lg leading-relaxed mb-8">
+                                    We strive to form profound partnerships with farmers from all over the world to create perspective together and form healthy working relationships built on trust and respect.
+                                </p>
 
-                        <!-- CTA Button -->
-                        <div>
-                            <a href="/vision" class="inline-block border-2 border-[#0767B3] text-[#0767B3] font-semibold hover:bg-[#0767B3] hover:text-white transition-all duration-300 px-6 sm:px-8 py-2.5 sm:py-3 text-sm sm:text-base">
-                                Read More
-                            </a>
+                                <!-- CTA Button -->
+                                <div>
+                                    <a href="/vision" class="inline-block border-2 border-[#0767B3] text-[#0767B3] font-semibold hover:bg-[#0767B3] hover:text-white transition-all duration-300 px-6 sm:px-8 py-2.5 sm:py-3 text-sm sm:text-base">
+                                        Read More
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Spacer for video -->
+                            <div></div>
                         </div>
-                    </div>
 
-                    <!-- Right Video -->
-                    <div>
-                        <div class="relative w-full aspect-video bg-gray-200 overflow-hidden shadow-lg group cursor-pointer">
+                        <!-- Right Video - Positioned Absolutely to Overflow to Screen Edge -->
+                        <div class="absolute top-0 left-1/2 right-0 h-full" style="width: calc(50vw + ((100vw - 100%) / 2));">
+                            <div class="relative w-full h-full bg-gray-200 overflow-hidden shadow-lg group cursor-pointer">
                             @if (!string.IsNullOrEmpty(videoMediaUrl))
                             {
                                 @* Use uploaded video with custom play button *@
