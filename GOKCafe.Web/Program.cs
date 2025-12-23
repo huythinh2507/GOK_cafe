@@ -34,13 +34,11 @@ builder.CreateUmbracoBuilder()
     .AddBackOffice()
     .AddWebsite()
     .AddComposers()
-    .AddUmbracoCommerce(umbracoCommerceBuilder =>
-    {
-        umbracoCommerceBuilder.AddCommerceProductFeeds();
-    })
+    .AddUmbracoCommerce()
     .Build();
 
 // ===== API Services Configuration =====
+// Note: Do not re-register distributed cache as Umbraco already registers it
 
 // Configure DbContext with SQL Server for API
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -51,8 +49,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 // Register repositories
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-// Configure caching
-builder.Services.AddDistributedMemoryCache();
+// Configure cache service
 builder.Services.AddSingleton<ICacheService, CacheService>();
 
 // Register infrastructure services
@@ -127,8 +124,17 @@ builder.Services.AddSwaggerGen(options =>
         Description = "API for GOK Cafe management system"
     });
 
-    // Include all API controllers regardless of GroupName
-    options.DocInclusionPredicate((docName, apiDesc) => true);
+    // Include only GOKCafe API controllers from the API assembly
+    options.DocInclusionPredicate((docName, apiDesc) =>
+    {
+        // Only include controllers from GOKCafe.API assembly
+        var controllerType = apiDesc.ActionDescriptor as Microsoft.AspNetCore.Mvc.Controllers.ControllerActionDescriptor;
+        return controllerType != null &&
+               controllerType.ControllerTypeInfo.Assembly.GetName().Name == "GOKCafe.API";
+    });
+
+    // Use fully qualified names for generic types to avoid schema ID conflicts
+    options.CustomSchemaIds(type => type.FullName?.Replace("+", "."));
 
     // Include XML comments if available
     var apiXmlFile = "GOKCafe.API.xml";
@@ -140,9 +146,27 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 // Add API Controllers support (for Web API endpoints like ProductApiController)
-// Include controllers from GOKCafe.API assembly
+// Include controllers from GOKCafe.API and GOKCafe.Web assemblies, exclude Gotik.Commerce
 builder.Services.AddControllers()
-    .AddApplicationPart(typeof(GOKCafe.API.Controllers.AuthController).Assembly)
+    .ConfigureApplicationPartManager(manager =>
+    {
+        // Remove Gotik.Commerce assembly to prevent duplicate API controllers
+        var gotikCommercePart = manager.ApplicationParts
+            .OfType<Microsoft.AspNetCore.Mvc.ApplicationParts.AssemblyPart>()
+            .FirstOrDefault(p => p.Assembly.GetName().Name == "Gotik.Commerce");
+
+        if (gotikCommercePart != null)
+        {
+            manager.ApplicationParts.Remove(gotikCommercePart);
+        }
+
+        // Ensure GOKCafe.API assembly is added
+        if (!manager.ApplicationParts.Any(p => p is Microsoft.AspNetCore.Mvc.ApplicationParts.AssemblyPart ap && ap.Assembly.GetName().Name == "GOKCafe.API"))
+        {
+            manager.ApplicationParts.Add(new Microsoft.AspNetCore.Mvc.ApplicationParts.AssemblyPart(
+                typeof(GOKCafe.API.Controllers.AuthController).Assembly));
+        }
+    })
     .AddControllersAsServices();
 
 WebApplication app = builder.Build();
