@@ -7,7 +7,7 @@ env:
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "releases/cloud-deployment" ]
   workflow_dispatch:
 
 permissions:
