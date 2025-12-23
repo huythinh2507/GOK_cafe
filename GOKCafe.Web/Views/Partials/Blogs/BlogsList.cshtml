@@ -1,0 +1,242 @@
+@using GOKCafe.Web.Models.DTOs
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@{
+    // Get blogs from ViewData (passed from controller)
+    var paginatedBlogs = ViewData["Blogs"] as PaginatedResponse<BlogDto>;
+    var blogs = paginatedBlogs?.Items ?? new List<BlogDto>();
+    var totalPages = paginatedBlogs?.TotalPages ?? 1;
+    var currentPage = paginatedBlogs?.PageNumber ?? 1;
+
+    // Get search term from ViewData
+    var searchTerm = ViewData["SearchTerm"] as string ?? string.Empty;
+
+    // Helper function to build pagination URL
+    string BuildPaginationUrl(int page)
+    {
+        var queryParams = new List<string> { $"page={page}" };
+
+        if (!string.IsNullOrEmpty(searchTerm))
+        {
+            queryParams.Add($"search={System.Web.HttpUtility.UrlEncode(searchTerm)}");
+        }
+
+        return "?" + string.Join("&", queryParams);
+    }
+}
+
+<!-- Blogs List Section -->
+<section class="py-12 bg-white">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-4">
+        @* <!-- Header Section -->
+        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-4">
+            <!-- Page Title -->
+            <h1 class="text-3xl font-semibold text-gray-900">BLOG & NEWS</h1>
+
+            <!-- Search Bar -->
+            <div class="w-full lg:w-auto">
+                <div class="relative max-w-md">
+                    <input
+                        type="text"
+                        id="blogSearchInput"
+                        value="@searchTerm"
+                        placeholder="Search for blogs..."
+                        class="w-full lg:w-80 px-4 py-3 pl-12 border-2 border-gray-300 rounded-lg focus:border-primary focus:outline-none"
+                    />
+                    <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                </div>
+            </div>
+        </div> *@
+
+        <!-- Blogs Grid -->
+        @if (blogs.Any())
+        {
+            <div class="justify-between grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6 mb-12">
+                @foreach (var blog in blogs)
+                {
+                                        <script>
+                        console.log(@Html.Raw(
+                            System.Text.Json.JsonSerializer.Serialize(blogs)
+                        ));
+                    </script>
+                    var blogUrl = $"/blog/blog-detail?id={blog.Id}";
+                    var blogDate = blog.PublishedDate.ToString("MMM dd, yyyy");
+
+                    <!-- Blog Card -->
+                    <a href="@blogUrl" class="group relative overflow-hidden cursor-pointer block w-full lg:w-[400px] h-[400px] aspect-square">
+                        <!-- Background Image with overlay -->
+                        <div class="absolute inset-0 bg-cover bg-center"
+                             style="background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('@blog.FeaturedImageUrl');">
+                            @if (string.IsNullOrEmpty(blog.FeaturedImageUrl))
+                            {
+                                <div class="w-full h-full bg-gray-400"></div>
+                            }
+                        </div>
+
+                        <!-- Content -->
+                        <div class="relative h-full flex flex-col justify-end p-6 text-white">
+                            <!-- Date Badge -->
+                            <div class="mb-3">
+                                <span class="inline-block bg-white/20 backdrop-blur-sm px-3 py-1 rounded text-xs font-medium uppercase">
+                                    @blogDate
+                                </span>
+                            </div>
+
+                            <!-- Title -->
+                            <h3 class="text-xl font-semibold mb-3 leading-snug" style="max-width: 320px;">
+                                @blog.Title
+                            </h3>
+
+                            <!-- Excerpt -->
+                            @if (!string.IsNullOrEmpty(blog.Excerpt))
+                            {
+                                <p class="text-sm text-white/90 mb-3 line-clamp-2" style="max-width: 320px;">
+                                    @blog.Excerpt
+                                </p>
+                            }
+
+                            <!-- Read More Link -->
+                            <div class="inline-flex items-center text-white text-sm font-medium group-hover:gap-3 transition-all">
+                                <span>Read more</span>
+                                <span class="ml-2 text-xl transform group-hover:translate-x-1 transition-transform">&rarr;</span>
+                            </div>
+                        </div>
+                    </a>
+                }
+            </div>
+
+            <!-- Pagination -->
+            @if (totalPages > 1)
+            {
+                <div class="flex justify-center items-center gap-2 mt-8">
+                    <!-- Previous Button -->
+                    @if (currentPage > 1)
+                    {
+                        <a href="@BuildPaginationUrl(currentPage - 1)"
+                           class="w-12 h-12 flex items-center justify-center border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors rounded cursor-pointer">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    }
+                    else
+                    {
+                        <span class="w-12 h-12 flex items-center justify-center border border-gray-300 text-gray-300 rounded cursor-not-allowed">
+                            <i class="fas fa-chevron-left"></i>
+                        </span>
+                    }
+
+                    @* Show page numbers *@
+                    @for (int i = 1; i <= Math.Min(3, totalPages); i++)
+                    {
+                        if (i == currentPage)
+                        {
+                            <span class="w-12 h-12 flex items-center justify-center border-2 border-primary bg-primary text-white font-medium rounded">
+                                @i
+                            </span>
+                        }
+                        else
+                        {
+                            <a href="@BuildPaginationUrl(i)"
+                               class="w-12 h-12 flex items-center justify-center border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors rounded cursor-pointer">
+                                @i
+                            </a>
+                        }
+                    }
+
+                    @* Show dots if there are more pages *@
+                    @if (totalPages > 4)
+                    {
+                        <span class="px-2 text-gray-500">...</span>
+
+                        @* Show last page *@
+                        if (currentPage == totalPages)
+                        {
+                            <span class="w-12 h-12 flex items-center justify-center border-2 border-primary bg-primary text-white font-medium rounded">
+                                @totalPages
+                            </span>
+                        }
+                        else
+                        {
+                            <a href="@BuildPaginationUrl(totalPages)"
+                               class="w-12 h-12 flex items-center justify-center border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors rounded cursor-pointer">
+                                @totalPages
+                            </a>
+                        }
+                    }
+
+                    <!-- Next Button -->
+                    @if (currentPage < totalPages)
+                    {
+                        <a href="@BuildPaginationUrl(currentPage + 1)"
+                           class="w-12 h-12 flex items-center justify-center border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors rounded cursor-pointer">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    }
+                    else
+                    {
+                        <span class="w-12 h-12 flex items-center justify-center border border-gray-300 text-gray-300 rounded cursor-not-allowed">
+                            <i class="fas fa-chevron-right"></i>
+                        </span>
+                    }
+                </div>
+            }
+        }
+        else
+        {
+            <!-- No Results Message -->
+            <div class="text-center py-16">
+                <i class="fas fa-newspaper text-6xl text-gray-300 mb-4"></i>
+                <p class="text-gray-500 text-lg">No blog posts found.</p>
+                @if (!string.IsNullOrEmpty(searchTerm))
+                {
+                    <p class="text-gray-400 text-sm mt-2">Try adjusting your search terms</p>
+                }
+            </div>
+        }
+    </div>
+</section>
+
+<script>
+    // Search functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('blogSearchInput');
+        let searchTimeout;
+
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                const value = this.value.trim();
+
+                searchTimeout = setTimeout(() => {
+                    const url = new URL(window.location.href);
+
+                    if (value.length > 0) {
+                        url.searchParams.set('search', value);
+                    } else {
+                        url.searchParams.delete('search');
+                    }
+
+                    url.searchParams.set('page', '1'); // Reset to first page
+                    window.location.href = url.toString();
+                }, 500); // 500ms debounce
+            });
+
+            // Allow Enter key to search immediately
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    clearTimeout(searchTimeout);
+                    const value = this.value.trim();
+                    const url = new URL(window.location.href);
+
+                    if (value.length > 0) {
+                        url.searchParams.set('search', value);
+                    } else {
+                        url.searchParams.delete('search');
+                    }
+
+                    url.searchParams.set('page', '1');
+                    window.location.href = url.toString();
+                }
+            });
+        }
+    });
+</script>
