@@ -1,4 +1,4 @@
-@using GOKCafe.Web.Models.DTOs
+﻿@using GOKCafe.Web.Models.DTOs
 @inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
 @{
     Layout = "_Layout.cshtml";
@@ -12,9 +12,9 @@
         blog = new BlogDto
         {
             Id = Guid.NewGuid(),
-            Title = "Blog Title",
-            Content = "Blog content goes here...",
-            FeaturedImageUrl = "",
+            Title = "Discovering the Aroma Trails of Da Lat Coffee Farms",
+            Content = "We began by visiting smallholder farms tucked deep in the hills. These were places where generations of growers tended their crops with quiet dedication, nurturing each tree by hand. The cool mountain climate, gentle sunlight, and volcanic soil created the perfect environment for delicate Arabica varieties to thrive. We began by visiting smallholder farms tucked deep in the hills. These were places where generations of growers tended their crops with quiet dedication, nurturing each tree by hand. The cool mountain climate, gentle sunlight, and volcanic soil created the perfect environment for delicate Arabica varieties to thrive.",
+            FeaturedImageUrl = "/media/image/blog-details.png",
             PublishedDate = DateTime.Now,
             Author = "GOK Cafe",
             Excerpt = "Blog excerpt..."
@@ -24,11 +24,9 @@
     ViewData["Title"] = blog.Title;
 }
 
-
-
 <!-- Blog Detail Section -->
 <section class="py-12 bg-white">
-    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="container mx-auto">
         <!-- Back Button -->
         <div class="mb-8">
             <a href="/blogs" class="inline-flex items-center text-primary hover:text-primary-dark transition-colors">
@@ -38,7 +36,7 @@
         </div>
 
         <!-- Blog Header -->
-        <div class="max-w-4xl mx-auto">
+        <div class="w-full">
             <!-- Featured Image -->
             @if (!string.IsNullOrEmpty(blog.FeaturedImageUrl))
             {
@@ -48,7 +46,7 @@
             }
 
             <!-- Title -->
-            <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            <h1 class="text-4xl md:text-4xl font-bold text-gray-900 mb-4">
                 @blog.Title
             </h1>
 
@@ -69,13 +67,5 @@
                 @Html.Raw(blog.Content)
             </div>
         </div>
-    </div>
-</section>
-
-<!-- Related Blogs (Optional) -->
-<section class="py-12 bg-gray-50">
-    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="text-3xl font-bold text-gray-900 mb-8">Related Articles</h2>
-        <!-- Add related blogs here if needed -->
     </div>
 </section>
