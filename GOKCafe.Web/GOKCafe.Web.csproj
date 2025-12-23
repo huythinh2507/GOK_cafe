@@ -32,7 +32,12 @@
     <ProjectReference Include="..\GOKCafe.Infrastructure\GOKCafe.Infrastructure.csproj" />
     <ProjectReference Include="..\GOKCafe.Domain\GOKCafe.Domain.csproj" />
     <ProjectReference Include="..\Gotik.Commerce\Gotik.Commerce.csproj" />
-    <ProjectReference Include="..\GOKCafe.API\GOKCafe.API.csproj" />
+    <ProjectReference Include="..\GOKCafe.API\GOKCafe.API.csproj">
+      <!-- Only reference the compiled assembly, not content files -->
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+      <IncludeAssets>runtime; compile</IncludeAssets>
+      <ExcludeAssets>contentFiles</ExcludeAssets>
+    </ProjectReference>
   </ItemGroup>
 
   <PropertyGroup>
