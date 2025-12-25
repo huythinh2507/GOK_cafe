@@ -41,6 +41,9 @@ public class ApplicationDbContext : DbContext
     public DbSet<ProductAttributeValue> ProductAttributeValues { get; set; }
     public DbSet<ProductAttributeSelection> ProductAttributeSelections { get; set; }
     public DbSet<ProductComment> ProductComments { get; set; }
+    public DbSet<Blog> Blogs { get; set; }
+    public DbSet<BlogCategory> BlogCategories { get; set; }
+    public DbSet<BlogComment> BlogComments { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -77,6 +80,9 @@ public class ApplicationDbContext : DbContext
         modelBuilder.Entity<ProductAttributeValue>().HasQueryFilter(e => !e.IsDeleted);
         modelBuilder.Entity<ProductAttributeSelection>().HasQueryFilter(e => !e.IsDeleted);
         modelBuilder.Entity<ProductComment>().HasQueryFilter(e => !e.IsDeleted);
+        modelBuilder.Entity<Blog>().HasQueryFilter(e => !e.IsDeleted);
+        modelBuilder.Entity<BlogCategory>().HasQueryFilter(e => !e.IsDeleted);
+        modelBuilder.Entity<BlogComment>().HasQueryFilter(e => !e.IsDeleted);
     }
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
