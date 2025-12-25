@@ -23,6 +23,7 @@ namespace GOKCafe.Web.Controllers
             _umbracoContextAccessor = umbracoContextAccessor;
         }
 
+        [ResponseCache(Duration = 300, VaryByQueryKeys = new[] { "id" })]
         public override IActionResult Index()
         {
             var currentPage = CurrentPage;
@@ -52,6 +53,51 @@ namespace GOKCafe.Web.Controllers
                     return NotFound();
                 }
 
+                // Get content - handle both string and BlockGrid
+                string content = "";
+                var contentValue = blogNode.Value("content");
+
+                if (contentValue is string strContent)
+                {
+                    content = strContent;
+                }
+                else if (contentValue is Umbraco.Cms.Core.Models.Blocks.BlockGridModel blockGrid)
+                {
+                    // Convert BlockGrid to HTML string
+                    // Each block has a "content" property with the rich text HTML
+                    var htmlParts = new List<string>();
+                    foreach (var item in blockGrid)
+                    {
+                        // Try to get the "content" property from each Rich Text Block
+                        var blockContent = item.Content.Value<string>("content");
+                        if (!string.IsNullOrWhiteSpace(blockContent))
+                        {
+                            htmlParts.Add(blockContent);
+                        }
+                    }
+                    content = string.Join("", htmlParts);
+                }
+                else if (contentValue != null)
+                {
+                    content = contentValue.ToString() ?? "";
+                }
+
+                // Get tags
+                var tags = new List<string>();
+                var tagProperty = blogNode.GetProperty("tagName");
+                if (tagProperty != null)
+                {
+                    var tagValue = tagProperty.GetValue();
+                    if (tagValue is IEnumerable<string> tagList)
+                    {
+                        tags = tagList.ToList();
+                    }
+                    else if (tagValue is string tagStr && !string.IsNullOrEmpty(tagStr))
+                    {
+                        tags = tagStr.Split(',').Select(t => t.Trim()).ToList();
+                    }
+                }
+
                 // Map to BlogDto
                 var blog = new BlogDto
                 {
@@ -59,16 +105,19 @@ namespace GOKCafe.Web.Controllers
                     Title = blogNode.Value<string>("title") ?? blogNode.Name,
                     Slug = blogNode.UrlSegment,
                     Excerpt = blogNode.Value<string>("excerpt") ?? "",
-                    Content = blogNode.Value<string>("content") ?? "",
+                    Content = content,
                     FeaturedImageUrl = blogNode.Value<IPublishedContent>("image")?.Url() ?? "",
                     PublishedDate = blogNode.Value<DateTime>("publishDate") != default
                         ? blogNode.Value<DateTime>("publishDate")
                         : DateTime.Now,
                     Author = blogNode.Value<string>("author") ?? "GOK Cafe",
-                    IsPublished = true
+                    IsPublished = true,
+                    Tags = tags
                 };
 
                 _logger.LogInformation($"BlogDetailController: Successfully loaded blog: {blog.Title}");
+                _logger.LogInformation($"  - Content length: {blog.Content?.Length ?? 0}");
+                _logger.LogInformation($"  - Tags: {string.Join(", ", blog.Tags)}");
 
                 // Pass data to view
                 ViewData["Blog"] = blog;
