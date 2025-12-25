@@ -44,6 +44,11 @@ public class ApplicationDbContext : DbContext
     public DbSet<Blog> Blogs { get; set; }
     public DbSet<BlogCategory> BlogCategories { get; set; }
     public DbSet<BlogComment> BlogComments { get; set; }
+    public DbSet<Event> Events { get; set; }
+    public DbSet<EventRegistration> EventRegistrations { get; set; }
+    public DbSet<EventReview> EventReviews { get; set; }
+    public DbSet<EventHighlight> EventHighlights { get; set; }
+    public DbSet<EventNotificationSubscription> EventNotificationSubscriptions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
