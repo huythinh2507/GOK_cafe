@@ -33,6 +33,14 @@ public interface IUnitOfWork : IDisposable
     IRepository<ProductAttributeValue> ProductAttributeValues { get; }
     IRepository<ProductAttributeSelection> ProductAttributeSelections { get; }
     IRepository<ProductComment> ProductComments { get; }
+    IRepository<Blog> Blogs { get; }
+    IRepository<BlogCategory> BlogCategories { get; }
+    IRepository<BlogComment> BlogComments { get; }
+    IRepository<Event> Events { get; }
+    IRepository<EventRegistration> EventRegistrations { get; }
+    IRepository<EventReview> EventReviews { get; }
+    IRepository<EventHighlight> EventHighlights { get; }
+    IRepository<EventNotificationSubscription> EventNotificationSubscriptions { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
     Task BeginTransactionAsync();

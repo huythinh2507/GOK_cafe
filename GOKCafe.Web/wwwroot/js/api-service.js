@@ -67,7 +67,19 @@ class ApiService {
     }
 
     async get(endpoint, params = {}) {
-        const queryString = new URLSearchParams(params).toString();
+        // Build query string with proper array handling
+        const queryParams = new URLSearchParams();
+
+        for (const [key, value] of Object.entries(params)) {
+            if (Array.isArray(value)) {
+                // For arrays, append each value with the same key
+                value.forEach(item => queryParams.append(key, item));
+            } else if (value !== null && value !== undefined) {
+                queryParams.append(key, value);
+            }
+        }
+
+        const queryString = queryParams.toString();
         const url = `${this.baseUrl}${endpoint}${queryString ? '?' + queryString : ''}`;
         return this.request(url, { method: 'GET' });
     }
