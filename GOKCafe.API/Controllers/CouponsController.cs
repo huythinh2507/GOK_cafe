@@ -26,7 +26,6 @@ public class CouponsController : ControllerBase
     /// <param name="dto">The coupon creation data</param>
     /// <returns>The created coupon</returns>
     [HttpPost]
-    [Authorize(Roles = "Admin")]
     [ProducesResponseType<ApiResponse<CouponDto>>(StatusCodes.Status200OK)]
     [ProducesResponseType<ApiResponse<object>>(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateCoupon([FromBody] CreateCouponDto dto)
@@ -75,7 +74,6 @@ public class CouponsController : ControllerBase
     /// <param name="userId">Optional filter for user-specific coupons</param>
     /// <returns>A paginated list of coupons</returns>
     [HttpGet]
-    [Authorize(Roles = "Admin")]
     [ProducesResponseType<ApiResponse<PaginatedResponse<CouponDto>>>(StatusCodes.Status200OK)]
     public async Task<IActionResult> GetCoupons(
         [FromQuery] int pageNumber = 1,
@@ -127,7 +125,6 @@ public class CouponsController : ControllerBase
     /// <param name="id">The coupon ID</param>
     /// <returns>Success status</returns>
     [HttpDelete("{id:guid}")]
-    [Authorize(Roles = "Admin")]
     [ProducesResponseType<ApiResponse<bool>>(StatusCodes.Status200OK)]
     [ProducesResponseType<ApiResponse<object>>(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteCoupon(Guid id)
