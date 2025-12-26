@@ -49,3 +49,14 @@ public class ProductCommentSummaryDto
     public double AverageRating { get; set; }
     public Dictionary<int, int> RatingDistribution { get; set; } = new(); // Key: rating (1-5), Value: count
 }
+
+public class ProductCommentFilterDto
+{
+    public int PageNumber { get; set; } = 1;
+    public int PageSize { get; set; } = 10;
+    public bool? IsApproved { get; set; } = true;
+    public List<int>? Ratings { get; set; }
+    public bool? HasReplies { get; set; }
+    public bool? HasImages { get; set; }
+    public string? Search { get; set; }
+}

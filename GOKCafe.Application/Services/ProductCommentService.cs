@@ -4,6 +4,7 @@ using GOKCafe.Application.Services.Interfaces;
 using GOKCafe.Domain.Entities;
 using GOKCafe.Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace GOKCafe.Application.Services;
 
@@ -25,31 +26,41 @@ public class ProductCommentService : IProductCommentService
 
     public async Task<ApiResponse<PaginatedResponse<ProductCommentDto>>> GetProductCommentsAsync(
         Guid productId,
-        int pageNumber = 1,
-        int pageSize = 10,
-        bool? isApproved = true)
+        ProductCommentFilterDto filter)
     {
         try
         {
-            var cacheKey = $"{ProductCommentsCacheKeyPrefix}{productId}:page:{pageNumber}:size:{pageSize}:approved:{isApproved}";
+            // Build cache key including all filter parameters
+            var ratingsKey = filter.Ratings != null && filter.Ratings.Any()
+                ? string.Join("-", filter.Ratings.OrderBy(r => r))
+                : "all";
+            var ratingFilter = filter.Ratings;
+            var cacheKey = $"{ProductCommentsCacheKeyPrefix}{productId}:page:{filter.PageNumber}:size:{filter.PageSize}:approved:{filter.IsApproved}:ratings:{ratingsKey}:hasReplies:{filter.HasReplies}:hasImages:{filter.HasImages}:search:{filter.Search}";
+
             var cachedResponse = await _cacheService.GetAsync<ApiResponse<PaginatedResponse<ProductCommentDto>>>(cacheKey);
             if (cachedResponse != null)
                 return cachedResponse;
+
+            Expression<Func<ProductComment, bool>> predicate = c => c.ProductId == productId && c.ParentCommentId == null;
+
+            if (ratingFilter != null && ratingFilter.Count != 0)
+                predicate = c => c.ProductId == productId && c.ParentCommentId == null && ratingFilter.Contains(c.Rating);
 
             var query = _unitOfWork.ProductComments.GetQueryable()
                 .Include(c => c.User)
                 .Include(c => c.Replies)
                     .ThenInclude(r => r.User)
-                .Where(c => c.ProductId == productId && c.ParentCommentId == null);
+                .Where(predicate);
 
-            if (isApproved.HasValue)
-                query = query.Where(c => c.IsApproved == isApproved.Value);
+            // Apply search filter
+            if (!string.IsNullOrWhiteSpace(filter.Search))
+                query = query.Where(c => c.Comment.Contains(filter.Search));
 
             var totalItems = await query.CountAsync();
             var comments = await query
                 .OrderByDescending(c => c.CreatedAt)
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
+                .Skip((filter.PageNumber - 1) * filter.PageSize)
+                .Take(filter.PageSize)
                 .ToListAsync();
 
             var commentDtos = comments.Select(MapToDto).ToList();
@@ -59,8 +70,8 @@ public class ProductCommentService : IProductCommentService
                 {
                     Items = commentDtos,
                     TotalItems = totalItems,
-                    PageNumber = pageNumber,
-                    PageSize = pageSize
+                    PageNumber = filter.PageNumber,
+                    PageSize = filter.PageSize
                 });
 
             await _cacheService.SetAsync(cacheKey, response, CacheExpiration);

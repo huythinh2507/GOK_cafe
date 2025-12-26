@@ -11,12 +11,12 @@
             </div>
 
             <!-- Products Grid -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-8">
+            <div class="flex flex-wrap justify-center gap-8">
                 @foreach (var product in Model.Take(4))
                 {
                     var productPrice = product.Price.ToString("N0", new System.Globalization.CultureInfo("vi-VN")).Replace(",", ".");
 
-                    <div class="group">
+                    <div class="group w-full sm:w-[calc(50%-1rem)] lg:w-[calc(25%-1.5rem)] max-w-sm">
                         <!-- Product Image -->
                         <a href="/@product.Slug" class="overflow-hidden mb-4 flex items-center justify-center bg-gray-100 h-[480px]">
                             @if (!string.IsNullOrEmpty(product.ImageUrl))

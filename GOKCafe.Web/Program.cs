@@ -145,6 +145,9 @@ builder.Services.AddSwaggerGen(options =>
     }
 });
 
+// Add HttpContextAccessor for views
+builder.Services.AddHttpContextAccessor();
+
 // Add API Controllers support (for Web API endpoints like ProductApiController)
 // Include controllers from GOKCafe.API and GOKCafe.Web assemblies, exclude Gotik.Commerce
 builder.Services.AddControllers()
