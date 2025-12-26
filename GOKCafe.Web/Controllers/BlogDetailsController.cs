@@ -1,4 +1,5 @@
 using GOKCafe.Web.Models.DTOs;
+using GOKCafe.Web.Models.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewEngines;
 using Umbraco.Cms.Core.Models.PublishedContent;
@@ -8,13 +9,13 @@ using Umbraco.Extensions;
 
 namespace GOKCafe.Web.Controllers
 {
-    public class BlogDetailController : RenderController
+    public class BlogDetailsController : RenderController
     {
-        private readonly ILogger<BlogDetailController> _logger;
+        private readonly ILogger<BlogDetailsController> _logger;
         private readonly IUmbracoContextAccessor _umbracoContextAccessor;
 
-        public BlogDetailController(
-            ILogger<BlogDetailController> logger,
+        public BlogDetailsController(
+            ILogger<BlogDetailsController> logger,
             ICompositeViewEngine compositeViewEngine,
             IUmbracoContextAccessor umbracoContextAccessor)
             : base(logger, compositeViewEngine, umbracoContextAccessor)
@@ -35,7 +36,7 @@ namespace GOKCafe.Web.Controllers
                 // Get blog ID from query string
                 var blogIdString = Request.Query["id"].ToString();
 
-                _logger.LogInformation($"BlogDetailController: Fetching blog with ID: {blogIdString}");
+                _logger.LogInformation($"BlogDetailsController: Fetching blog with ID: {blogIdString}");
 
                 if (string.IsNullOrEmpty(blogIdString) || !Guid.TryParse(blogIdString, out var blogId))
                 {
@@ -47,10 +48,20 @@ namespace GOKCafe.Web.Controllers
                 var umbracoContext = _umbracoContextAccessor.GetRequiredUmbracoContext();
                 var blogNode = umbracoContext.Content?.GetById(blogId);
 
+                _logger.LogInformation($"BlogDetailController: Blog node retrieved: {blogNode != null}");
+                if (blogNode != null)
+                {
+                    _logger.LogInformation($"BlogDetailController: Blog ContentType Alias: {blogNode.ContentType.Alias}");
+                    _logger.LogInformation($"BlogDetailController: Blog Name: {blogNode.Name}");
+                    _logger.LogInformation($"BlogDetailController: Blog IsPublished: {blogNode.IsPublished()}");
+                }
+
                 if (blogNode == null || blogNode.ContentType.Alias != "blogsItem")
                 {
-                    _logger.LogWarning($"BlogDetailController: Blog not found with ID: {blogId}");
-                    return NotFound();
+                    _logger.LogWarning($"BlogDetailController: Blog not found or wrong content type. BlogNode null: {blogNode == null}, ContentType: {blogNode?.ContentType?.Alias ?? "N/A"}");
+                    ViewData["Blog"] = null;
+                    ViewData["Error"] = $"Blog not found. ID: {blogId}";
+                    return CurrentTemplate(CurrentPage);
                 }
 
                 // Get content - handle both string and BlockGrid
@@ -119,8 +130,24 @@ namespace GOKCafe.Web.Controllers
                 _logger.LogInformation($"  - Content length: {blog.Content?.Length ?? 0}");
                 _logger.LogInformation($"  - Tags: {string.Join(", ", blog.Tags)}");
 
+                // Create breadcrumbs
+                var breadcrumbs = new List<BreadcrumbItem>
+                {
+                    new BreadcrumbItem { Name = "Home", Url = "/", IsActive = false },
+                    new BreadcrumbItem { Name = "Blog", Url = "/blogs", IsActive = false },
+                    new BreadcrumbItem { Name = blog.Title, Url = "", IsActive = true }
+                };
+
+                // Create ViewModel
+                var viewModel = new BlogDetailViewModel
+                {
+                    Blog = blog,
+                    Breadcrumbs = breadcrumbs
+                };
+
                 // Pass data to view
                 ViewData["Blog"] = blog;
+                ViewData["BlogDetailViewModel"] = viewModel;
 
                 return CurrentTemplate(CurrentPage);
             }

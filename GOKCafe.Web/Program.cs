@@ -32,10 +32,15 @@ builder.CreateUmbracoBuilder()
 // Add API Controllers support (for Web API endpoints like ProductApiController)
 builder.Services.AddControllers();
 
+// Add Response Caching
+builder.Services.AddResponseCaching();
+
 WebApplication app = builder.Build();
 
 await app.BootUmbracoAsync();
 
+// CRITICAL: Response Caching must come BEFORE Umbraco
+app.UseResponseCaching();
 
 app.UseUmbraco()
     .WithMiddleware(u =>
