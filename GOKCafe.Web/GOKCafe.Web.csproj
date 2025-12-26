@@ -9,6 +9,10 @@
   <ItemGroup>
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.*" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.*" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.13.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="8.1.1" />
     <PackageReference Include="Umbraco.Cms" Version="16.3.4" />
     <PackageReference Include="Umbraco.Commerce" Version="16.0.0" />
     <PackageReference Include="Umbraco.Commerce.Checkout" Version="16.0.0" />
@@ -19,7 +23,6 @@
   <ItemGroup>
     <!-- Opt-in to app-local ICU to ensure consistent globalization APIs across different platforms -->
     <PackageReference Include="Microsoft.ICU.ICU4C.Runtime" Version="72.1.0.3" />
-    <PackageReference Include="Umbraco.Commerce.ProductFeeds" Version="16.0.0" />
     <RuntimeHostConfigurationOption Include="System.Globalization.AppLocalIcu" Value="72.1.0.3" Condition="$(RuntimeIdentifier.StartsWith('linux')) or $(RuntimeIdentifier.StartsWith('win')) or ('$(RuntimeIdentifier)' == '' and !$([MSBuild]::IsOSPlatform('osx')))" />
   </ItemGroup>
 
@@ -28,6 +31,12 @@
     <ProjectReference Include="..\GOKCafe.Infrastructure\GOKCafe.Infrastructure.csproj" />
     <ProjectReference Include="..\GOKCafe.Domain\GOKCafe.Domain.csproj" />
     <ProjectReference Include="..\Gotik.Commerce\Gotik.Commerce.csproj" />
+    <ProjectReference Include="..\GOKCafe.API\GOKCafe.API.csproj">
+      <!-- Only reference the compiled assembly, not content files -->
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+      <IncludeAssets>runtime; compile</IncludeAssets>
+      <ExcludeAssets>contentFiles</ExcludeAssets>
+    </ProjectReference>
   </ItemGroup>
 
   <PropertyGroup>

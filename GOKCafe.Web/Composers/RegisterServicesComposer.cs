@@ -49,7 +49,7 @@ namespace GOKCafe.Web.Composers
             builder.Services.AddScoped<IProductTypeService, ProductTypeService>();
 
             // Register HttpClient with base URL for API
-            var apiBaseUrl = builder.Config.GetSection("ApiSettings:BaseUrl").Value ?? "https://localhost:7045";
+            var apiBaseUrl = !string.IsNullOrEmpty(builder.Config.GetSection("ApiSettings:BaseUrl").Value)? builder.Config.GetSection("ApiSettings:BaseUrl").Value : "https://localhost:7045";
             builder.Services.AddHttpClient<GOKCafe.Web.Services.Interfaces.IApiHttpClient, GOKCafe.Web.Services.Implementations.ApiHttpClient>(client =>
             {
                 client.BaseAddress = new Uri(apiBaseUrl);

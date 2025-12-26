@@ -71,7 +71,7 @@ namespace GOKCafe.Web.Services.Implementations
 
                 if (!response.IsSuccessStatusCode)
                 {
-                    _logger.LogError($"API returned {response.StatusCode} when fetching products");
+                    _logger.LogError("API returned {StatusCode} when fetching products", response.StatusCode);
                     return new ApiResponse<PaginatedResponse<ProductDto>>
                     {
                         Success = false,
@@ -160,7 +160,7 @@ namespace GOKCafe.Web.Services.Implementations
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error fetching product {id} from API");
+                _logger.LogError(ex, "Error fetching product {Id} from API", id);
                 return new ApiResponse<ProductDto>
                 {
                     Success = false,
@@ -230,7 +230,7 @@ namespace GOKCafe.Web.Services.Implementations
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error fetching category {id} from API");
+                _logger.LogError(ex, "Error fetching category {Id} from API", id);
                 return new ApiResponse<CategoryDto>
                 {
                     Success = false,
