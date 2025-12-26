@@ -200,9 +200,14 @@ public class CartController : ControllerBase
             if (result.Success && result.Data != null)
             {
                 var recommendedProducts = result.Data.Items.ToList();
+                var count = recommendedProducts.Count;
+                var message = count == 1
+                    ? "Retrieved 1 recommended product"
+                    : $"Retrieved {count} recommended products";
+
                 return Ok(ApiResponse<List<ProductDto>>.SuccessResult(
                     recommendedProducts,
-                    $"Retrieved {recommendedProducts.Count} recommended products"
+                    message
                 ));
             }
 
