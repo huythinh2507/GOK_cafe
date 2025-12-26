@@ -11,24 +11,6 @@ namespace GOKCafe.Infrastructure.Data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropIndex(
-                name: "IX_ProductAttributeSelections_ProductId_ProductAttributeId_ProductAttributeValueId",
-                table: "ProductAttributeSelections");
-
-            migrationBuilder.AlterColumn<Guid>(
-                name: "ProductAttributeValueId",
-                table: "ProductAttributeSelections",
-                type: "uniqueidentifier",
-                nullable: true,
-                oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier");
-
-            migrationBuilder.AddColumn<string>(
-                name: "CustomValue",
-                table: "ProductAttributeSelections",
-                type: "nvarchar(max)",
-                nullable: true);
-
             migrationBuilder.CreateTable(
                 name: "ProductComments",
                 columns: table => new
@@ -68,13 +50,6 @@ namespace GOKCafe.Infrastructure.Data.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_ProductAttributeSelections_ProductId_ProductAttributeId_ProductAttributeValueId",
-                table: "ProductAttributeSelections",
-                columns: new[] { "ProductId", "ProductAttributeId", "ProductAttributeValueId" },
-                unique: true,
-                filter: "[ProductAttributeValueId] IS NOT NULL");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_ProductComments_IsApproved",
                 table: "ProductComments",
                 column: "IsApproved");
@@ -105,30 +80,6 @@ namespace GOKCafe.Infrastructure.Data.Migrations
         {
             migrationBuilder.DropTable(
                 name: "ProductComments");
-
-            migrationBuilder.DropIndex(
-                name: "IX_ProductAttributeSelections_ProductId_ProductAttributeId_ProductAttributeValueId",
-                table: "ProductAttributeSelections");
-
-            migrationBuilder.DropColumn(
-                name: "CustomValue",
-                table: "ProductAttributeSelections");
-
-            migrationBuilder.AlterColumn<Guid>(
-                name: "ProductAttributeValueId",
-                table: "ProductAttributeSelections",
-                type: "uniqueidentifier",
-                nullable: false,
-                defaultValue: new Guid("00000000-0000-0000-0000-000000000000"),
-                oldClrType: typeof(Guid),
-                oldType: "uniqueidentifier",
-                oldNullable: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ProductAttributeSelections_ProductId_ProductAttributeId_ProductAttributeValueId",
-                table: "ProductAttributeSelections",
-                columns: new[] { "ProductId", "ProductAttributeId", "ProductAttributeValueId" },
-                unique: true);
         }
     }
 }

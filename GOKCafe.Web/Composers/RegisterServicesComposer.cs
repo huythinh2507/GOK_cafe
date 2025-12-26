@@ -4,6 +4,7 @@ using GOKCafe.Domain.Interfaces;
 using GOKCafe.Infrastructure.Data;
 using GOKCafe.Infrastructure.Repositories;
 using GOKCafe.Infrastructure.Services;
+using GOKCafe.Web.Services;
 using GOKCafe.Web.Services.Implementations;
 using Gotik.Commerce.Composing;
 using Microsoft.EntityFrameworkCore;
@@ -78,6 +79,9 @@ namespace GOKCafe.Web.Composers
             builder.Services.AddScoped<WebCategoryService, GOKCafe.Web.Services.Implementations.CategoryService>();
             builder.Services.AddScoped<WebProductCommentService, GOKCafe.Web.Services.Implementations.ProductCommentService>();
             builder.Services.AddScoped<GOKCafe.Web.Services.Interfaces.IBreadcrumbService, BreadcrumbService>();
+
+            // Register Umbraco Blog Sync Service
+            builder.Services.AddScoped<IUmbracoSyncService, UmbracoSyncService>();
 
             // Register HttpClient for external API calls (Odoo, etc.)
             builder.Services.AddHttpClient();

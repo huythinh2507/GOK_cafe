@@ -1,0 +1,182 @@
+﻿@using Umbraco.Cms.Web.Common.PublishedModels;
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@{
+    Layout = "_Layout.cshtml";
+}
+
+@* Breadcrumbs *@
+@await Html.PartialAsync("~/Views/Partials/Shared/_Breadcrumbs.cshtml", Model)
+
+<!-- Contact Us Hero Section -->
+<section class="bg-white py-8">
+    <div class="containe bg-cream-50 mx-auto py-8 px-4">
+        <div class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">GET IN TOUCH!</h1>
+            <p class="text-lg text-gray-600">
+                Ask A Question, Send Us Your Feedback, Or Drop A Message By Filling Up This Form
+            </p>
+        </div>
+
+        <!-- Contact Form -->
+        <div class="max-w-2xl mx-auto">
+            <form id="contactForm" class="space-y-6">
+                <!-- Email -->
+                <div>
+                    <label class="block text-gray-900 font-semibold mb-2">Email</label>
+                    <input type="email"
+                           name="email"
+                           required
+                           class="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-gray-500 transition-colors">
+                </div>
+
+                <!-- Subject -->
+                <div>
+                    <label class="block text-gray-900 font-semibold mb-2">Subject</label>
+                    <input type="text"
+                           name="subject"
+                           required
+                           class="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-gray-500 transition-colors">
+                </div>
+
+                <!-- Order Number -->
+                <div>
+                    <label class="block text-gray-900 font-semibold mb-2">Order Number (If any)</label>
+                    <input type="text"
+                           name="orderNumber"
+                           class="w-full px-4 py-3 border border-gray-300  focus:outline-none focus:border-gray-500 transition-colors">
+                </div>
+
+                <!-- Category Dropdown -->
+                <div>
+                    <label class="block text-gray-900 font-semibold mb-2">Category</label>
+                    <select name="category"
+                            required
+                            class="w-full px-4 py-3 border border-gray-300  focus:outline-none focus:border-gray-500 transition-colors appearance-none">
+                        <option value="">Select a category</option>
+                        <option value="general">General Inquiry</option>
+                        <option value="order">Order Issue</option>
+                        <option value="feedback">Feedback</option>
+                        <option value="wholesale">Wholesale</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+
+                <!-- Description -->
+                <div>
+                    <label class="block text-gray-900 font-semibold mb-2">Description</label>
+                    <textarea name="description"
+                              rows="6"
+                              required
+                              class="w-full px-4 py-3 border border-gray-300  focus:outline-none focus:border-gray-500 transition-colors resize-none"></textarea>
+                </div>
+
+                <!-- Registered Phone Number -->
+                <div>
+                    <label class="block text-gray-900 font-semibold mb-2">Registered Phone Number</label>
+                    <input type="tel"
+                           name="phone"
+                           class="w-full px-4 py-3 border border-gray-300 focus:outline-none focus:border-gray-500 transition-colors">
+                </div>
+
+                <!-- Submit Button -->
+                <div>
+                    <button type="submit"
+                            class="w-full text-center inline-block px-4 py-3 border-2 border-primary text-primary font-semibold hover:bg-primary hover:text-white transition-all duration-300">
+                        SUBMIT
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<!-- Contact Information Section -->
+<section class="w-full py-8">
+    <div class="container mx-auto">
+        <div class="max-w-3xl mx-auto space-y-12">
+            <!-- Contact Us -->
+            <div class="mb-12">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">Contact Us</h2>
+                <p class="text-gray-700 mb-4">
+                    Have Coffee Questions, Feedback For Us, Or Thoughts To Share? We're Here For You!
+                </p>
+                <p class="text-gray-700">
+                    Call <a href="tel:+919606842077" class="text-primary hover:underline font-semibold">+91 96060 42077</a>
+                    Or Email Us At <a href="mailto:Getcoffee@bluetokacoffee.Com" class="text-primary hover:underline font-semibold">GOKcoffee@gmail.com</a>
+                </p>
+                <p class="text-gray-700 mt-2">
+                    Available 9:00 Am To 8:00 Pm (IST), 7 Days A Week (Except Major Holidays).
+                </p>
+            </div>
+
+            <!-- Send A Message -->
+            <div class="mb-12">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">Send A Message</h2>
+                <p class="text-gray-700">
+                    Click The Blue Chat Icon At The Bottom-Right During Business Hours To Start A Conversation.
+                </p>
+            </div>
+
+            <!-- For Wholesale -->
+            <div class="mb-12">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">For Wholesale:</h2>
+                <p class="text-gray-700 mb-4">
+                    Elevate Your Coffee Experience With End-To-End Solutions For Restaurants, Hotels, And Offices.
+                </p>
+                <a href="/wholesale"
+                   class="inline-block border-2 border-primary text-primary hover:bg-primary hover:text-white font-bold px-8 py-3 uppercase tracking-wider transition-colors duration-300">
+                    GET STARTED
+                </a>
+            </div>
+
+            <!-- E-Mandate Cancellation -->
+            <div class="mb-8">
+                <p class="text-gray-700">
+                    If You Have Any Questions About E-Mandate Or The Cancellation Of An Existing Mandate, Please Email Us At
+                    <a href="mailto:emandate@bluetokacoffee.Com" class="text-primary hover:underline font-semibold">GOKcoffee@gmail.com</a>
+                </p>
+            </div>
+
+            <!-- Stay Connected -->
+            <div>
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">STAY CONNECTED</h2>
+                <div class="flex gap-4">
+                    <a href="https://facebook.com" target="_blank" class="text-primary hover:text-blue-800 transition-colors">
+                        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                        </svg>
+                    </a>
+                    <a href="https://google.com" target="_blank" class="text-red-600 hover:text-red-800 transition-colors">
+                        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                        </svg>
+                    </a>
+                    <a href="https://facebook.com" target="_blank" class="text-blue-700 hover:text-blue-900 transition-colors">
+                        <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"/>
+                        </svg>
+                    </a>
+                </div>
+                <p class="text-gray-600 mt-4">Follow Or DM Us On Your Favourite Platform.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+    document.getElementById('contactForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+        const data = Object.fromEntries(formData.entries());
+
+        console.log('Contact Form Submitted:', data);
+
+        // TODO: Send to API endpoint
+        alert('Thank you for contacting us! We will get back to you soon.');
+        this.reset();
+    });
+</script>

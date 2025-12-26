@@ -42,6 +42,14 @@ public class UnitOfWork : IUnitOfWork
         ProductAttributeValues = new Repository<ProductAttributeValue>(_context);
         ProductAttributeSelections = new Repository<ProductAttributeSelection>(_context);
         ProductComments = new Repository<ProductComment>(_context);
+        Blogs = new Repository<Blog>(_context);
+        BlogCategories = new Repository<BlogCategory>(_context);
+        BlogComments = new Repository<BlogComment>(_context);
+        Events = new Repository<Event>(_context);
+        EventRegistrations = new Repository<EventRegistration>(_context);
+        EventReviews = new Repository<EventReview>(_context);
+        EventHighlights = new Repository<EventHighlight>(_context);
+        EventNotificationSubscriptions = new Repository<EventNotificationSubscription>(_context);
     }
 
     public IRepository<User> Users { get; }
@@ -73,6 +81,14 @@ public class UnitOfWork : IUnitOfWork
     public IRepository<ProductAttributeValue> ProductAttributeValues { get; }
     public IRepository<ProductAttributeSelection> ProductAttributeSelections { get; }
     public IRepository<ProductComment> ProductComments { get; }
+    public IRepository<Blog> Blogs { get; }
+    public IRepository<BlogCategory> BlogCategories { get; }
+    public IRepository<BlogComment> BlogComments { get; }
+    public IRepository<Event> Events { get; }
+    public IRepository<EventRegistration> EventRegistrations { get; }
+    public IRepository<EventReview> EventReviews { get; }
+    public IRepository<EventHighlight> EventHighlights { get; }
+    public IRepository<EventNotificationSubscription> EventNotificationSubscriptions { get; }
 
     public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {

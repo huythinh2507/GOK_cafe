@@ -69,31 +69,70 @@
 <!-- Products Grid Section -->
 <section class="py-12 bg-white">
     <div class="container mx-auto px-4 sm:px-6 lg:px-4">
-        <div class=" flex flex-row justify-between ">
+        <!-- Header with Title and Mobile Actions -->
+        <div class="flex flex-row justify-between items-center mb-8">
+            <!-- Page Title -->
+            <h1 class="text-2xl md:text-3xl font-semibold text-gray-900">PRODUCTS LIST</h1>
 
-        <!-- Page Title -->
-        <h1 class="text-3xl font-semibold text-gray-900 mb-8">PRODUCTS LIST</h1>
-        <!-- Search Bar -->
-        <div class="mb-8">
-            <div class="max-w-2xl">
+            <!-- Desktop Search Bar -->
+            <div class="hidden md:block">
                 <div class="relative">
                     <input
                         type="text"
                         id="productSearchInput"
                         value="@searchTerm"
-                        placeholder="Search for products..."
+                        placeholder="Search products..."
                         class="w-60 px-4 py-3 pl-12 border-2 border-gray-300 rounded-lg focus:border-primary focus:outline-none text-lg"
                     />
                     <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                 </div>
             </div>
+
+            <!-- Mobile Icons (Search & Filter) -->
+            <div class="flex md:hidden gap-4">
+                <!-- Mobile Search Icon -->
+                <button
+                    id="mobileSearchBtn"
+                    onclick="toggleMobileSearch()"
+                    class="w-10 h-10 flex items-center justify-center border-2 border-gray-300 rounded-lg hover:border-primary transition-colors"
+                    aria-label="Search">
+                    <i class="fas fa-search text-gray-600"></i>
+                </button>
+
+                <!-- Mobile Filter Icon -->
+                <button
+                    id="mobileFilterBtn"
+                    onclick="toggleMobileFilter()"
+                    class="w-10 h-10 flex items-center justify-center border-2 border-gray-300 rounded-lg hover:border-primary transition-colors"
+                    aria-label="Filter">
+                    <i class="fas fa-filter text-gray-600"></i>
+                </button>
+            </div>
         </div>
+
+        <!-- Mobile Search Bar (Hidden by default) -->
+        <div id="mobileSearchBar" class="hidden md:hidden mb-6">
+            <div class="relative">
+                <input
+                    type="text"
+                    id="mobileProductSearchInput"
+                    value="@searchTerm"
+                    placeholder="Search products..."
+                    class="w-full px-4 py-3 pl-12 pr-12 border-2 border-gray-300 rounded-lg focus:border-primary focus:outline-none"
+                />
+                <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                <button
+                    onclick="toggleMobileSearch()"
+                    class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
         </div>
 
 
         <div class="flex flex-col justify-between lg:flex-row gap-8">
-            <!-- Filters Sidebar -->
-            <aside class="w-full lg:w-48 flex-shrink-0">
+            <!-- Filters Sidebar (Desktop Only) -->
+            <aside class="hidden lg:block w-full lg:w-48 flex-shrink-0">
                 <div class="space-y-6">
                     <!-- Category Filter (Dynamic from Backend) -->
                     <div class="border-b border-gray-200 pb-4">
@@ -111,7 +150,7 @@
                                     <input type="checkbox"
                                         class="category-checkbox w-5 h-5 accent-primary border-gray-300 rounded focus:ring-primary"
                                         data-category-id="@option.Id" @(option.IsChecked ? "checked" : "")
-                                        onchange="filterByCategory('@option.Id')">
+                                        onchange="productFilterController.handleCategoryChange(this)">
                                     <span class="ml-3 text-sm text-gray-700">@option.Name</span>
                                 </label>
                             }
@@ -136,7 +175,7 @@
                                         <input type="checkbox"
                                             class="flavour-checkbox w-5 h-5 accent-primary border-gray-300 rounded focus:ring-primary"
                                             data-flavour-id="@option.Id" @(option.IsChecked ? "checked" : "")
-                                            onchange="filterByFlavour()">
+                                            onchange="productFilterController.handleFlavourChange()">
                                         <span class="ml-3 text-sm text-gray-700">@option.Name</span>
                                     </label>
                                 }
@@ -162,7 +201,7 @@
                                         <input type="checkbox"
                                             class="equipment-checkbox w-5 h-5 accent-primary border-gray-300 rounded focus:ring-primary"
                                             data-equipment-id="@option.Id" @(option.IsChecked ? "checked" : "")
-                                            onchange="filterByEquipment()">
+                                            onchange="productFilterController.handleEquipmentChange()">
                                         <span class="ml-3 text-sm text-gray-700">@option.Name</span>
                                     </label>
                                 }
@@ -185,7 +224,7 @@
                                     name="availability"
                                     class="w-5 h-5 accent-primary border-gray-300 focus:ring-primary"
                                     @(selectedInStock == null ? "checked" : "")
-                                    onchange="filterByAvailability(null)">
+                                    onchange="productFilterController.handleAvailabilityChange(null)">
                                 <span class="ml-3 text-sm text-gray-700">All Products</span>
                             </label>
                             <label
@@ -194,7 +233,7 @@
                                     name="availability"
                                     class="w-5 h-5 accent-primary border-gray-300 focus:ring-primary"
                                     @(selectedInStock == true ? "checked" : "")
-                                    onchange="filterByAvailability(true)">
+                                    onchange="productFilterController.handleAvailabilityChange(true)">
                                 <span class="ml-3 text-sm text-gray-700">In Stock (@inStockCount)</span>
                             </label>
                             <label
@@ -203,7 +242,7 @@
                                     name="availability"
                                     class="w-5 h-5 accent-primary border-gray-300 focus:ring-primary"
                                     @(selectedInStock == false ? "checked" : "")
-                                    onchange="filterByAvailability(false)">
+                                    onchange="productFilterController.handleAvailabilityChange(false)">
                                 <span class="ml-3 text-sm text-gray-700">Out of Stock (@outOfStockCount)</span>
                             </label>
                         </div>
@@ -219,7 +258,7 @@
                         @foreach (var product in products)
                         {
                             var productUrl = $"/product-details?id={product.Id}";
-               
+
 
                             <!-- Product Card -->
                             <div class="group">
@@ -290,9 +329,9 @@
                 }
 
                 <!-- Pagination -->
-                @if (totalPages > 1)
-                {
-                    <div class="flex justify-center items-center gap-2 mt-8">
+                <div id="product-pagination" class="flex justify-center items-center gap-2 mt-8">
+                    @if (totalPages > 1)
+                    {
                         <!-- Previous Button -->
                         @if (currentPage > 1)
                         {
@@ -365,152 +404,172 @@
                                 <i class="fas fa-chevron-right"></i>
                             </span>
                         }
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Filter Modal -->
+        <div id="mobileFilterModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden">
+            <div class="fixed inset-y-0 right-0 w-full sm:w-96 bg-white shadow-xl transform transition-transform duration-300 ease-in-out flex flex-col h-full">
+                <!-- Modal Header -->
+                <div class="flex items-center justify-between p-4 border-b border-gray-200 flex-shrink-0">
+                    <h2 class="text-xl font-semibold text-gray-900">Filters</h2>
+                    <button
+                        onclick="closeMobileFilter()"
+                        class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors">
+                        <i class="fas fa-times text-gray-600"></i>
+                    </button>
+                </div>
+
+                <!-- Modal Body (Scrollable) -->
+                <div class="flex-1 min-h-0 overflow-y-auto overflow-x-hidden p-4">
+                    <div class="space-y-6">
+                        <!-- Category Filter -->
+                        <div class="border-b border-gray-200 pb-4">
+                            <button
+                                class="flex items-center justify-between w-full text-left font-semibold text-gray-900 mb-4"
+                                onclick="toggleMobileFilterSection('category')">
+                                <span>Product Category</span>
+                                <i class="fas fa-chevron-up" id="mobile-category-icon"></i>
+                            </button>
+                            <div id="mobile-category-filter" class="space-y-3">
+                                @foreach (var option in categoryOptions)
+                                {
+                                    <label
+                                        class="flex items-center cursor-pointer hover:bg-primary/10 p-2 -m-2 rounded transition-colors">
+                                        <input type="checkbox"
+                                            class="mobile-category-checkbox w-5 h-5 accent-primary border-gray-300 rounded focus:ring-primary"
+                                            data-category-id="@option.Id" @(option.IsChecked ? "checked" : "")
+                                            onchange="productFilterController.handleMobileCategoryChange(this)">
+                                        <span class="ml-3 text-sm text-gray-700">@option.Name</span>
+                                    </label>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Flavour Profile Filter -->
+                        @if (flavourOptions != null && flavourOptions.Any())
+                        {
+                            <div class="border-b border-gray-200 pb-4">
+                                <button
+                                    class="flex items-center justify-between w-full text-left font-semibold text-gray-900 mb-4"
+                                    onclick="toggleMobileFilterSection('flavour')">
+                                    <span>Flavour Profile</span>
+                                    <i class="fas fa-chevron-up" id="mobile-flavour-icon"></i>
+                                </button>
+                                <div id="mobile-flavour-filter" class="space-y-3">
+                                    @foreach (var option in flavourOptions)
+                                    {
+                                        <label
+                                            class="flex items-center cursor-pointer hover:bg-primary/10 p-2 -m-2 rounded transition-colors">
+                                            <input type="checkbox"
+                                                class="mobile-flavour-checkbox w-5 h-5 accent-primary border-gray-300 rounded focus:ring-primary"
+                                                data-flavour-id="@option.Id" @(option.IsChecked ? "checked" : "")>
+                                            <span class="ml-3 text-sm text-gray-700">@option.Name</span>
+                                        </label>
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Equipment Filter -->
+                        @if (equipmentOptions != null && equipmentOptions.Any())
+                        {
+                            <div class="border-b border-gray-200 pb-4">
+                                <button
+                                    class="flex items-center justify-between w-full text-left font-semibold text-gray-900 mb-4"
+                                    onclick="toggleMobileFilterSection('equipment')">
+                                    <span>Equipment</span>
+                                    <i class="fas fa-chevron-up" id="mobile-equipment-icon"></i>
+                                </button>
+                                <div id="mobile-equipment-filter" class="space-y-3">
+                                    @foreach (var option in equipmentOptions)
+                                    {
+                                        <label
+                                            class="flex items-center cursor-pointer hover:bg-primary/10 p-2 -m-2 rounded transition-colors">
+                                            <input type="checkbox"
+                                                class="mobile-equipment-checkbox w-5 h-5 accent-primary border-gray-300 rounded focus:ring-primary"
+                                                data-equipment-id="@option.Id" @(option.IsChecked ? "checked" : "")>
+                                            <span class="ml-3 text-sm text-gray-700">@option.Name</span>
+                                        </label>
+                                    }
+                                </div>
+                            </div>
+                        }
+
+                        <!-- Availability Filter -->
+                        <div class="pb-4">
+                            <button
+                                class="flex items-center justify-between w-full text-left font-semibold text-gray-900 mb-4"
+                                onclick="toggleMobileFilterSection('availability')">
+                                <span>Availability</span>
+                                <i class="fas fa-chevron-up" id="mobile-availability-icon"></i>
+                            </button>
+                            <div id="mobile-availability-filter" class="space-y-3">
+                                <label
+                                    class="flex items-center cursor-pointer hover:bg-primary/10 p-2 -m-2 rounded transition-colors">
+                                    <input type="radio"
+                                        name="mobile-availability"
+                                        class="mobile-availability-radio w-5 h-5 accent-primary border-gray-300 focus:ring-primary"
+                                        data-value=""
+                                        @(selectedInStock == null ? "checked" : "")>
+                                    <span class="ml-3 text-sm text-gray-700">All Products</span>
+                                </label>
+                                <label
+                                    class="flex items-center cursor-pointer hover:bg-primary/10 p-2 -m-2 rounded transition-colors">
+                                    <input type="radio"
+                                        name="mobile-availability"
+                                        class="mobile-availability-radio w-5 h-5 accent-primary border-gray-300 focus:ring-primary"
+                                        data-value="true"
+                                        @(selectedInStock == true ? "checked" : "")>
+                                    <span class="ml-3 text-sm text-gray-700">In Stock (@inStockCount)</span>
+                                </label>
+                                <label
+                                    class="flex items-center cursor-pointer hover:bg-primary/10 p-2 -m-2 rounded transition-colors">
+                                    <input type="radio"
+                                        name="mobile-availability"
+                                        class="mobile-availability-radio w-5 h-5 accent-primary border-gray-300 focus:ring-primary"
+                                        data-value="false"
+                                        @(selectedInStock == false ? "checked" : "")>
+                                    <span class="ml-3 text-sm text-gray-700">Out of Stock (@outOfStockCount)</span>
+                                </label>
+                            </div>
+                        </div>
                     </div>
-                }
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="flex-shrink-0 p-4 border-t border-gray-200 bg-white flex gap-3">
+                    <button
+                        onclick="clearMobileFilters()"
+                        class="flex-1 px-4 py-3 border-2 border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-colors rounded-lg">
+                        Clear All
+                    </button>
+                    <button
+                        onclick="applyMobileFilters()"
+                        class="flex-1 px-4 py-3 bg-primary text-white font-semibold hover:bg-primary-dark transition-colors rounded-lg">
+                        Apply Filters
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 </section>
 
+<script src="~/js/services/product-filter-service.js"></script>
+<script src="~/js/controllers/product-grid-ui-controller.js"></script>
+<script src="~/js/controllers/product-filter-controller.js"></script>
+<script src="~/js/utils/mobile-modal-helper.js"></script>
+
 <script>
-    // Search functionality
+    let productFilterController;
+
     document.addEventListener('DOMContentLoaded', function() {
-        const searchInput = document.getElementById('productSearchInput');
-        let searchTimeout;
-
-        if (searchInput) {
-            searchInput.addEventListener('input', function() {
-                clearTimeout(searchTimeout);
-                const value = this.value.trim();
-
-                searchTimeout = setTimeout(() => {
-                    const url = new URL(window.location.href);
-
-                    if (value.length > 0) {
-                        url.searchParams.set('search', value);
-                    } else {
-                        url.searchParams.delete('search');
-                    }
-
-                    url.searchParams.set('page', '1'); // Reset to first page
-                    window.location.href = url.toString();
-                }, 500); // 500ms debounce
-            });
-
-            // Allow Enter key to search immediately
-            searchInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    e.preventDefault(); // Prevent form submission if in a form
-                    clearTimeout(searchTimeout);
-                    const value = this.value.trim();
-                    const url = new URL(window.location.href);
-                    const currentSearch = url.searchParams.get('search') || '';
-
-                    // Only navigate if search value changed
-                    if (value.length > 0) {
-                        if (value !== currentSearch) {
-                            url.searchParams.set('search', value);
-                            url.searchParams.set('page', '1');
-                            window.location.href = url.toString();
-                        }
-                    } else {
-                        // Only reload if there was a search term to clear
-                        if (currentSearch) {
-                            url.searchParams.delete('search');
-                            url.searchParams.set('page', '1');
-                            window.location.href = url.toString();
-                        }
-                    }
-                }
-            });
-        }
+        const filterService = new ProductFilterService(window.apiService);
+        const uiController = new ProductGridUIController();
+        productFilterController = new ProductFilterController(filterService, uiController);
+        productFilterController.init();
+        window.productFilterController = productFilterController;
     });
-
-    function toggleFilter(filterId) {
-        const filterDiv = document.getElementById(filterId + '-filter');
-        const icon = document.getElementById(filterId + '-icon');
-
-        if (filterDiv.style.display === 'none') {
-            filterDiv.style.display = 'block';
-            icon.classList.remove('fa-chevron-down');
-            icon.classList.add('fa-chevron-up');
-        } else {
-            filterDiv.style.display = 'none';
-            icon.classList.remove('fa-chevron-up');
-            icon.classList.add('fa-chevron-down');
-        }
-    }
-
-    function filterByCategory(categoryId) {
-        const url = new URL(window.location.href);
-
-        // Get all checked category checkboxes
-        const checkedCategories = Array.from(document.querySelectorAll('.category-checkbox:checked'))
-            .map(cb => cb.getAttribute('data-category-id'))
-            .filter(id => id && id !== 'null' && id !== '');
-
-        // Remove existing category parameters
-        url.searchParams.delete('category');
-
-        // Add new category parameters (multiple categories support)
-        checkedCategories.forEach(id => {
-            url.searchParams.append('category', id);
-        });
-
-        url.searchParams.set('page', '1'); // Reset to first page when filtering
-
-        // Navigate to filtered URL
-        window.location.href = url.toString();
-    }
-
-    function filterByFlavour() {
-        const url = new URL(window.location.href);
-
-        // Get all checked flavour checkboxes
-        const checkedFlavours = Array.from(document.querySelectorAll('.flavour-checkbox:checked'))
-            .map(cb => cb.getAttribute('data-flavour-id'));
-
-        // Remove existing flavour parameters
-        url.searchParams.delete('flavour');
-
-        // Add new flavour parameters
-        checkedFlavours.forEach(id => {
-            url.searchParams.append('flavour', id);
-        });
-
-        url.searchParams.set('page', '1'); // Reset to first page when filtering
-        window.location.href = url.toString();
-    }
-
-    function filterByEquipment() {
-        const url = new URL(window.location.href);
-
-        // Get all checked equipment checkboxes
-        const checkedEquipment = Array.from(document.querySelectorAll('.equipment-checkbox:checked'))
-            .map(cb => cb.getAttribute('data-equipment-id'));
-
-        // Remove existing equipment parameters
-        url.searchParams.delete('equipment');
-
-        // Add new equipment parameters
-        checkedEquipment.forEach(id => {
-            url.searchParams.append('equipment', id);
-        });
-
-        url.searchParams.set('page', '1'); // Reset to first page when filtering
-        window.location.href = url.toString();
-    }
-
-    function filterByAvailability(inStock) {
-        const url = new URL(window.location.href);
-
-        if (inStock === null) {
-            url.searchParams.delete('inStock');
-        } else {
-            url.searchParams.set('inStock', inStock);
-        }
-
-        url.searchParams.set('page', '1'); // Reset to first page when filtering
-        window.location.href = url.toString();
-    }
 </script>

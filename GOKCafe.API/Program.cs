@@ -47,6 +47,12 @@ builder.Services.AddScoped<ICouponService, CouponService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<ILoyaltyPlatformService, LoyaltyPlatformService>();
 builder.Services.AddScoped<IProductCommentService, ProductCommentService>();
+builder.Services.AddScoped<IBlogService, BlogService>();
+builder.Services.AddScoped<IBlogCategoryService, BlogCategoryService>();
+builder.Services.AddScoped<IBlogCommentService, BlogCommentService>();
+builder.Services.AddScoped<IPartnerService, PartnerService>();
+builder.Services.AddScoped<IContactService, ContactService>();
+builder.Services.AddScoped<IEventService, EventService>();
 
 // Register HttpClient for external API calls
 builder.Services.AddHttpClient();
@@ -95,6 +101,37 @@ builder.Services.AddSwaggerGen(options =>
         Title = "GOK Cafe API",
         Version = "v1",
         Description = "API for GOK Cafe management system"
+    });
+
+    // Include all endpoints regardless of ApiExplorerSettings GroupName
+    options.DocInclusionPredicate((docName, apiDesc) => true);
+
+    // Use full type names for schema IDs to avoid conflicts
+    options.CustomSchemaIds(type => type.FullName?.Replace("+", "."));
+
+    // Add JWT Bearer authentication to Swagger
+    options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token in the text input below.",
+        Name = "Authorization",
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+
+    options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    {
+        {
+            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                {
+                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
     });
 });
 
