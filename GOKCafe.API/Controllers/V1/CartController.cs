@@ -1,6 +1,7 @@
 using GOKCafe.Application.DTOs.Cart;
 using GOKCafe.Application.DTOs.Common;
 using GOKCafe.Application.DTOs.Order;
+using GOKCafe.Application.DTOs.Product;
 using GOKCafe.Application.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,11 +15,16 @@ namespace GOKCafe.API.Controllers.V1;
 public class CartController : ControllerBase
 {
     private readonly ICartService _cartService;
+    private readonly IProductService _productService;
     private readonly ILogger<CartController> _logger;
 
-    public CartController(ICartService cartService, ILogger<CartController> logger)
+    public CartController(
+        ICartService cartService,
+        IProductService productService,
+        ILogger<CartController> logger)
     {
         _cartService = cartService;
+        _productService = productService;
         _logger = logger;
     }
 
@@ -165,6 +171,59 @@ public class CartController : ControllerBase
 
         var result = await _cartService.CheckoutFromCartAsync(userId, sessionId, dto);
         return result.Success ? Ok(result) : BadRequest(result);
+    }
+
+    /// <summary>
+    /// Get recommended products for cart panel
+    /// Returns popular/featured products to upsell
+    /// </summary>
+    /// <param name="limit">Number of recommended products to return (default: 4)</param>
+    [HttpGet("recommended-products")]
+    [ProducesResponseType<ApiResponse<List<ProductDto>>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ApiResponse<List<ProductDto>>>(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetRecommendedProducts([FromQuery] int limit = 4)
+    {
+        try
+        {
+            // Get featured/popular products
+            var result = await _productService.GetProductsAsync(
+                pageNumber: 1,
+                pageSize: limit,
+                categoryIds: null,
+                isFeatured: true, // Get featured products
+                search: null,
+                flavourProfileIds: null,
+                equipmentIds: null,
+                inStock: true // Only show in-stock items
+            );
+
+            if (result.Success && result.Data != null)
+            {
+                var recommendedProducts = result.Data.Items.ToList();
+                var count = recommendedProducts.Count;
+                var message = count == 1
+                    ? "Retrieved 1 recommended product"
+                    : $"Retrieved {count} recommended products";
+
+                return Ok(ApiResponse<List<ProductDto>>.SuccessResult(
+                    recommendedProducts,
+                    message
+                ));
+            }
+
+            return Ok(ApiResponse<List<ProductDto>>.SuccessResult(
+                new List<ProductDto>(),
+                "No recommended products found"
+            ));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting recommended products for cart");
+            return BadRequest(ApiResponse<List<ProductDto>>.FailureResult(
+                "Error getting recommended products",
+                new List<string> { ex.Message }
+            ));
+        }
     }
 
     #region Private Helpers
