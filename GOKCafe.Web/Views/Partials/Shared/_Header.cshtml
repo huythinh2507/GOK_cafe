@@ -105,7 +105,34 @@
             <div class="hidden md:flex items-center md:gap-3 lg:gap-12">
                 <a href="/partners" class="text-gray-700 hover:text-primary font-medium transition-colors uppercase  text-base">Partners</a>
                 <a href="/contact" class="text-gray-700 hover:text-primary font-medium transition-colors uppercase  text-base">Contact</a>
-                <a href="/visions" class="text-gray-700 hover:text-primary font-medium transition-colors uppercase  text-base">Visions</a>
+               
+                <!-- Visions Dropdown -->
+                <div class="relative group">
+                    <a href="/learn" class="text-gray-700 hover:text-primary font-medium transition-colors uppercase text-base flex items-center gap-1">
+                        Learn
+                        <i class="fas fa-chevron-down text-xs transition-transform group-hover:rotate-180"></i>
+                    </a>
+
+                    <!-- Visions Dropdown Menu -->
+                    <div class="absolute right-0 top-full mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
+                        <div class="p-4">
+                            <div class="space-y-2">
+                                <a href="/events" class="block px-3 py-2 text-gray-700 hover:bg-gray-100 hover:text-primary rounded-md transition-colors">
+                                    <span class="font-medium">Events</span>
+                                </a>
+                                <a href="/gifting" class="block px-3 py-2 text-gray-700 hover:bg-gray-100 hover:text-primary rounded-md transition-colors">
+                                    <span class="font-medium">Gifting</span>
+                                </a>
+                                <a href="/wholesale" class="block px-3 py-2 text-gray-700 hover:bg-gray-100 hover:text-primary rounded-md transition-colors">
+                                    <span class="font-medium">Wholesale</span>
+                                </a>
+                                <a href="/our-package" class="block px-3 py-2 text-gray-700 hover:bg-gray-100 hover:text-primary rounded-md transition-colors">
+                                    <span class="font-medium">Our Package</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="flex items-center gap-4">
                 <!-- Search Icon -->
@@ -144,9 +171,23 @@
                     </div>
                 </div>
 
-                <a href="/visions" class="text-gray-700 hover:text-primary font-medium transition-colors py-2 uppercase text-sm">Visions</a>
                 <a href="/partners" class="text-gray-700 hover:text-primary font-medium transition-colors py-2 uppercase text-sm">Partners</a>
-                <a href="/contact" class="text-gray-700 hover:text-primary font-medium transition-colors py-2 uppercase text-sm">Contact</a>
+                <a href="/contact" class="text-gray-700 hover:text-primary font-medium transition-colors uppercase py-2 text-sm">Contact</a>
+
+
+                <!-- Visions with sub-menu for mobile -->
+                <div>
+                    <button type="button" onclick="toggleMobileVisionsMenu()" class="w-full text-left text-gray-700 hover:text-primary font-medium transition-colors py-2 uppercase text-sm flex items-center justify-between">
+                        Learn
+                        <i id="mobileVisionsChevron" class="fas fa-chevron-down text-xs transition-transform"></i>
+                    </button>
+                    <div id="mobileVisionsSubmenu" class="hidden pl-4 mt-2 space-y-2">
+                        <a href="/gifting" class="block text-gray-600 hover:text-primary transition-colors py-1 text-sm">Gifting</a>
+                        <a href="/wholesale" class="block text-gray-600 hover:text-primary transition-colors py-1 text-sm">Wholesale</a>
+                        <a href="/events" class="block text-gray-600 hover:text-primary transition-colors py-1 text-sm">Events</a>
+                        <a href="/our-package" class="block text-gray-600 hover:text-primary transition-colors py-1 text-sm">Our Package</a>
+                    </div>
+                </div>
             </div>
         </div>
     </nav>
@@ -171,6 +212,13 @@
     function toggleMobileProductsMenu() {
         const submenu = document.getElementById('mobileProductsSubmenu');
         const chevron = document.getElementById('mobileProductsChevron');
+        submenu.classList.toggle('hidden');
+        chevron.classList.toggle('rotate-180');
+    }
+
+    function toggleMobileVisionsMenu() {
+        const submenu = document.getElementById('mobileVisionsSubmenu');
+        const chevron = document.getElementById('mobileVisionsChevron');
         submenu.classList.toggle('hidden');
         chevron.classList.toggle('rotate-180');
     }

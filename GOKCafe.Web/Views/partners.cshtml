@@ -1,0 +1,106 @@
+@using Umbraco.Cms.Web.Common.PublishedModels;
+@using GOKCafe.Web.Models.DTOs;
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
+@{
+    Layout = "_Layout.cshtml";
+
+    var title = ViewData["Title"] as string ?? "Our Partners";
+    var description = ViewData["Description"] as string ?? "";
+    var partnerItems = ViewData["PartnerItems"] as List<PartnerDto> ?? new List<PartnerDto>();
+}
+
+@* Breadcrumbs *@
+@await Html.PartialAsync("~/Views/Partials/Shared/_Breadcrumbs.cshtml", Model)
+
+<!-- Partners Hero Section -->
+<section class=" pt-8">
+    <div class="container mx-auto px-4">
+        <div class="max-w-5xl mx-auto text-center">
+            <div class="text-4xl md:text-8xl italic font-medium text-gray-900 mb-6">@title</div>
+            @if (!string.IsNullOrEmpty(description))
+            {
+                <p class="text-base md:text-2xl text-gray-600 leading-loose">@description</p>
+            }
+        </div>
+    </div>
+</section>
+
+<!-- Partners Grid Section -->
+<section class="py-16">
+    <div class="container mx-auto px-4">
+        @if (partnerItems.Count > 0)
+        {
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                @foreach (var partner in partnerItems)
+                {
+                    <a href="/partner-details?id=@partner.Id" class="block relative overflow-hidden group cursor-pointer">
+                        @if (!string.IsNullOrEmpty(partner.ImageUrl))
+                        {
+                            <!-- Partner Image with Overlay -->
+                            <div class="relative h-96 w-full overflow-hidden">
+                                <!-- Background Image -->
+                                <img src="@partner.ImageUrl"
+                                     alt="@partner.Title"
+                                     class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+
+                                <!-- Gradient Overlay -->
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
+
+                                <!-- Content on top of image -->
+                                <div class="relative z-10 h-full flex flex-col justify-between p-6">
+                                    <!-- Partner Title - Top Right -->
+                                    <div class="flex justify-end">
+                                        <h3 class="text-white text-2xl md:text-xl font-bold tracking-wider uppercase text-right">
+                                            @partner.Title
+                                        </h3>
+                                    </div>
+
+                                    <!-- Learn More Button - Bottom Right -->
+                                    <div class="flex justify-end">
+                                        <span class="bg-white hover:bg-cyan-100 text-gray-900 font-bold px-8 py-3 uppercase tracking-wider text-sm transition-all duration-300 inline-block">
+                                            Learn More
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <!-- Fallback if no image -->
+                            <div class="relative h-96 w-full bg-gray-800">
+                                <div class="relative z-10 h-full flex flex-col justify-between p-6">
+                                    <div class="flex justify-end">
+                                        <h3 class="text-white text-2xl font-bold tracking-wider uppercase text-right">
+                                            @partner.Title
+                                        </h3>
+                                    </div>
+                                    <div class="flex justify-end">
+                                        <span class="bg-white/90 hover:bg-white text-gray-900 font-semibold px-8 py-3 uppercase tracking-wider text-sm transition-all duration-300 inline-block">
+                                            Learn More
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </a>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-12">
+                <p class="text-gray-500 text-lg">No partners found.</p>
+            </div>
+        }
+    </div>
+</section>
+
+<script>
+    // Console log partner data for debugging
+    console.log('Partners Page Data:', {
+        title: '@title',
+        description: '@description',
+        partnerCount: @partnerItems.Count,
+        partners: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(partnerItems))
+    });
+</script>

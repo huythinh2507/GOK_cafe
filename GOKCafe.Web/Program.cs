@@ -169,6 +169,9 @@ builder.Services.AddControllers()
     })
     .AddControllersAsServices();
 
+// Add Response Caching
+builder.Services.AddResponseCaching();
+
 WebApplication app = builder.Build();
 
 // Seed API database
@@ -198,6 +201,10 @@ using (var scope = app.Services.CreateScope())
 
 await app.BootUmbracoAsync();
 
+
+// CRITICAL: Response Caching must come BEFORE Umbraco
+app.UseResponseCaching();
+
 // Enable Swagger in all environments (you can restrict to Development if needed)
 app.UseSwagger();
 app.UseSwaggerUI(options =>
@@ -212,6 +219,7 @@ app.UseCors("AllowAll");
 // Enable Authentication and Authorization for API
 app.UseAuthentication();
 app.UseAuthorization();
+
 
 app.UseUmbraco()
     .WithMiddleware(u =>
