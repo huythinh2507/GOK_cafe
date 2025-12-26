@@ -1,71 +1,100 @@
 ﻿@using GOKCafe.Web.Models.DTOs
+@using GOKCafe.Web.Models.ViewModels
 @inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage
 @{
     Layout = "_Layout.cshtml";
 
     // Get Blog from ViewData (provided by controller)
     var blog = ViewData["Blog"] as BlogDto;
+    var viewModel = ViewData["BlogDetailViewModel"] as BlogDetailViewModel;
 
-    // Fallback to mock data if no blog found
-    if (blog == null)
-    {
-        blog = new BlogDto
-        {
-            Id = Guid.NewGuid(),
-            Title = "Discovering the Aroma Trails of Da Lat Coffee Farms",
-            Content = "We began by visiting smallholder farms tucked deep in the hills. These were places where generations of growers tended their crops with quiet dedication, nurturing each tree by hand. The cool mountain climate, gentle sunlight, and volcanic soil created the perfect environment for delicate Arabica varieties to thrive. We began by visiting smallholder farms tucked deep in the hills. These were places where generations of growers tended their crops with quiet dedication, nurturing each tree by hand. The cool mountain climate, gentle sunlight, and volcanic soil created the perfect environment for delicate Arabica varieties to thrive.",
-            FeaturedImageUrl = "/media/image/blog-details.png",
-            PublishedDate = DateTime.Now,
-            Author = "GOK Cafe",
-            Excerpt = "Blog excerpt..."
-        };
-    }
-
-    ViewData["Title"] = blog.Title;
+    ViewData["Title"] = blog?.Title ?? "Blog Not Found";
 }
 
+@section Styles {
+    <link rel="stylesheet" href="~/css/blog-content.css" asp-append-version="true">
+}
+
+
 <!-- Blog Detail Section -->
-<section class="py-12 bg-white">
-    <div class="container mx-auto">
+<section class="pb-12 bg-white">
+    <div class=" mx-auto">
         <!-- Back Button -->
-        <div class="mb-8">
+        @* <div class="mb-8">
             <a href="/blogs" class="inline-flex items-center text-primary hover:text-primary-dark transition-colors">
                 <i class="fas fa-arrow-left mr-2"></i>
                 Back to Blog
             </a>
-        </div>
+        </div> *@
 
-        <!-- Blog Header -->
-        <div class="w-full">
-            <!-- Featured Image -->
-            @if (!string.IsNullOrEmpty(blog.FeaturedImageUrl))
-            {
-                <div class="mb-8">
-                    <img src="@blog.FeaturedImageUrl" alt="@blog.Title" class="w-full h-[400px] md:h-[500px] object-cover rounded-lg shadow-lg" />
-                </div>
-            }
-
-            <!-- Title -->
-            <h1 class="text-4xl md:text-4xl font-bold text-gray-900 mb-4">
-                @blog.Title
-            </h1>
-
-            <!-- Meta Info -->
-            <div class="flex items-center gap-6 text-gray-600 mb-8 pb-8 border-b border-gray-200">
-                <div class="flex items-center gap-2">
-                    <i class="fas fa-calendar-alt"></i>
-                    <span>@blog.PublishedDate.ToString("MMMM dd, yyyy")</span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <i class="fas fa-user"></i>
-                    <span>@blog.Author</span>
-                </div>
+        @if (blog == null)
+        {
+            <!-- Blog Not Found Message -->
+            <div class="text-center py-16">
+                <i class="fas fa-exclamation-circle text-6xl text-gray-300 mb-4"></i>
+                <h2 class="text-2xl font-semibold text-gray-700 mb-2">Blog Not Found</h2>
+                <p class="text-gray-500">The blog post you're looking for doesn't exist or has been removed.</p>
             </div>
+        }
+        else
+        {
+            
+            <!-- Blog Header -->
+            <div class="w-full">
+                <!-- Featured Image -->
+                @if (!string.IsNullOrEmpty(blog.FeaturedImageUrl))
+                {
+                    <div class="">
+                        <img src="@blog.FeaturedImageUrl" alt="@blog.Title" class="w-full h-[200px] lg:h-[400px] object-cover shadow-lg" />
+                    </div>
+                }
+                @* Breadcrumbs - Use dynamic breadcrumbs if available from ViewModel *@
+                @* @if (viewModel?.Breadcrumbs != null && viewModel.Breadcrumbs.Any())
+                {
+                    @await Html.PartialAsync("~/Views/Partials/Shared/_DynamicBreadcrumbs.cshtml", viewModel.Breadcrumbs)
+                }
+                else
+                {
+                    @await Html.PartialAsync("~/Views/Partials/Shared/_Breadcrumbs.cshtml", Model)
+                } *@
 
-            <!-- Content -->
-            <div class="prose prose-lg max-w-none">
-                @Html.Raw(blog.Content)
-            </div>
-        </div>
+                <div class="container">
+
+                            <!-- Title -->
+                            <h1 class="text-2xl md:text-4xl font-bold text-gray-900 pt-8 py-4">
+                                @blog.Title
+                            </h1>
+
+                            <!-- Meta Info -->
+                            <div class="flex flex-wrap items-center gap-3 md:gap-6 text-sm text-gray-600 mb-8 pb-8 border-b border-gray-200">
+                                <div class="flex items-center gap-2">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span>@blog.PublishedDate.ToString("MMMM dd, yyyy")</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <i class="fas fa-user"></i>
+                                    <span>@blog.Author</span>
+                                </div>
+                                @if (blog.Tags != null && blog.Tags.Any())
+                                {
+                                    <div class="flex items-center gap-2">
+                                        <i class="fas fa-tags"></i>
+                                        <div class="flex gap-2">
+                                            @foreach (var tag in blog.Tags)
+                                            {
+                                                <span class="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">@tag</span>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+
+                            <!-- Content -->
+                            <div class="prose prose-lg max-w-none blog-content">
+                                @Html.Raw(blog.Content)
+                            </div>
+                        </div>
+                </div>
+        }
     </div>
 </section>
