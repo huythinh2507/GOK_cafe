@@ -5,6 +5,83 @@
 <!-- Cart Sidebar Overlay -->
 <div id="cartOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden transition-opacity duration-300" onclick="closeCartSidebar()"></div>
 
+<!-- Voucher Condition Modal -->
+<div id="voucherConditionModal" class="fixed inset-0 bg-black bg-opacity-50 z-[70] hidden flex items-center justify-center p-4" onclick="closeVoucherConditionModal(event)">
+    <div class="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto" onclick="event.stopPropagation()">
+        <!-- Modal Header -->
+        <div class="flex items-center justify-between p-4 border-b border-gray-200 sticky top-0 bg-white">
+            <h3 class="text-lg font-bold text-gray-900">Voucher Conditions</h3>
+            <button type="button" onclick="closeVoucherConditionModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="p-4 space-y-4">
+            <!-- Voucher Code -->
+            <div class="bg-primary/10 rounded-lg p-3 text-center">
+                <p class="text-xs text-gray-600 mb-1">Voucher Code</p>
+                <p id="modalVoucherCode" class="text-xl font-bold text-primary uppercase tracking-wider"></p>
+            </div>
+
+            <!-- Voucher Name -->
+            <div>
+                <p class="text-xs text-gray-500 mb-1">Name</p>
+                <p id="modalVoucherName" class="text-base font-semibold text-gray-900"></p>
+            </div>
+
+            <!-- Description -->
+            <div>
+                <p class="text-xs text-gray-500 mb-1">Description</p>
+                <p id="modalVoucherDescription" class="text-sm text-gray-700"></p>
+            </div>
+
+            <!-- Type -->
+            <div>
+                <p class="text-xs text-gray-500 mb-1">Type</p>
+                <p id="modalVoucherType" class="text-sm text-gray-900"></p>
+            </div>
+
+            <!-- Discount Value -->
+            <div>
+                <p class="text-xs text-gray-500 mb-1">Discount</p>
+                <p id="modalDiscountValue" class="text-sm font-semibold text-green-600"></p>
+            </div>
+
+            <!-- Max Discount Amount -->
+            <div id="modalMaxDiscountContainer">
+                <p class="text-xs text-gray-500 mb-1">Maximum Discount</p>
+                <p id="modalMaxDiscountAmount" class="text-sm text-gray-900"></p>
+            </div>
+
+            <!-- Min Order Amount -->
+            <div>
+                <p class="text-xs text-gray-500 mb-1">Minimum Order</p>
+                <p id="modalMinOrderAmount" class="text-sm text-gray-900"></p>
+            </div>
+
+            <!-- Valid Period -->
+            <div>
+                <p class="text-xs text-gray-500 mb-1">Valid Period</p>
+                <div class="flex items-center gap-2 text-sm text-gray-900">
+                    <span id="modalStartDate"></span>
+                    <span>-</span>
+                    <span id="modalEndDate"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="p-4 border-t border-gray-200 sticky bottom-0 bg-white">
+            <button type="button" onclick="closeVoucherConditionModal()" class="w-full bg-primary text-white py-2 rounded-lg font-medium hover:bg-primary/90 transition-colors">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
+
 <!-- Cart Sidebar Panel -->
 <div id="cartSidebar" class="fixed top-0 right-0 h-full w-full z-50  md:w-[400px] bg-white shadow-2xl z-60 transform translate-x-full transition-transform duration-300 flex flex-col">
 
@@ -70,24 +147,33 @@
                         <!-- Quantity Controls & Price -->
                         <div class="flex justify-between items-center">
                             <!-- Quantity Controls -->
-                            <div class="flex items-center border border-gray-300 rounded text-xs">
-                                <button type="button" class="px-2 py-1 hover:bg-gray-100 transition-colors cart-decrease-btn">
+                            <div class="flex items-center border border-gray-300 rounded">
+                                <button type="button" class="px-2 py-1 hover:bg-gray-100 transition-colors font-semibold text-sm cart-decrease-btn">
                                     -
                                 </button>
-                                <input type="number" value="1" min="1" readonly class="w-10 text-center border-x border-gray-300 py-1 font-semibold text-sm cart-item-quantity" />
-                                <button type="button" class="px-2 py-1 hover:bg-gray-100 transition-colors cart-increase-btn">
+                                <input type="number" value="1" min="1" class="w-10 text-center border-x border-gray-300 font-semibold text-sm cart-item-quantity" />
+                                <button type="button" class="px-2 py-1 hover:bg-gray-100 transition-colors font-semibold text-sm cart-increase-btn">
                                     +
                                 </button>
                             </div>
 
                             <!-- Price -->
-                            <p class="font-semibold text-sm text-gray-900 cart-item-price">32,000 VND</p>
+                            <p class="font-semibold text-sm text-gray-900 cart-item-price"></p>
                         </div>
                     </div>
                 </div>
             </div>
         </template>
+        <!-- Recommended Products Section -->
+    <div id="recommendedProductsSection" class="px-4 py-5 bg-white border-t border-gray-200">
+        <h3 class="font-bold text-xs text-gray-900 mb-3 mt-3 uppercase tracking-wider">You May Also Like</h3>
+        <div class="flex gap-4 justify-center" id="recommendedProductsContainer">
+            <!-- Recommended products will be rendered here dynamically -->
+        </div>
     </div>
+    </div>
+
+    
 
     <!-- Special Price Section - Hidden -->
     <div id="specialPriceSection" class="px-5 py-4 bg-gray-50 border-y border-gray-200 hidden">
@@ -119,18 +205,42 @@
                 </button>
             </div>
         </template>
+
+        <!-- Recommended Product Template -->
+        <template id="recommendedProductTemplate">
+            <div class="recommended-product-item" data-product-id="">
+                <!-- Product Image with Price Overlay -->
+                <div class="relative" style="width: 160px; height: 160px; overflow: hidden;">
+                    <img src="" alt="" class="w-full h-full object-cover recommended-product-image" />
+
+                    <!-- Price Overlay (positioned at bottom) -->
+                    <div class="recommended-price-overlay">
+                        <span class="recommended-base-price"></span>
+                        <span class="recommended-sale-price"></span>
+                    </div>
+                </div>
+
+                <!-- Product Name -->
+                <h4 class="recommended-product-name">GREEN TEA</h4>
+
+                <!-- Add to Cart Button -->
+                <button class="recommended-add-btn">
+                    ADD TO CART
+                </button>
+            </div>
+        </template>
     </div>
 
     <div class="flex-1 overflow-y-auto">
         <!-- Special Instructions -->
         <div class="px-5 py-3 border-b border-gray-200">
-            <label class="block text-xs font-medium text-gray-700 mb-2" for="specialInstructions">
+            @* <label class="block text-xs font-medium text-gray-700 mb-2" for="specialInstructions">
                 Special Instructions For Seller
             </label>
             <textarea id="specialInstructions"
                     rows="2"
                     class="w-full border border-gray-300 rounded px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-gray-400 focus:border-gray-400 resize-none"
-                    placeholder=""></textarea>
+                    placeholder=""></textarea> *@
         </div>
 
         <!-- Cart Footer -->
@@ -169,14 +279,8 @@
                     <span class="text-sm font-semibold text-gray-900" id="cartSubtotal">0đ</span>
                 </div>
 
-                <!-- Shipping Fee -->
-                <div class="flex justify-between items-center">
-                    <span class="text-sm text-gray-700">Shipping fee</span>
-                    <span class="text-sm text-gray-900" id="shippingFee">0đ</span>
-                </div>
-
                 <!-- Coupon Input -->
-                <div class="space-y-2">
+                @* <div class="space-y-2">
                     <label for="couponCode" class="block text-xs font-medium text-gray-700 uppercase">Enter coupon code</label>
                     <div class="flex gap-2">
                         <input type="text"
@@ -191,7 +295,7 @@
                     </div>
                     <p id="couponError" class="text-xs text-red-600 hidden"></p>
                     <p id="couponSuccess" class="text-xs text-green-600 hidden"></p>
-                </div>
+                </div> *@
 
                 <!-- Coupon Discount (Applied) -->
                 <div id="couponDiscountContainer" class="hidden">
@@ -215,62 +319,103 @@
                 <!-- Voucher Selection -->
                 <div class="space-y-2">
                     <div class="flex items-center justify-between">
-                        <label class="block text-xs font-medium text-gray-700 uppercase">Enter Voucher</label>
-                        <button type="button" class="text-xs text-primary hover:underline" onclick="showAllVouchers()">
-                            View all
+                        <label class="block text-xs font-medium text-gray-700 uppercase">GOK discount code</label>
+                    </div>
+
+                    <!-- Voucher Input Field -->
+                    <div class="flex gap-2 mb-3">
+                        <input type="text"
+                            id="voucherCodeInput"
+                            placeholder="Enter voucher code"
+                            oninput="this.value = this.value.toUpperCase()"
+                            class="flex-1 border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary" />
+                        <button type="button"
+                                onclick="applyVoucherFromInput()"
+                                class="bg-primary text-white px-4 py-2 rounded text-sm font-medium hover:bg-primary/90 transition-colors">
+                            Apply
                         </button>
                     </div>
 
                     <!-- Voucher Cards Container (Horizontal Scroll) -->
                     <div class="relative">
-                        <div id="voucherContainer" class="flex gap-3 overflow-x-auto pb-2 scroll-smooth" style="scrollbar-width: thin;">
+                        <div id="voucherContainer" class="flex gap-3 overflow-x-auto pb-2 scroll-smooth hide-scrollbar snap-x snap-mandatory" style="scrollbar-width: none;">
                             <!-- Vouchers will be loaded dynamically -->
                             <div class="text-center text-gray-400 text-sm py-4 w-full">
                                 Loading vouchers...
                             </div>
                         </div>
 
-                        <!-- Scroll Navigation Buttons (Optional) -->
+                        <!-- Scroll Navigation Buttons -->
                         <button type="button"
                                 id="scrollLeftBtn"
                                 onclick="scrollVouchers('left')"
-                                class="hidden absolute left-0 top-1/2 -translate-y-1/2 bg-white/90 rounded-full w-6 h-6 shadow-md items-center justify-center hover:bg-white z-10">
+                                class="hidden absolute left-0 top-1/2 -translate-y-1/2 bg-white/90 rounded-full w-8 h-8 shadow-md flex items-center justify-center hover:bg-white z-10 border border-gray-300">
                             <i class="fas fa-chevron-left text-xs text-gray-600"></i>
                         </button>
                         <button type="button"
                                 id="scrollRightBtn"
                                 onclick="scrollVouchers('right')"
-                                class="hidden absolute right-0 top-1/2 -translate-y-1/2 bg-white/90 rounded-full w-6 h-6 shadow-md items-center justify-center hover:bg-white z-10">
+                                class="hidden absolute right-0 top-1/2 -translate-y-1/2 bg-white/90 rounded-full w-8 h-8 shadow-md flex items-center justify-center hover:bg-white z-10 border border-gray-300">
                             <i class="fas fa-chevron-right text-xs text-gray-600"></i>
                         </button>
                     </div>
 
                     <!-- Voucher Card Template -->
                     <template id="voucherCardTemplate">
-                        <div class="voucher-card flex-shrink-0 w-48 border rounded-lg p-3 cursor-pointer transition-all hover:shadow-md"
-                            data-voucher-id=""
-                            onclick="selectVoucher(this)">
-                            <!-- Voucher Header -->
-                            <div class="flex items-start justify-between mb-2">
-                                <div class="flex-1">
-                                    <h4 class="voucher-code text-sm font-bold text-gray-900 uppercase"></h4>
-                                    <p class="voucher-discount text-xs text-gray-600 mt-1"></p>
+                        <div class="voucher-card flex-shrink-0 relative"
+                             data-voucher-id=""
+                             data-voucher-code=""
+                             style="width: 300px;">
+
+                            <div class="voucher-ticket"
+                                 onclick="toggleVoucherSelection(this.closest('.voucher-card'))">
+
+                                <div class="voucher-ticket__inner">
+
+                                    <!-- Notch spacing (12px) -->
+                                    <div class="voucher-ticket__notch-space"></div>
+
+                                    <!-- Tear line -->
+                                    <div class="voucher-ticket__tear"></div>
+
+                                    <!-- Gap after tear line (12px) -->
+                                    <div class="voucher-ticket__tear-gap"></div>
+
+                                    <!-- Content -->
+                                    <div class="flex-1 py-3">
+                                        <div class="flex items-center gap-1 mb-1">
+                                            <span class="voucher-code text-sm font-semibold uppercase text-gray-900"></span>
+                                            <span class="voucher-badge text-xs text-gray-500"></span>
+                                        </div>
+
+                                        <p class="voucher-description text-xs text-gray-700 leading-snug mb-1 line-clamp-2"></p>
+
+                                        <p class="voucher-expiry text-xs text-gray-500"></p>
+                                    </div>
+
+                                    <!-- Right side -->
+                                    <div class="flex flex-col justify-between items-center px-3 py-3">
+                                        <input type="radio"
+                                               name="selectedVoucher"
+                                               class="voucher-radio w-4 h-4 accent-blue-600"
+                                               onclick="event.stopPropagation(); toggleVoucherSelection(this.closest('.voucher-card'))">
+
+                                        <button type="button"
+                                                class="text-xs text-blue-600 font-medium hover:underline voucher-condition-btn">
+                                            Condition
+                                        </button>
+                                    </div>
+
+                                    <div class="voucher-status-msg mt-2 text-xs font-medium hidden"></div>
+
                                 </div>
-                                <input type="radio" name="selectedVoucher" class="voucher-radio mt-1" />
-                            </div>
-
-                            <!-- Voucher Details -->
-                            <div class="voucher-description text-xs text-gray-500 mb-2"></div>
-
-                            <!-- Expiry Date -->
-                            <div class="flex items-center justify-between">
-                                <span class="voucher-expiry text-xs text-gray-400"></span>
-                                <button type="button" class="text-xs text-primary hover:underline">
-                                    Terms
-                                </button>
                             </div>
                         </div>
                     </template>
+                   
+
+
+
                 </div>
 
                 <!-- Voucher Discount -->
@@ -363,36 +508,294 @@
     -moz-appearance: textfield;
 }
 
-/* Voucher Container Scrollbar */
+/* Voucher Container Scrollbar - Hide scrollbar */
+#voucherContainer {
+    scroll-padding: 0 50%;
+}
+
 #voucherContainer::-webkit-scrollbar {
-    height: 6px;
+    display: none;
 }
 
-#voucherContainer::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 3px;
+.hide-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
 }
 
-#voucherContainer::-webkit-scrollbar-thumb {
-    background: #888;
-    border-radius: 3px;
-}
-
-#voucherContainer::-webkit-scrollbar-thumb:hover {
-    background: #555;
+.hide-scrollbar::-webkit-scrollbar {
+    display: none;  /* Chrome, Safari and Opera */
 }
 
 /* Voucher Card Styles */
 .voucher-card {
-    border-color: #e5e7eb;
+    scroll-snap-align: center;
 }
 
-.voucher-card:hover {
-    border-color: #d1d5db;
+/* Voucher Notch Effect - Circle on left side */
+.voucher-notch {
+    position: relative;
+    overflow: hidden; 
 }
 
-.voucher-card.border-primary {
-    border-color: #3B82F6;
-    border-width: 2px;
+.voucher-notch::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 24px;
+    height: 24px;
+    transform: translate(-50%, -50%);
+    border-radius: 0 50% 50% 0;
+    background-color: #fff;
+    border: 1px solid #d1d5db;
+    z-index: 10;
 }
+
+.voucher-card.selected .border-gray-200 {
+    border-color: #3B82F6 !important;
+    background: #EFF6FF !important;
+}
+
+.voucher-card.selected .voucher-radio {
+    accent-color: #3B82F6;
+}
+
+.voucher-status-msg.success {
+    color: #10B981;
+    display: block;
+}
+
+.voucher-status-msg.error {
+    color: #EF4444;
+    display: block;
+}
+/* ===== Voucher Ticket ===== */
+.voucher-ticket {
+    position: relative;
+    background: #dff7e2;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    cursor: pointer;
+    overflow: hidden;
+}
+
+/* Notch */
+.voucher-ticket::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    width: 24px;
+    height: 24px;
+    background: #f3f4f6;
+    border-radius: 50%;
+    transform: translateY(-50%);
+    z-index: 3;
+}
+
+.voucher-ticket::before {
+    left: -9px;
+}
+
+.voucher-ticket::after {
+    right: -9px;
+}
+
+/* Inner layout */
+.voucher-ticket__inner {
+    display: flex;
+    align-items: stretch;
+}
+
+/* Column: notch space */
+.voucher-ticket__notch-space {
+    width: 20px;
+    flex-shrink: 0;
+}
+
+/* Tear line column */
+.voucher-ticket__tear {
+    width: 1px;
+    margin: 0;
+    border-left: 1px dashed #d1d5db;
+    flex-shrink: 0;
+}
+
+/* Gap after tear line */
+.voucher-ticket__tear-gap {
+    width: 12px;
+    flex-shrink: 0;
+}
+
+/* Cart Item Quantity Input - Remove top and bottom borders */
+.cart-item-quantity {
+    border-top: none !important;
+    border-bottom: none !important;
+}
+
+/* ========================================
+   Recommended Products Section Styles
+   ======================================== */
+
+#recommendedProductsSection {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+#recommendedProductsSection::-webkit-scrollbar {
+    display: none;
+}
+
+#recommendedProductsContainer {
+    scrollbar-width: none;
+}
+
+.recommended-product-item {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0;
+    isolation: isolate;
+    width: 160px;
+    min-width: 160px;
+    height: auto;
+    flex: none;
+    flex-shrink: 0;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    background: #FFFFFF;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.recommended-product-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.recommended-product-image {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    flex: none;
+    order: 0;
+    flex-grow: 0;
+    z-index: 0;
+}
+
+/* Price Overlay - positioned at bottom of image */
+.recommended-price-overlay {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 8px;
+    position: absolute;
+    width: 100%;
+    left: 0;
+    bottom: 0;
+    background: rgba(59, 59, 59, 0.65);
+    backdrop-filter: blur(4px);
+    z-index: 3;
+}
+
+/* Base Price (crossed out) */
+.recommended-base-price {
+    font-family: 'Poppins', sans-serif;
+    font-style: normal;
+    font-weight: 300;
+    font-size: 11px;
+    line-height: 1.4;
+    text-align: center;
+    text-decoration-line: line-through;
+    color: #ffffff;
+    margin-bottom: 2px;
+}
+
+/* Sale Price */
+.recommended-sale-price {
+    font-family: 'Poppins', sans-serif;
+    font-style: normal;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 1.3;
+    text-align: center;
+    color: #FFFFFF;
+}
+
+/* Product Name */
+.recommended-product-name {
+    width: 100%;
+    height: auto;
+    padding: 10px 8px 8px 8px;
+    font-family: 'Poppins', sans-serif;
+    font-style: normal;
+    font-weight: 600;
+    font-size: 11px;
+    text-align: center;
+    text-transform: uppercase;
+    color: #1a1a1a;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+}
+
+/* Add to Cart Button */
+.recommended-add-btn {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    padding: 10px 16px;
+    width: 100%;
+    height: 38px;
+    border: 1px solid #000000;
+    background: #FFFFFF;
+    font-family: 'Poppins', sans-serif;
+    font-style: normal;
+    font-weight: 600;
+    font-size: 10px;
+    line-height: 1;
+    letter-spacing: 0.8px;
+    text-align: center;
+    text-transform: uppercase;
+    color: #1a1a1a;
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.recommended-add-btn:hover {
+    background-color: #1a1a1a;
+    color: #FFFFFF;
+    border-top-color: #1a1a1a;
+}
+
+.recommended-add-btn:active {
+    transform: scale(0.98);
+}
+
+@@media (max-width: 400px) {
+    .recommended-product-item {
+        width: 140px;
+        min-width: 140px;
+    }
+
+    .recommended-product-image {
+        height: 140px;
+    }
+
+    .recommended-product-name {
+        font-size: 10px;
+        padding: 8px 6px 6px 6px;
+        min-height: 40px;
+    }
+
+    .recommended-add-btn {
+        font-size: 9px;
+        padding: 9px 12px;
+    }
+}
+
 </style>
