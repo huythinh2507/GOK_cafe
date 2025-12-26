@@ -53,11 +53,6 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6 mb-12">
                 @foreach (var blog in blogs)
                 {
-                                        <script>
-                        console.log(@Html.Raw(
-                            System.Text.Json.JsonSerializer.Serialize(blogs)
-                        ));
-                    </script>
                     var blogUrl = $"/blog-details?id={blog.Id}";
                     var blogDate = blog.PublishedDate.ToString("MMM dd, yyyy");
 
@@ -195,6 +190,29 @@
 </section>
 
 <script>
+    // Console log all blog data for testing
+    console.log('=== BLOG DATA ===');
+    console.log('Total blogs:', @blogs.Count());
+    console.log('Current page:', @currentPage);
+    console.log('Total pages:', @totalPages);
+
+    // Log each blog separately with detailed info
+    const blogs = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(blogs, new System.Text.Json.JsonSerializerOptions { WriteIndented = true }));
+
+    console.log('Blog items:', blogs);
+
+    // Log first blog in detail
+    if (blogs.length > 0) {
+        console.log('\n=== FIRST BLOG DETAIL ===');
+        console.log('ID:', blogs[0].Id);
+        console.log('Title:', blogs[0].Title);
+        console.log('Content (first 500 chars):', blogs[0].Content?.substring(0, 500));
+        console.log('Content length:', blogs[0].Content?.length);
+        console.log('Tags:', blogs[0].Tags);
+        console.log('Tags Count:', blogs[0].Tags?.length || 0);
+    }
+    console.log('==================');
+
     // Search functionality
     document.addEventListener('DOMContentLoaded', function() {
         const searchInput = document.getElementById('blogSearchInput');
