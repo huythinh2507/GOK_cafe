@@ -90,6 +90,11 @@ public class Coupon : BaseEntity
     /// </summary>
     public bool IsUsed { get; set; }
 
+    /// <summary>
+    /// Image URL for the coupon visual representation
+    /// </summary>
+    public string? ImageUrl { get; set; }
+
     // Navigation properties
     public User? User { get; set; }
     public ICollection<CouponUsage> CouponUsages { get; set; } = new List<CouponUsage>();

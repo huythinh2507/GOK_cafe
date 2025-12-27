@@ -63,7 +63,8 @@ public class CouponService : ICouponService
                 EndDate = dto.EndDate,
                 MaxUsageCount = dto.MaxUsageCount,
                 UsageCount = 0,
-                IsUsed = false
+                IsUsed = false,
+                ImageUrl = dto.ImageUrl
             };
 
             await _unitOfWork.Coupons.AddAsync(coupon);
@@ -429,7 +430,8 @@ public class CouponService : ICouponService
             EndDate = coupon.EndDate,
             MaxUsageCount = coupon.MaxUsageCount,
             UsageCount = coupon.UsageCount,
-            IsUsed = coupon.IsUsed
+            IsUsed = coupon.IsUsed,
+            ImageUrl = coupon.ImageUrl
         };
     }
 }
