@@ -354,6 +354,18 @@ window.openCartSidebar = function() {
     // Prevent body scroll when sidebar is open
     document.body.style.overflow = 'hidden';
 
+    // Clear voucher selection when opening cart (don't auto-select)
+    currentDiscount.voucherId = null;
+    currentDiscount.voucherDiscount = 0;
+    currentDiscount.voucherType = null;
+    saveDiscount();
+
+    // Clear voucher input field
+    const voucherInput = document.getElementById('voucherCodeInput');
+    if (voucherInput) {
+        voucherInput.value = '';
+    }
+
     // Render cart items
     renderCartSidebar();
 
@@ -448,8 +460,8 @@ function renderCartSidebar() {
     // Update total with shipping and discount
     updateCartTotal();
 
-    // Render special price products (mock data for now)
-    renderSpecialPriceProducts();
+    // Update voucher eligibility based on new subtotal
+    updateVoucherEligibility();
 }
 
 function createCartItemElement(item) {
@@ -502,16 +514,16 @@ function createCartItemElement(item) {
         // Build HTML with original price (strikethrough) and discount price
         priceElement.innerHTML = `
             <div class="flex flex-col items-end gap-1">
-            <span class="font-semibold text-primary text-sm">${discountItemPrice}</span>
+            <span class="font-semibold text-sm text-gray-900">${discountItemPrice}</span>
                 <div class="flex items-center gap-2">
-                    <span class="text-gray-400 line-through text-xs">${originalItemPrice}</span>
+                    <span class="text-gray-500 line-through text-xs">${originalItemPrice}</span>
                 </div>
             </div>
         `;
     } else {
-        // No discount - display regular price without rounding
+        // No discount - display regular price with 2 decimal places
         const priceNum = Number.parseFloat(item.price) || 0;
-        const itemPrice = priceNum * item.quantity;
+        const itemPrice = (priceNum * item.quantity).toFixed(2);
         priceElement.textContent = itemPrice;
     }
 
@@ -559,7 +571,7 @@ function createCartItemElement(item) {
 }
 
 function formatPrice(price) {
-    return price;
+    return Number.parseFloat(price).toFixed(2);
 }
 
 // ========================================
@@ -656,81 +668,6 @@ function getSelectedCartTotal() {
     });
 
     return selectedTotal;
-}
-
-// ========================================
-// Special Price Products Rendering
-// ========================================
-function renderSpecialPriceProducts() {
-    const container = document.getElementById('specialPriceProducts');
-    if (!container) return;
-
-    // Clear existing items
-    container.innerHTML = '';
-
-    // Mock data for special price products (replace with real data later)
-    const specialProducts = [
-        {
-            id: '101',
-            name: '75g Amruthavanam',
-            price: 149,
-            imageUrl: '/media/special1.jpg'
-        },
-        {
-            id: '102',
-            name: '75g Kalledevara',
-            price: 149,
-            imageUrl: '/media/special2.jpg'
-        },
-        {
-            id: '103',
-            name: '75g St. Joseph',
-            price: 149,
-            imageUrl: '/media/special3.jpg'
-        }
-    ];
-
-    specialProducts.forEach(product => {
-        const productElement = createSpecialPriceElement(product);
-        container.appendChild(productElement);
-    });
-}
-
-function createSpecialPriceElement(product) {
-    const template = document.getElementById('specialPriceTemplate');
-    const clone = template.content.cloneNode(true);
-
-    // Set image
-    const img = clone.querySelector('.special-product-image');
-    img.src = product.imageUrl;
-    img.alt = product.name;
-
-    // Set name
-    const name = clone.querySelector('.special-product-name');
-    name.textContent = product.name;
-
-    // Set price
-    const price = clone.querySelector('.special-product-price');
-    price.textContent = `₹${product.price}`;
-
-    // Add click handler for add button
-    const addBtn = clone.querySelector('.special-add-btn');
-    addBtn.addEventListener('click', () => {
-        // Add to cart logic
-        cart.addItem(product.id, 1);
-        renderCartSidebar();
-        showNotificationMessage(`${product.name} added to cart!`, 'success');
-    });
-
-    return clone;
-}
-
-function showNotificationMessage(message, type = 'info') {
-    if (cart && cart.showNotification) {
-        cart.showNotification(message, type);
-    } else {
-        console.log(message);
-    }
 }
 
 // ========================================
@@ -863,33 +800,44 @@ function createRecommendedProductElement(product) {
             window.location.href = `/product-details?id=${product.id}`;
         });
 
-        // Click on "Add to Cart" button to add product directly via API
+        // Click on "Add to Cart" button to add product directly
         addBtn.addEventListener('click', async function(e) {
             e.stopPropagation();
 
             try {
-                // Add to cart using API service
-                const result = await window.apiService.addToCart({
+                // Create cart item object
+                const cartItem = {
                     productId: product.id,
+                    name: product.name,
+                    imageUrl: product.imageUrl,
+                    price: product.price,
+                    discountPrice: product.discountPrice,
                     quantity: 1,
-                    flavourProfileIds: [],
-                    equipmentIds: []
-                });
+                    packaging: null,
+                    grind: null,
+                    addedAt: new Date().toISOString()
+                };
 
-                if (result.success) {
-                    // Show success notification
-                    cart.showNotification(`Added ${product.name} to cart!`, 'success');
+                // Add to localStorage cart first
+                cart.addItem(cartItem);
 
-                    // Reload cart items from server to reflect API changes
-                    if (typeof window.loadCartItems === 'function') {
-                        await window.loadCartItems();
+                // Also sync with API if available
+                if (window.apiService) {
+                    try {
+                        await window.apiService.addToCart({
+                            productId: product.id,
+                            quantity: 1,
+                            flavourProfileIds: [],
+                            equipmentIds: []
+                        });
+                    } catch (apiError) {
+                        console.warn('Failed to sync with API, but item added to local cart:', apiError);
                     }
-
-                    // Update cart UI
-                    cart.updateCartUI();
-                } else {
-                    cart.showNotification(result.message || 'Failed to add to cart', 'error');
                 }
+
+                // Re-render cart sidebar to show new item
+                renderCartSidebar();
+
             } catch (error) {
                 console.error('Error adding to cart:', error);
                 cart.showNotification('Failed to add to cart. Please try again.', 'error');
@@ -986,11 +934,11 @@ window.openProductModal = async function(productId) {
         const priceElement = document.getElementById('modalProductPrice');
         if (currentProduct.discountPrice && currentProduct.discountPrice > 0 && currentProduct.discountPrice < currentProduct.price) {
             priceElement.innerHTML = `
-                <span class="text-gray-400 line-through text-xl mr-2">${currentProduct.price.toLocaleString('en-US')}</span>
-                <span class="text-primary">${currentProduct.discountPrice.toLocaleString('en-US')}</span>
+                <span class="text-gray-400 line-through text-xl mr-2">${Number.parseFloat(currentProduct.price).toFixed(2)}</span>
+                <span class="text-primary">${Number.parseFloat(currentProduct.discountPrice).toFixed(2)}</span>
             `;
         } else {
-            priceElement.textContent = currentProduct.price.toLocaleString('en-US');
+            priceElement.textContent = Number.parseFloat(currentProduct.price).toFixed(2);
         }
 
         // Set short description
@@ -1295,9 +1243,9 @@ let currentDiscount = loadDiscount();
 
 const SHIPPING_FEE = 150000; // Fixed shipping fee 30,000 VND
 
-// Format price in VND
+// Format price in VND with 2 decimal places
 function formatPriceVND(price) {
-    return price ;
+    return Number.parseFloat(price).toFixed(2);
 }
 
 // Get cart subtotal
@@ -1724,6 +1672,78 @@ async function validateVoucherWithAPI(couponCode, orderAmount) {
 }
 
 // ========================================
+// Voucher Eligibility Update
+// ========================================
+/**
+ * Update voucher eligibility based on current cart subtotal
+ * Called when cart items or quantities change
+ */
+function updateVoucherEligibility() {
+    const voucherCards = document.querySelectorAll('.voucher-card');
+    if (voucherCards.length === 0) return;
+
+    const currentSubtotal = getCartSubtotal();
+    voucherCards.forEach(card => updateSingleVoucherEligibility(card, currentSubtotal));
+}
+
+function updateSingleVoucherEligibility(card, currentSubtotal) {
+    const minOrderAmount = Number.parseFloat(card.dataset.minOrderAmount) || 0;
+    const isActive = card.dataset.isActive !== 'false';
+    const isExpired = card.dataset.isExpired === 'true';
+    const canBeUsed = card.dataset.canBeUsed !== 'false';
+
+    const meetsConditions = canBeUsed && isActive && !isExpired && currentSubtotal >= minOrderAmount;
+
+    if (meetsConditions) {
+        enableVoucherCard(card);
+    } else {
+        disableVoucherCard(card, { isActive, isExpired, minOrderAmount, currentSubtotal });
+    }
+}
+
+function enableVoucherCard(card) {
+    card.classList.remove('opacity-50');
+    card.removeAttribute('title');
+
+    const voucherTicket = card.querySelector('.voucher-ticket');
+    const radioBtn = card.querySelector('.voucher-radio');
+
+    if (voucherTicket) voucherTicket.style.pointerEvents = '';
+    if (radioBtn) {
+        radioBtn.disabled = false;
+        radioBtn.style.cursor = '';
+    }
+}
+
+function disableVoucherCard(card, { isActive, isExpired, minOrderAmount, currentSubtotal }) {
+    card.classList.add('opacity-50');
+
+    const voucherTicket = card.querySelector('.voucher-ticket');
+    const conditionBtn = card.querySelector('.voucher-condition-btn');
+    const radioBtn = card.querySelector('.voucher-radio');
+
+    if (voucherTicket) voucherTicket.style.pointerEvents = 'none';
+    if (conditionBtn) {
+        conditionBtn.style.pointerEvents = 'auto';
+        conditionBtn.style.cursor = 'pointer';
+    }
+    if (radioBtn) {
+        radioBtn.disabled = true;
+        radioBtn.style.cursor = 'not-allowed';
+    }
+
+    const tooltipText = getVoucherDisabledReason(isActive, isExpired, minOrderAmount, currentSubtotal);
+    card.setAttribute('title', tooltipText);
+}
+
+function getVoucherDisabledReason(isActive, isExpired, minOrderAmount, currentSubtotal) {
+    if (!isActive) return 'Voucher không khả dụng';
+    if (isExpired) return 'Voucher đã hết hạn';
+    if (currentSubtotal < minOrderAmount) return `Đơn hàng cần tối thiểu ${formatPriceVND(minOrderAmount)}`;
+    return 'Voucher không thể sử dụng';
+}
+
+// ========================================
 // Voucher Loading & Management
 // ========================================
 async function loadVouchers() {
@@ -1796,17 +1816,13 @@ async function loadVouchers() {
             card.dataset.startDate = voucher.startDate || '';
             card.dataset.endDate = voucher.endDate || '';
 
-            // Check if previously selected
-            if (currentDiscount.voucherId === voucher.id) {
-                card.classList.add('selected');
-                card.querySelector('.voucher-radio').checked = true;
+            // Store eligibility flags for dynamic updates
+            card.dataset.canBeUsed = voucher.canBeUsed;
+            card.dataset.isActive = voucher.isActive;
+            card.dataset.isExpired = voucher.isExpired;
 
-                // Update input field
-                const voucherInput = document.getElementById('voucherCodeInput');
-                if (voucherInput) {
-                    voucherInput.value = voucher.code;
-                }
-            }
+            // Don't auto-select vouchers on load - user must manually select
+            // This section is intentionally commented out to prevent auto-selection
 
             // Check if voucher can be used
             const canBeUsed = voucher.canBeUsed &&
@@ -1814,9 +1830,29 @@ async function loadVouchers() {
                              !voucher.isExpired &&
                              currentSubtotal >= voucher.minOrderAmount;
 
-            // Disable if not eligible
+            // Disable if not eligible - but still allow clicking "Condition" button
             if (!canBeUsed) {
-                card.classList.add('opacity-50', 'pointer-events-none');
+                card.classList.add('opacity-50');
+
+                // Disable click on the card itself (not the condition button)
+                const voucherTicket = card.querySelector('.voucher-ticket');
+                if (voucherTicket) {
+                    voucherTicket.style.pointerEvents = 'none';
+                }
+
+                // Re-enable pointer events for the Condition button specifically
+                const conditionBtn = card.querySelector('.voucher-condition-btn');
+                if (conditionBtn) {
+                    conditionBtn.style.pointerEvents = 'auto';
+                    conditionBtn.style.cursor = 'pointer';
+                }
+
+                // Ensure radio button is also disabled
+                const radioBtn = card.querySelector('.voucher-radio');
+                if (radioBtn) {
+                    radioBtn.disabled = true;
+                    radioBtn.style.cursor = 'not-allowed';
+                }
 
                 let tooltipText = '';
                 if (!voucher.isActive) {
@@ -1929,7 +1965,6 @@ function attachVoucherConditionListeners() {
 
             const card = conditionBtn.closest('.voucher-card');
             if (card) {
-                console.log('Opening voucher condition modal for:', card.getAttribute('data-voucher-code'));
                 openVoucherConditionModal(card);
             }
         }
@@ -1948,8 +1983,6 @@ function openVoucherConditionModal(voucherCard) {
         console.error('Voucher condition modal not found in DOM');
         return;
     }
-
-    console.log('Opening modal for voucher card:', voucherCard);
 
     // Close cart sidebar first
     const cartSidebar = document.getElementById('cartSidebar');
