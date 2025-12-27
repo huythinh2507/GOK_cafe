@@ -1,0 +1,310 @@
+@using GOKCafe.Web.Models.DTOs
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@model Guid
+@{
+    // Get productId from Model or ViewData
+    var productId = Model != Guid.Empty ? Model : (Guid?)ViewData["ProductId"] ?? Guid.Empty;
+
+    // Get current page URL for form action - use the actual request path
+    var currentPageUrl = HttpContextAccessor.HttpContext?.Request.Path.Value ?? "/";
+
+    // Get the ID query parameter if it exists
+    var productIdParam = HttpContextAccessor.HttpContext?.Request.Query["id"].ToString();
+
+    // Get comments and summary from ViewData (passed from controller)
+    var paginatedComments = ViewData["ProductComments"] as PaginatedResponse<ProductCommentDto>;
+    var comments = paginatedComments?.Items ?? new List<ProductCommentDto>();
+    var totalPages = paginatedComments?.TotalPages ?? 1;
+    var currentPage = paginatedComments?.PageNumber ?? 1;
+    var totalComments = paginatedComments?.TotalItems ?? 0;
+
+    var summary = ViewData["CommentSummary"] as ProductCommentSummaryDto;
+    var averageRating = summary?.AverageRating ?? 0.0;
+    var ratingDistribution = summary?.RatingDistribution ?? new Dictionary<int, int>();
+
+    // Get filter state from ViewData
+    var selectedRatings = ViewData["SelectedRatings"] as List<int> ?? new List<int>();
+    var searchTerm = ViewData["SearchTerm"] as string ?? string.Empty;
+
+    // Helper function to build filter URL
+    string BuildFilterUrl(Dictionary<string, string> additionalParams = null)
+    {
+        var queryParams = new List<string>();
+
+        // Preserve product ID if it exists
+        if (!string.IsNullOrEmpty(productIdParam))
+        {
+            queryParams.Add($"id={productIdParam}");
+        }
+
+        foreach (var rating in selectedRatings)
+        {
+            queryParams.Add($"ratings={rating}");
+        }
+
+        if (!string.IsNullOrEmpty(searchTerm))
+        {
+            queryParams.Add($"search={System.Web.HttpUtility.UrlEncode(searchTerm)}");
+        }
+
+        if (additionalParams != null)
+        {
+            foreach (var param in additionalParams)
+            {
+                queryParams.Add($"{param.Key}={param.Value}");
+            }
+        }
+
+        var queryString = queryParams.Any() ? "?" + string.Join("&", queryParams) : "";
+        return currentPageUrl + queryString;
+    }
+}
+
+<!-- Product Rating and Reviews Section -->
+<section class="py-12 bg-gray-50">
+    <div class="max-w-screen-2xl mx-auto px-4">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <!-- Left Sidebar - Filters -->
+            <div class="lg:col-span-3">
+                <div class="bg-gray-50">
+                    <!-- Section Title -->
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6">RATING<br>PRODUCT</h2>
+
+                    <form method="get" id="comment-filter-form" action="@currentPageUrl">
+                        @* Preserve product ID if it exists as query parameter *@
+                        @if (!string.IsNullOrEmpty(productIdParam))
+                        {
+                            <input type="hidden" name="id" value="@productIdParam" />
+                        }
+
+                        <!-- Search Filter -->
+                        <div class="mb-8">
+                            <h3 class="text-sm font-medium text-gray-700 mb-3">Filter rating</h3>
+                            <div class="relative">
+                                <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none"
+                                    stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                </svg>
+                                <input type="text" name="search" value="@searchTerm" placeholder="Search for comments"
+                                    class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                    onchange="this.form.submit()">
+                            </div>
+                        </div>
+
+                        <!-- Rating Filter -->
+                        <div class="mb-8">
+                            <h3 class="text-sm font-medium text-gray-700 mb-3">Rating levels</h3>
+                            <div class="space-y-2">
+                                @for (int i = 5; i >= 1; i--)
+                                {
+                                    <label class="flex items-center cursor-pointer hover:bg-gray-50 p-2 rounded">
+                                        <input type="checkbox" name="ratings" value="@i"
+                                            @(selectedRatings.Contains(i) ? "checked" : "")
+                                            class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
+                                            onchange="this.form.submit()">
+                                        <span class="ml-2 text-sm text-gray-700">@i</span>
+                                        <div class="flex ml-2">
+                                            @for (int j = 0; j < 5; j++)
+                                            {
+                                                if (j < i)
+                                                {
+                                                    <svg class="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
+                                                        <path
+                                                            d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
+                                                    </svg>
+                                                }
+                                                else
+                                                {
+                                                    <svg class="w-4 h-4 text-gray-300 fill-current" viewBox="0 0 20 20">
+                                                        <path
+                                                            d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
+                                                    </svg>
+                                                }
+                                            }
+                                        </div>
+                                    </label>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Additional Filters -->
+                        <div>
+                            <div class="mb-3">
+                                <div class="flex items-center font-semibold text-sm text-primary">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    The first reviews from customers who have actually purchased from GOK.
+                                </div>
+                            </div>
+                            <h3 class="text-sm font-medium text-gray-700 mb-3">Filter feedback</h3>
+                            <div class="space-y-2">
+                                <label class="flex items-center cursor-pointer hover:bg-gray-50 p-2 rounded">
+                                    <input type="checkbox" name="hasReplies" value="true"
+                                        class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
+                                        onchange="this.form.submit()">
+                                    <span class="ml-2 text-sm text-gray-700">Has replies</span>
+                                </label>
+                                <label class="flex items-center cursor-pointer hover:bg-gray-50 p-2 rounded">
+                                    <input type="checkbox" name="hasImages" value="true"
+                                        class="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
+                                        onchange="this.form.submit()">
+                                    <span class="ml-2 text-sm text-gray-700">Has images</span>
+                                </label>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Center - Reviews List -->
+            <div class="lg:col-span-9">
+                <!-- Overall Rating and Sorting Row -->
+                <div class="mb-8 flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+                    <!-- Overall Rating -->
+                    <div>
+                        <div class="flex items-center mb-2">
+                            <span class="text-6xl font-bold text-gray-900 mr-4">@averageRating.ToString("0.0")</span>
+                            <div class="flex">
+                                @for (int i = 0; i < 5; i++)
+                                {
+                                    <svg class="w-12 h-12 text-yellow-400 fill-current" viewBox="0 0 20 20">
+                                        <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
+                                    </svg>
+                                }
+                            </div>
+                        </div>
+                        <p class="text-gray-600">
+                            @if (totalComments > 0)
+                            {
+                                @($"Based on {totalComments} {(totalComments == 1 ? "review" : "reviews")} from customers")
+                            }
+                            else
+                            {
+                                @("No reviews from customers yet")
+                            }
+                        </p>
+                    </div>
+
+                    <!-- Sorting Dropdown -->
+                    <div class="lg:min-w-[200px]">
+                        <select
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <option>Sort by</option>
+                            <option>Newest</option>
+                            <option>Oldest</option>
+                            <option>Highest rating</option>
+                            <option>Lowest rating</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Filter Display -->
+                <div class="mb-4">
+                    <p class="text-sm text-gray-600">
+                        @if (totalComments > 0)
+                        {
+                            var startIndex = ((currentPage - 1) * 5) + 1;
+                            var endIndex = Math.Min(currentPage * 5, totalComments);
+                            @($"Show reviews from {startIndex}-{endIndex}")
+                        }
+                        else
+                        {
+                            @("No reviews yet")
+                        }
+                    </p>
+                </div>
+
+                <!-- Reviews -->
+                <div class="space-y-6">
+                    @if (comments.Any())
+                    {
+                        @foreach (var comment in comments)
+                        {
+                            <div class="bg-white p-6 rounded-lg shadow-sm">
+                                <div class="flex items-start justify-between mb-3">
+                                    <div>
+                                        <div class="flex items-center gap-2 mb-1">
+                                            <h4 class="font-semibold text-gray-900">@comment.UserName</h4>
+                                            <span class="text-sm text-gray-500">@comment.CreatedAt.ToString("dd/MM/yyyy")</span>
+                                        </div>
+                                        @if (comment.Rating > 0)
+                                        {
+                                            <div class="flex mb-2">
+                                                @for (int i = 0; i < 5; i++)
+                                                {
+                                                    var starClass = i < comment.Rating ? "text-yellow-400" : "text-gray-300";
+                                                    <svg class="w-5 h-5 @starClass fill-current" viewBox="0 0 20 20">
+                                                        <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
+                                                    </svg>
+                                                }
+                                            </div>
+                                        }
+                                    </div>
+                                    @if (comment.IsApproved)
+                                    {
+                                        <div class="flex items-center gap-1 px-3 py-1 bg-green-50 border border-green-200 rounded-full">
+                                            <svg class="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                            </svg>
+                                            <span class="text-xs font-medium text-green-700">Verified Purchase</span>
+                                        </div>
+                                    }
+                                </div>
+                                <div>
+                                    <p class="text-gray-700">@comment.Comment</p>
+                                </div>
+
+                                @* Display Replies *@
+                                @if (comment.Replies != null && comment.Replies.Any())
+                                {
+                                    <div class="mt-4 pt-4 border-t border-gray-200">
+                                        <details class="group">
+                                            <summary class="flex items-center gap-2 text-primary text-sm font-medium cursor-pointer hover:underline list-none">
+                                                <svg class="w-4 h-4 transition-transform duration-200 group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                                </svg>
+                                                <span>@(comment.Replies.Count) @(comment.Replies.Count == 1 ? "reply" : "replies")</span>
+                                            </summary>
+                                            <div class="mt-4 ml-6 space-y-3">
+                                                @foreach (var reply in comment.Replies)
+                                                {
+                                                    <div class="bg-gray-50 p-4 rounded-lg border-l-4 border-primary">
+                                                        <div class="flex items-center gap-2 mb-2">
+                                                            <h5 class="font-semibold text-gray-800 text-sm">@reply.UserName</h5>
+                                                            <span class="text-xs text-gray-500">@reply.CreatedAt.ToString("dd/MM/yyyy")</span>
+                                                        </div>
+                                                        <p class="text-sm text-gray-700 leading-relaxed">@reply.Comment</p>
+                                                    </div>
+                                                }
+                                            </div>
+                                        </details>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-center text-gray-600 py-12">No reviews yet. Be the first to review!</p>
+                    }
+                </div>
+
+                <!-- Pagination -->
+                @if (totalPages > 1)
+                {
+                    <div class="mt-8 text-center">
+                        @if (currentPage < totalPages)
+                        {
+                            <a href="@BuildFilterUrl(new Dictionary<string, string> { { "page", (currentPage + 1).ToString() } })"
+                               class="px-8 py-3 border-2 border-primary text-primary font-semibold hover:bg-primary hover:text-white transition-all duration-300 inline-block">
+                                See more reviews
+                            </a>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</section>

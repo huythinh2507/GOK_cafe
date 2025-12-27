@@ -66,6 +66,8 @@ else
 
 @await Html.PartialAsync("~/Views/Partials/ProductDetail/_RecommendProduct.cshtml", relatedProducts)
 
+@await Html.PartialAsync("~/Views/Partials/ProductDetail/_RatingAndCommentProduct.cshtml", product.Id);
+
 @* Products Banner Carousel *@
 @await Html.PartialAsync("~/Views/Partials/Products/ProductsBanner.cshtml", Model)
 

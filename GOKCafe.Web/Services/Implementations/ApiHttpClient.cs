@@ -238,5 +238,104 @@ namespace GOKCafe.Web.Services.Implementations
                 };
             }
         }
+
+        public async Task<ApiResponse<PaginatedResponse<ProductCommentDto>>> GetProductCommentsAsync(
+            Guid productId,
+            ProductCommentFilterDto filter)
+        {
+            try
+            {
+                var queryParams = new List<string>
+                {
+                    $"pageNumber={filter.PageNumber}",
+                    $"pageSize={filter.PageSize}"
+                };
+
+                if (filter.IsApproved.HasValue)
+                    queryParams.Add($"isApproved={filter.IsApproved.Value}");
+
+                if (filter.Ratings != null && filter.Ratings.Any())
+                {
+                    foreach (var rating in filter.Ratings)
+                        queryParams.Add($"ratings={rating}");
+                }
+
+                if (filter.HasReplies.HasValue)
+                    queryParams.Add($"hasReplies={filter.HasReplies.Value}");
+
+                if (filter.HasImages.HasValue)
+                    queryParams.Add($"hasImages={filter.HasImages.Value}");
+
+                if (!string.IsNullOrWhiteSpace(filter.Search))
+                    queryParams.Add($"search={Uri.EscapeDataString(filter.Search)}");
+
+                var query = string.Join("&", queryParams);
+                var response = await _httpClient.GetAsync($"/api/v1/products/{productId}/comments?{query}");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogError("API returned {StatusCode} when fetching product comments", response.StatusCode);
+                    return new ApiResponse<PaginatedResponse<ProductCommentDto>>
+                    {
+                        Success = false,
+                        Message = $"API error: {response.StatusCode}"
+                    };
+                }
+
+                var content = await response.Content.ReadAsStringAsync();
+                var result = JsonSerializer.Deserialize<ApiResponse<PaginatedResponse<ProductCommentDto>>>(content, _jsonOptions);
+
+                return result ?? new ApiResponse<PaginatedResponse<ProductCommentDto>>
+                {
+                    Success = false,
+                    Message = "Failed to deserialize response"
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching product comments from API for product {ProductId}", productId);
+                return new ApiResponse<PaginatedResponse<ProductCommentDto>>
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
+        public async Task<ApiResponse<ProductCommentSummaryDto>> GetProductCommentSummaryAsync(Guid productId)
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync($"/api/v1/products/{productId}/comments/summary");
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogError("API returned {StatusCode} when fetching comment summary", response.StatusCode);
+                    return new ApiResponse<ProductCommentSummaryDto>
+                    {
+                        Success = false,
+                        Message = $"API error: {response.StatusCode}"
+                    };
+                }
+
+                var content = await response.Content.ReadAsStringAsync();
+                var result = JsonSerializer.Deserialize<ApiResponse<ProductCommentSummaryDto>>(content, _jsonOptions);
+
+                return result ?? new ApiResponse<ProductCommentSummaryDto>
+                {
+                    Success = false,
+                    Message = "Failed to deserialize response"
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching comment summary from API for product {ProductId}", productId);
+                return new ApiResponse<ProductCommentSummaryDto>
+                {
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
     }
 }

@@ -7,9 +7,7 @@ public interface IProductCommentService
 {
     Task<ApiResponse<PaginatedResponse<ProductCommentDto>>> GetProductCommentsAsync(
         Guid productId,
-        int pageNumber = 1,
-        int pageSize = 10,
-        bool? isApproved = true);
+        ProductCommentFilterDto filter);
 
     Task<ApiResponse<ProductCommentDto>> GetCommentByIdAsync(Guid id);
 

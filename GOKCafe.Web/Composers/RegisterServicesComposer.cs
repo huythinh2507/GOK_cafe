@@ -12,6 +12,7 @@ using Umbraco.Cms.Core.Composing;
 using Umbraco.Cms.Core.DependencyInjection;
 using WebProductService = GOKCafe.Web.Services.Interfaces.IProductService;
 using WebCategoryService = GOKCafe.Web.Services.Interfaces.ICategoryService;
+using WebProductCommentService = GOKCafe.Web.Services.Interfaces.IProductCommentService;
 using AppProductService = GOKCafe.Application.Services.Interfaces.IProductService;
 using AppCategoryService = GOKCafe.Application.Services.Interfaces.ICategoryService;
 using AppCouponService = GOKCafe.Application.Services.Interfaces.ICouponService;
@@ -76,6 +77,7 @@ namespace GOKCafe.Web.Composers
             // Register Web layer services (Umbraco-specific)
             builder.Services.AddScoped<WebProductService, GOKCafe.Web.Services.Implementations.ProductService>();
             builder.Services.AddScoped<WebCategoryService, GOKCafe.Web.Services.Implementations.CategoryService>();
+            builder.Services.AddScoped<WebProductCommentService, GOKCafe.Web.Services.Implementations.ProductCommentService>();
             builder.Services.AddScoped<GOKCafe.Web.Services.Interfaces.IBreadcrumbService, BreadcrumbService>();
 
             // Register Umbraco Blog Sync Service

@@ -22,23 +22,19 @@ public class ProductCommentsController : ControllerBase
     }
 
     /// <summary>
-    /// Get all comments for a product with pagination
+    /// Get all comments for a product with pagination and filtering
     /// </summary>
     /// <param name="productId">The unique identifier of the product</param>
-    /// <param name="pageNumber">The page number for pagination (default: 1)</param>
-    /// <param name="pageSize">The number of items per page (default: 10)</param>
-    /// <param name="isApproved">Filter by approval status (default: true - approved comments only)</param>
+    /// <param name="filter">Filter and pagination parameters</param>
     /// <returns>A paginated list of comments for the product</returns>
     [HttpGet]
     [ProducesResponseType<ApiResponse<PaginatedResponse<ProductCommentDto>>>(StatusCodes.Status200OK)]
     [ProducesResponseType<ApiResponse<PaginatedResponse<ProductCommentDto>>>(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetProductComments(
         Guid productId,
-        [FromQuery] int pageNumber = 1,
-        [FromQuery] int pageSize = 10,
-        [FromQuery] bool? isApproved = true)
+        [FromQuery] ProductCommentFilterDto filter)
     {
-        var result = await _commentService.GetProductCommentsAsync(productId, pageNumber, pageSize, isApproved);
+        var result = await _commentService.GetProductCommentsAsync(productId, filter);
         return result.Success ? Ok(result) : BadRequest(result);
     }
 
