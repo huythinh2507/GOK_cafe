@@ -1,5 +1,6 @@
 using GOKCafe.Web.Models.ViewModels;
 using GOKCafe.Web.Services.Interfaces;
+using GOKCafe.Web.Models.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewEngines;
 using Umbraco.Cms.Core.Web;
@@ -12,6 +13,8 @@ namespace GOKCafe.Web.Controllers
         private readonly IProductService _productService;
         private readonly ICategoryService _categoryService;
         private readonly Services.Interfaces.IBreadcrumbService _breadcrumbService;
+        private readonly IProductCommentService _commentService;
+        private readonly ILogger<ProductDetailController> _logger;
 
         public ProductDetailController(
             ILogger<ProductDetailController> logger,
@@ -19,12 +22,15 @@ namespace GOKCafe.Web.Controllers
             IUmbracoContextAccessor umbracoContextAccessor,
             IProductService productService,
             ICategoryService categoryService,
-            Services.Interfaces.IBreadcrumbService breadcrumbService)
+            Services.Interfaces.IBreadcrumbService breadcrumbService,
+            IProductCommentService commentService)
             : base(logger, compositeViewEngine, umbracoContextAccessor)
         {
             _productService = productService;
             _categoryService = categoryService;
             _breadcrumbService = breadcrumbService;
+            _commentService = commentService;
+            _logger = logger;
         }
 
         public override IActionResult Index()
@@ -143,8 +149,73 @@ namespace GOKCafe.Web.Controllers
 
             ViewData["ProductDetailViewModel"] = viewModel;
 
+            // Load product comments
+            LoadProductComments(product.Id);
+
             // Return CurrentTemplate with the current page model, not our custom viewModel
             return CurrentTemplate(CurrentPage);
+        }
+
+        private void LoadProductComments(Guid productId)
+        {
+            try
+            {
+                // Get query parameters for filtering
+                var pageNumber = int.TryParse(Request.Query["page"], out var page) ? page : 1;
+                var pageSize = 5;
+                var ratings = Request.Query["ratings"].Where(x => x != null).Select(x => int.Parse(x!)).ToList();
+                var hasReplies = Request.Query["hasReplies"].ToString() == "true" ? (bool?)true : null;
+                var hasImages = Request.Query["hasImages"].ToString() == "true" ? (bool?)true : null;
+                var search = Request.Query["search"].ToString();
+
+                var filter = new ProductCommentFilterDto
+                {
+                    PageNumber = pageNumber,
+                    PageSize = pageSize,
+                    IsApproved = true,
+                    Ratings = ratings.Any() ? ratings : null,
+                    HasReplies = hasReplies,
+                    HasImages = hasImages,
+                    Search = string.IsNullOrWhiteSpace(search) ? null : search
+                };
+
+                // Fetch comments and summary in parallel
+                var commentsTask = _commentService.GetProductCommentsAsync(productId, filter);
+                var summaryTask = _commentService.GetProductCommentSummaryAsync(productId);
+
+                Task.WaitAll(commentsTask, summaryTask);
+
+                var comments = commentsTask.Result;
+                var summary = summaryTask.Result;
+
+                // Pass data to view via ViewData
+                ViewData["ProductComments"] = comments;
+                ViewData["CommentSummary"] = summary;
+                ViewData["SelectedRatings"] = ratings;
+                ViewData["SearchTerm"] = search;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading product comments for product {ProductId}", productId);
+
+                // Provide empty data so page doesn't crash
+                ViewData["ProductComments"] = new PaginatedResponse<ProductCommentDto>
+                {
+                    Items = new List<ProductCommentDto>(),
+                    PageNumber = 1,
+                    PageSize = 5,
+                    TotalItems = 0,
+                    TotalPages = 0
+                };
+                ViewData["CommentSummary"] = new ProductCommentSummaryDto
+                {
+                    TotalComments = 0,
+                    AverageRating = 0,
+                    RatingDistribution = new Dictionary<int, int>()
+                };
+                ViewData["SelectedRatings"] = new List<int>();
+                ViewData["SearchTerm"] = string.Empty;
+            }
         }
     }
 }

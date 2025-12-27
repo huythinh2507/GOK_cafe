@@ -71,12 +71,14 @@ builder.Services.AddScoped<ICouponService, CouponService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<ILoyaltyPlatformService, LoyaltyPlatformService>();
 builder.Services.AddScoped<IProductCommentService, ProductCommentService>();
+
+builder.Services.AddScoped<IBlogService, BlogService>();
 builder.Services.AddScoped<IBlogCategoryService, BlogCategoryService>();
 builder.Services.AddScoped<IBlogCommentService, BlogCommentService>();
-builder.Services.AddScoped<IBlogService, BlogService>();
 builder.Services.AddScoped<IContactService, ContactService>();
 builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<IPartnerService, PartnerService>();
+
 // Register HttpClient for external API calls
 builder.Services.AddHttpClient();
 
@@ -149,6 +151,9 @@ builder.Services.AddSwaggerGen(options =>
         options.IncludeXmlComments(apiXmlPath);
     }
 });
+
+// Add HttpContextAccessor for views
+builder.Services.AddHttpContextAccessor();
 
 // Add API Controllers support (for Web API endpoints like ProductApiController)
 // Include controllers from GOKCafe.API and GOKCafe.Web assemblies, exclude Gotik.Commerce

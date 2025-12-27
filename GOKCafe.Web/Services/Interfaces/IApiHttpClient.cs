@@ -21,5 +21,12 @@ namespace GOKCafe.Web.Services.Interfaces
         Task<ApiResponse<List<CategoryDto>>> GetCategoriesAsync();
 
         Task<ApiResponse<CategoryDto>> GetCategoryByIdAsync(Guid id);
+
+        // Product Comments
+        Task<ApiResponse<PaginatedResponse<ProductCommentDto>>> GetProductCommentsAsync(
+            Guid productId,
+            ProductCommentFilterDto filter);
+
+        Task<ApiResponse<ProductCommentSummaryDto>> GetProductCommentSummaryAsync(Guid productId);
     }
 }

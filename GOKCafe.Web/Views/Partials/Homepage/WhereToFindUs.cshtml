@@ -8,7 +8,7 @@
     var email = "hello@gok.com";
     var time = "7:00 - 22:30 (Monday - Sunday)";
     var buttonText = "View Map";
-    var buttonUrl = "/vision";
+    var buttonUrl = "https://www.google.com/maps/place/M%E1%BA%A7m+non+hoa+%C4%91%C4%83ng/@10.8704345,106.6867803,17z/data=!3m1!4b1!4m6!3m5!1s0x317529f491ee0b2d:0xe406f8b38a5dd0a8!8m2!3d10.8704345!4d106.6867803!16s%2Fg%2F11m7pnkr40?entry=ttu&g_ep=EgoyMDI1MTIwOS4wIKXMDSoKLDEwMDc5MjA2OUgBUAM%3D";
     var image = "/media/image/Wheretofindus.png"; // Default location image
 
     // Get Where To Find Us section from Home children
@@ -118,7 +118,7 @@
                 </div>
 
                 <!-- View Map Button -->
-                <a href="@buttonUrl"
+                <a href="@buttonUrl" target="_blank" rel="noopener noreferrer"
                     class="inline-block px-8 py-3 border-2 border-primary text-primary font-semibold hover:bg-primary hover:text-white transition-all duration-300">
                     @buttonText
                 </a>
