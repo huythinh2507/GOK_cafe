@@ -71,6 +71,7 @@ builder.Services.AddScoped<ICouponService, CouponService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<ILoyaltyPlatformService, LoyaltyPlatformService>();
 builder.Services.AddScoped<IProductCommentService, ProductCommentService>();
+
 builder.Services.AddScoped<IBlogService, BlogService>();
 builder.Services.AddScoped<IBlogCategoryService, BlogCategoryService>();
 builder.Services.AddScoped<IBlogCommentService, BlogCommentService>();
