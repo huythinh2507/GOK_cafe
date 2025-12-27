@@ -131,7 +131,36 @@ public class UmbracoSyncService : IUmbracoSyncService
         // Extract data from Umbraco
         var title = blogItem.Value<string>("title") ?? blogItem.Name;
         var slug = blogItem.UrlSegment;
-        var content = blogItem.Value<string>("content") ?? string.Empty;
+
+        // Handle content - support both string and BlockGridModel
+        string content = string.Empty;
+        var contentValue = blogItem.Value("content");
+
+        if (contentValue is string strContent)
+        {
+            content = strContent;
+        }
+        else if (contentValue is Umbraco.Cms.Core.Models.Blocks.BlockGridModel blockGrid)
+        {
+            // Convert BlockGrid to HTML string
+            var htmlParts = new List<string>();
+            foreach (var item in blockGrid)
+            {
+                // Try to get the "content" property from each Rich Text Block
+                var blockContent = item.Content.Value<string>("content");
+                if (!string.IsNullOrWhiteSpace(blockContent))
+                {
+                    htmlParts.Add(blockContent);
+                }
+            }
+            content = string.Join("", htmlParts);
+        }
+        else if (contentValue != null)
+        {
+            // Fallback: try to convert to string
+            content = contentValue.ToString() ?? string.Empty;
+        }
+
         var excerpt = blogItem.Value<string>("excerpt") ?? string.Empty;
         var featuredImage = blogItem.Value<string>("featuredImage") ?? string.Empty;
         var publishDate = blogItem.Value<DateTime?>("publishDate") ?? blogItem.CreateDate;

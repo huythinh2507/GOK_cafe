@@ -23,6 +23,7 @@ public class CouponDto
     public int? MaxUsageCount { get; set; }
     public int UsageCount { get; set; }
     public bool IsUsed { get; set; }
+    public string? ImageUrl { get; set; }
     public bool IsExpired => DateTime.UtcNow > EndDate;
     public bool CanBeUsed => IsActive && !IsExpired && !IsUsed && (MaxUsageCount == null || UsageCount < MaxUsageCount);
 }
@@ -43,6 +44,7 @@ public class CreateCouponDto
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
     public int? MaxUsageCount { get; set; }
+    public string? ImageUrl { get; set; }
 }
 
 public class ApplyCouponRequest
